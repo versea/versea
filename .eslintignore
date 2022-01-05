@@ -1,0 +1,9 @@
+.vscode
+typings
+node_modules
+lib
+dist
+build
+coverage
+esm
+public

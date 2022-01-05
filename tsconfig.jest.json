@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "paths": {
+      "@bee/*": ["./packages/*/src"]
+    }
+  },
+  "exclude": ["./packages/*/esm", "./packages/*/lib"]
+}

@@ -1,0 +1,8 @@
+node_modules
+*.log
+build
+__tests__
+.eslintrc
+jest.config.js
+tsconfig.json
+src
