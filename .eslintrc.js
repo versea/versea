@@ -25,6 +25,7 @@ module.exports = {
     ecmaFeatures: {
       jsx: true
     },
+    project: "./tsconfig.json",
   },
   overrides: [
     {
@@ -40,7 +41,7 @@ module.exports = {
       }
     },
     {
-      files: ["*.{spec,test}.{js,ts,tsx}", "**/__tests__/**/*.{js,ts,tsx}"],
+      files: ["*.{spec,test}.{js,ts,jsx,tsx}", "**/__tests__/**/*.{js,ts,jsx,tsx}"],
       env: {
         jest: true,
         "jest/globals": true,

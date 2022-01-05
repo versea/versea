@@ -1,0 +1,12 @@
+{
+  "gitlens.remotes": [
+    {
+      "domain": "github.com",
+      "type": "GitHub"
+    }
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
