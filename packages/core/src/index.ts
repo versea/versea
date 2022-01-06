@@ -1,6 +1,17 @@
-const a = 1;
+import 'reflect-metadata';
+import { Container } from 'inversify';
+import { Foo } from './common';
 
-export default a;
+const container = new Container({
+  defaultScope: 'Singleton',
+});
+
+container.bind('Foo').to(Foo).inSingletonScope();
+
+console.log(container.get<Foo>('Foo').say());
+
+export default container;
+
 export function b(c: string, d: string): string {
   return c + d;
 }
