@@ -2,8 +2,10 @@ module.exports = {
   verbose: true,
   testEnvironment: 'jsdom',
   preset: 'ts-jest',
-  testMatch: ['**/__tests__/**/*.spec.[jt]s?(x)'],
-  setupFilesAfterEnv: [require.resolve('jest-dom/extend-expect')],
+  testMatch: ['**/*.spec.[jt]s?(x)'],
+  setupFilesAfterEnv: [
+    require.resolve('@testing-library/jest-dom/extend-expect'),
+  ],
   globals: {
     'ts-jest': {
       babelConfig: false,
@@ -11,4 +13,5 @@ module.exports = {
       diagnostics: false,
     },
   },
+  collectCoverage: true,
 };
