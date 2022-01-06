@@ -1,0 +1,28 @@
+{
+  "name": "@bee/shared",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "lib",
+  "module": "esm",
+  "umd:main": "dist/bee.shared.umd.production.js",
+  "unpkg": "dist/bee.shared.umd.production.js",
+  "types": "esm/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chhu1/bee.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chhu1/bee/issues"
+  },
+  "homepage": "https://github.com/chhu1/bee#readme",
+  "scripts": {
+    "build": "rimraf -rf lib esm dist && npm run build:cjs && npm run build:esm && npm run build:umd",
+    "build:cjs": "tsc --project tsconfig.build.json",
+    "build:esm": "tsc --project tsconfig.build.json --module es2015 --outDir esm",
+    "build:umd": "rollup --config"
+  },
+  "dependencies": {
+    "inversify": "^6.0.1",
+    "reflect-metadata": "^0.1.13"
+  }
+}
