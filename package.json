@@ -64,18 +64,9 @@
     "type": "git",
     "url": "git+https://github.com/chhu1/bee.git"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && yarn test",
-      "commit-msg": "commitlint --edit"
-    }
-  },
   "lint-staged": {
-    "linters": {
-      "*.{js,jsx,ts,tsx,json}": [
-        "eslint --fix",
-        "git add"
-      ]
-    }
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   }
 }
