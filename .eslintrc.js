@@ -1,5 +1,7 @@
 const TypescriptRules = {
   '@typescript-eslint/no-redeclare': 'off',
+  '@typescript-eslint/no-type-alias': 'off',
+  '@typescript-eslint/strict-boolean-expressions': 'off',
   '@typescript-eslint/prefer-readonly-parameter-types': 'off',
   '@typescript-eslint/consistent-type-imports': 'off',
   '@typescript-eslint/explicit-member-accessibility': [
@@ -38,6 +40,24 @@ const TypescriptRules = {
       format: ['PascalCase'],
     },
   ],
+  'import/order': [
+    'error',
+    {
+      groups: [
+        'builtin',
+        'external',
+        'internal',
+        ['index', 'sibling', 'parent'],
+        'object',
+        'type',
+      ],
+      'newlines-between': 'always',
+      alphabetize: {
+        order: 'asc',
+        caseInsensitive: true,
+      },
+    },
+  ],
 }
 
 module.exports = {
@@ -47,6 +67,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:prettier/recommended',
+    'plugin:import/recommended',
   ],
   globals: {
     fetch: true,
@@ -86,6 +107,8 @@ module.exports = {
         'eslint:recommended',
         'plugin:@typescript-eslint/all',
         'plugin:prettier/recommended',
+        'plugin:import/recommended',
+        'plugin:import/typescript',
       ],
       rules: {
         ...TypescriptRules,
@@ -113,6 +136,8 @@ module.exports = {
         'eslint:recommended',
         'plugin:@typescript-eslint/all',
         'plugin:prettier/recommended',
+        'plugin:import/recommended',
+        'plugin:import/typescript',
       ],
       rules: {
         ...TypescriptRules,

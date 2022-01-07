@@ -71,12 +71,7 @@ export const getRollupConfig = (filename, targetName, ...plugins) => {
         },
       },
       external: ['inversify'],
-      plugins: [
-        ...presets(),
-        terser(),
-        ...plugins,
-        createEnvPlugin('production'),
-      ],
+      plugins: [...presets(), terser(), ...plugins, createEnvPlugin('production')],
     },
   ];
 

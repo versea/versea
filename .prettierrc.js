@@ -8,4 +8,5 @@ module.exports = {
   bracketSpacing: true,
   bracketSameLine: false,
   arrowParens: 'always',
+  printWidth: 120,
 };

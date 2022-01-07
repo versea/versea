@@ -1,18 +1,13 @@
-import { injectable } from 'inversify';
-import { AppProps, IApp } from './interface';
+import { provide } from '../../provider';
+import { AppProps, IApp, IAppKey } from './interface';
 
 export * from './interface';
 
-@injectable()
+@provide(IAppKey, 'Constructor')
 export class App implements IApp {
-  public name = '';
+  public name: string;
 
-  public static create(): App {
-    return new App();
-  }
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public setApp(props: AppProps): void {
+  constructor(props: AppProps) {
     this.name = props.name;
   }
 }
