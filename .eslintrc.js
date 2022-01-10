@@ -32,8 +32,12 @@ const TypescriptRules = {
     {
       selector: 'memberLike',
       modifiers: ['private'],
-      format: ['camelCase', 'PascalCase'],
+      format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
       leadingUnderscore: 'require',
+    },
+    {
+      selector: 'enumMember',
+      format: ['UPPER_CASE'],
     },
     {
       selector: 'typeLike',
@@ -43,14 +47,7 @@ const TypescriptRules = {
   'import/order': [
     'error',
     {
-      groups: [
-        'builtin',
-        'external',
-        'internal',
-        ['index', 'sibling', 'parent'],
-        'object',
-        'type',
-      ],
+      groups: ['builtin', 'external', 'internal', ['index', 'sibling', 'parent'], 'object', 'type'],
       'newlines-between': 'always',
       alphabetize: {
         order: 'asc',
@@ -58,29 +55,20 @@ const TypescriptRules = {
       },
     },
   ],
-}
+  '@typescript-eslint/no-magic-numbers': ['error', { ignore: [-1, 0, 1] }],
+};
 
 module.exports = {
   env: {
     node: true,
   },
-  extends: [
-    'eslint:recommended',
-    'plugin:prettier/recommended',
-    'plugin:import/recommended',
-  ],
+  extends: ['eslint:recommended', 'plugin:prettier/recommended', 'plugin:import/recommended'],
   globals: {
     fetch: true,
     FormData: true,
   },
   parser: '@typescript-eslint/parser',
-  plugins: [
-    '@typescript-eslint',
-    'jest',
-    'json',
-    'prettier',
-    'markdown',
-  ],
+  plugins: ['@typescript-eslint', 'jest', 'json', 'prettier', 'markdown'],
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 10,

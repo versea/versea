@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { BeeError } from '@bee/shared';
 import {
   decorate,
   injectable,
@@ -31,16 +32,34 @@ interface CreateProviderReturnType {
   buildProviderModule: () => interfaces.ContainerModule;
 }
 
-function addProvideSyntaxItem(metadata: ProvideSyntax[], provide: ProvideSyntax): ProvideSyntax[] {
-  const index = metadata.findIndex((item) => item.serviceIdentifier === provide.serviceIdentifier);
-  // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  if (index < 0) {
-    return [provide, ...metadata];
+function toString(serviceIdentifier: interfaces.ServiceIdentifier<any>): string {
+  if (typeof serviceIdentifier === 'function') {
+    return serviceIdentifier.name;
   }
-  console.warn('Provide Warning: duplicated serviceIdentifier, use new value to replace old value.');
-  const newMetaData = [...metadata];
-  newMetaData[index] = provide;
-  return newMetaData;
+  if (typeof serviceIdentifier === 'object') {
+    return 'unknown';
+  }
+  return serviceIdentifier.toString();
+}
+
+function addProvideSyntax(metadata: ProvideSyntax, metaDataKey: string): void {
+  let newMetadata: ProvideSyntax[] = [];
+  const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(metaDataKey, Reflect) || [];
+
+  const index = previousMetadata.findIndex((item) => item.serviceIdentifier === metadata.serviceIdentifier);
+  if (index < 0) {
+    newMetadata = [...previousMetadata, metadata];
+  } else {
+    console.warn(
+      `Provide Warning: duplicated serviceIdentifier ${toString(
+        metadata.serviceIdentifier,
+      )}, use new value to replace old value.`,
+    );
+    newMetadata = [...previousMetadata];
+    newMetadata[index] = metadata;
+  }
+
+  Reflect.defineMetadata(metaDataKey, newMetadata, Reflect);
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -51,20 +70,18 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
   ) {
     return function (target: any): any {
       const isAlreadyDecorated = Reflect.hasOwnMetadata(inversify_METADATA_KEY.PARAM_TYPES, target);
-
       if (!isAlreadyDecorated) {
         decorate(injectable(), target);
       }
 
-      const currentMetadata: ProvideSyntax = {
-        serviceIdentifier,
-        bindingType,
-        implementationType: target,
-      };
-      const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
-      const newMetadata = addProvideSyntaxItem(previousMetadata, currentMetadata);
-      Reflect.defineMetadata(MetaDataKey, newMetadata, Reflect);
-
+      addProvideSyntax(
+        {
+          serviceIdentifier,
+          bindingType,
+          implementationType: target,
+        },
+        MetaDataKey,
+      );
       return target;
     };
   }
@@ -74,14 +91,14 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     serviceIdentifier: interfaces.ServiceIdentifier<any>,
     bindingType: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider' = 'ConstantValue',
   ): any {
-    const currentMetadata: ProvideSyntax = {
-      serviceIdentifier,
-      bindingType,
-      implementationType: target,
-    };
-    const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
-    const newMetadata = addProvideSyntaxItem(previousMetadata, currentMetadata);
-    Reflect.defineMetadata(MetaDataKey, newMetadata, Reflect);
+    addProvideSyntax(
+      {
+        serviceIdentifier,
+        bindingType,
+        implementationType: target,
+      },
+      MetaDataKey,
+    );
     return target;
   }
 
@@ -90,7 +107,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
       provideMetadata.map(({ serviceIdentifier, implementationType, bindingType }) => {
         if (bindingType === BindingTypeEnum.Factory) {
-          throw new Error('Auto Binding Module Error: can not auto bind factory.');
+          throw new BeeError('Auto Binding Module Error: can not auto bind factory.');
         }
 
         if (bindingType === BindingTypeEnum.ConstantValue) {
