@@ -12,4 +12,5 @@ module.exports = {
     },
   },
   collectCoverage: true,
+  collectCoverageFrom: ['packages/*/src/**/*.{js,jsx,ts,tsx}'],
 };

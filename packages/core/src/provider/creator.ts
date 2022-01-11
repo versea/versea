@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import 'reflect-metadata';
 import { BeeError } from '@bee/shared';
 import {
   decorate,
@@ -43,7 +44,7 @@ function toString(serviceIdentifier: interfaces.ServiceIdentifier<any>): string 
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function addProvideSyntax(metadata: ProvideSyntax, MetaDataKey: string): void {
+function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
   let newMetadata: ProvideSyntax[] = [];
   const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
 
@@ -75,7 +76,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
         decorate(injectable(), target);
       }
 
-      addProvideSyntax(
+      appendMetadata(
         {
           serviceIdentifier,
           bindingType,
@@ -92,7 +93,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     serviceIdentifier: interfaces.ServiceIdentifier<any>,
     bindingType: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider' = 'ConstantValue',
   ): any {
-    addProvideSyntax(
+    appendMetadata(
       {
         serviceIdentifier,
         bindingType,

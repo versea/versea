@@ -23,9 +23,17 @@ export interface IApp {
   loadApp: () => Promise<AppHooks>;
 }
 
+/** App 实例化的参数 */
 export interface AppProps {
+  /** 应用名称 */
   name: string;
+
+  /** 应用的路径 */
   path: string;
+
+  /** 传给子应用的属性 */
   props: Record<string, any>;
+
+  /** 加载应用的方法 */
   loadApp: () => Promise<AppHooks>;
 }

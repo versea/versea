@@ -16,7 +16,7 @@
     "version:minor": "lerna version minor",
     "version:preminor": "lerna version preminor --preid beta",
     "version:major": "lerna version major",
-    "test": "jest --coverage"
+    "test": "jest --coverage --maxWorkers=8"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.1",

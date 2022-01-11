@@ -130,6 +130,7 @@ module.exports = {
       rules: {
         ...TypescriptRules,
         'max-nested-callbacks': 'off',
+        '@typescript-eslint/no-extraneous-class': 'off',
       },
     },
   ],
