@@ -42,9 +42,10 @@ function toString(serviceIdentifier: interfaces.ServiceIdentifier<any>): string 
   return serviceIdentifier.toString();
 }
 
-function addProvideSyntax(metadata: ProvideSyntax, metaDataKey: string): void {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+function addProvideSyntax(metadata: ProvideSyntax, MetaDataKey: string): void {
   let newMetadata: ProvideSyntax[] = [];
-  const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(metaDataKey, Reflect) || [];
+  const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
 
   const index = previousMetadata.findIndex((item) => item.serviceIdentifier === metadata.serviceIdentifier);
   if (index < 0) {
@@ -59,7 +60,7 @@ function addProvideSyntax(metadata: ProvideSyntax, metaDataKey: string): void {
     newMetadata[index] = metadata;
   }
 
-  Reflect.defineMetadata(metaDataKey, newMetadata, Reflect);
+  Reflect.defineMetadata(MetaDataKey, newMetadata, Reflect);
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
