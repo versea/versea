@@ -1,16 +1,13 @@
 module.exports = {
   verbose: true,
-  testEnvironment: 'jsdom',
-  preset: 'ts-jest',
-  testMatch: ['**/*.spec.[jt]s?(x)'],
-  setupFilesAfterEnv: [require.resolve('@testing-library/jest-dom/extend-expect')],
-  globals: {
-    'ts-jest': {
-      babelConfig: false,
-      tsconfig: './tsconfig.jest.json',
-      diagnostics: false,
-    },
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  testEnvironment: 'jsdom',
+  testMatch: ['**/*.spec.[jt]s?(x)'],
+  watchPlugins: ['jest-watch-lerna-packages'],
   collectCoverage: true,
   collectCoverageFrom: ['packages/*/src/**/*.{js,jsx,ts,tsx}'],
+  setupFilesAfterEnv: [require.resolve('@testing-library/jest-dom/extend-expect')],
 };
