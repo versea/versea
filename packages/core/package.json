@@ -1,6 +1,6 @@
 {
   "name": "@bee/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -22,6 +22,7 @@
     "build:umd": "rollup --config"
   },
   "dependencies": {
+    "@bee/shared": "0.0.2",
     "inversify": "^6.0.1",
     "path-to-regexp": "^6.2.0",
     "reflect-metadata": "^0.1.13"
