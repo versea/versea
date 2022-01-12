@@ -34,6 +34,7 @@ describe('createProvider', () => {
 
     const container = new Container();
     container.load(buildProviderModule());
+
     expect(container.get('test')).toBeInstanceOf(OtherTest);
   });
 
@@ -54,5 +55,26 @@ describe('createProvider', () => {
 
     expect(container.get('test')).toBeInstanceOf(Test);
     expect(otherContainer.get('test')).toBeInstanceOf(OtherTest);
+  });
+
+  test('创建一个常量，调用 provideValue，应当自动绑定成功。', () => {
+    const { provideValue, buildProviderModule } = createProvider('metaKey');
+
+    provideValue('foo', 'test');
+    const container = new Container();
+    container.load(buildProviderModule());
+
+    expect(container.get('test')).toBe('foo');
+  });
+
+  test('两次调用 provideValue 绑定同一个 key，应当绑定新值。', () => {
+    const { provideValue, buildProviderModule } = createProvider('metaKey');
+
+    provideValue('foo', 'test');
+    provideValue('bar', 'test');
+    const container = new Container();
+    container.load(buildProviderModule());
+
+    expect(container.get('test')).toBe('bar');
   });
 });
