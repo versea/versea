@@ -12,8 +12,8 @@ export class RouteMatcher implements IRouteMatcher {
   public match(
     path: string,
     route: string,
-    options: PathToRegexpOptions = {},
     params?: Record<string, string>,
+    options: PathToRegexpOptions = {},
   ): boolean {
     const keys: Key[] = [];
     const regex = this.compileRouteRegex(route, options, keys);
@@ -28,7 +28,7 @@ export class RouteMatcher implements IRouteMatcher {
         const key = keys[i - 1];
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (key) {
-          // Fix #1994: using * with props: true generates a param named 0
+          // 匹配 wildcard(.*) 时，使用 pathMatch 表示
           params[key.name || 'pathMatch'] =
             typeof matchArray[i] === 'string' ? decodeURIComponent(matchArray[i]) : matchArray[i];
         }
@@ -39,7 +39,10 @@ export class RouteMatcher implements IRouteMatcher {
   }
 
   protected compileRouteRegex(route: string, options: PathToRegexpOptions, keys: Key[]): RegExp {
-    const regex = pathToRegexp(route, keys, options);
+    const regex = pathToRegexp(route, keys, {
+      end: false,
+      ...options,
+    });
     if (process.env.NODE_ENV !== 'production') {
       const keysMapping = Object.create(null) as Record<string, boolean>;
       keys.forEach((key) => {

@@ -2,16 +2,16 @@ import { Container } from 'inversify';
 
 import { createProvider } from './creator';
 
+afterEach(() => {
+  Reflect.defineMetadata('metaKey', [], Reflect);
+  Reflect.defineMetadata('otherMetaKey', [], Reflect);
+});
+
 /**
  * unit
  * @author huchao
  */
 describe('createProvider', () => {
-  afterEach(() => {
-    Reflect.defineMetadata('metaKey', [], Reflect);
-    Reflect.defineMetadata('otherMetaKey', [], Reflect);
-  });
-
   test('新建一个类，使用 provide 装饰，应当自动绑定成功。', () => {
     const { provide, buildProviderModule } = createProvider('metaKey');
 

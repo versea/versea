@@ -52,11 +52,13 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
   if (index < 0) {
     newMetadata = [...previousMetadata, metadata];
   } else {
-    console.warn(
-      `Provide Warning: duplicated serviceIdentifier ${toString(
-        metadata.serviceIdentifier,
-      )}, use new value to replace old value.`,
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        `Provide Warning: duplicated serviceIdentifier ${toString(
+          metadata.serviceIdentifier,
+        )}, use new value to replace old value.`,
+      );
+    }
     newMetadata = [...previousMetadata];
     newMetadata[index] = metadata;
   }

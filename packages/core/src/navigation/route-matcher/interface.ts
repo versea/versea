@@ -8,7 +8,7 @@ export interface IRouteMatcher {
   match: (
     path: string,
     route: string,
-    options?: ParseOptions & TokensToRegexpOptions,
     params?: Record<string, string>,
+    options?: ParseOptions & TokensToRegexpOptions,
   ) => boolean;
 }
