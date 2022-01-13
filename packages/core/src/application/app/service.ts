@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { provide } from '../../provider';
-import { AppProps, IApp, IAppKey } from './interface';
+import { IApp, IAppKey, AppOptions, AppProps, FunctionalAppProps } from './interface';
 
 export * from './interface';
 
@@ -10,14 +10,24 @@ export class App implements IApp {
 
   public path: string;
 
-  public props: Record<string, any>;
-
   public loadApp: () => any;
 
-  constructor(props: AppProps) {
-    this.name = props.name;
-    this.path = props.path;
-    this.props = props.props;
-    this.loadApp = props.loadApp;
+  protected props: AppProps;
+
+  constructor(options: AppOptions) {
+    this.name = options.name;
+    this.path = options.path;
+    this.props = options.props ?? {};
+    this.loadApp = options.loadApp;
+  }
+
+  /** 获取最终传给子应用 loadApp 和 mount 方法的属性 */
+  public getProps(): Record<string, any> {
+    const props: Record<string, any> =
+      typeof this.props === 'function' ? (this.props as FunctionalAppProps)(this.name) : this.props;
+    return {
+      ...props,
+      name: this.name,
+    };
   }
 }

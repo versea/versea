@@ -9,6 +9,9 @@ export interface AppHooks {
   unmount: () => Promise<any>;
 }
 
+export type FunctionalAppProps = (name: string) => Record<string, any>;
+export type AppProps = FunctionalAppProps | Record<string, any>;
+
 export interface IApp {
   /** 应用名称 */
   name: string;
@@ -16,15 +19,14 @@ export interface IApp {
   /** 应用的路径 */
   path: string;
 
-  /** 传给子应用的属性 */
-  props: Record<string, any>;
-
   /** 加载应用的方法 */
   loadApp: () => Promise<AppHooks>;
+
+  getProps: () => Record<string, any>;
 }
 
 /** App 实例化的参数 */
-export interface AppProps {
+export interface AppOptions {
   /** 应用名称 */
   name: string;
 
@@ -32,7 +34,7 @@ export interface AppProps {
   path: string;
 
   /** 传给子应用的属性 */
-  props: Record<string, any>;
+  props?: AppProps;
 
   /** 加载应用的方法 */
   loadApp: () => Promise<AppHooks>;

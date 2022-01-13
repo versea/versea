@@ -19,7 +19,8 @@
     "build": "rimraf -rf lib esm dist && npm run build:cjs && npm run build:esm && npm run build:umd",
     "build:cjs": "tsc --project tsconfig.build.json",
     "build:esm": "tsc --project tsconfig.build.json --module es2015 --outDir esm",
-    "build:umd": "rollup --config"
+    "build:umd": "rollup --config",
+    "type:check": "tsc --noEmit"
   },
   "dependencies": {
     "inversify": "^6.0.1",

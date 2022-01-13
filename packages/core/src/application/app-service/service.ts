@@ -1,7 +1,7 @@
 import { inject, interfaces } from 'inversify';
 
 import { provide } from '../../provider';
-import { IApp, IAppKey, AppProps } from '../app/service';
+import { IApp, IAppKey, AppOptions } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
 
 export * from './interface';
@@ -15,9 +15,9 @@ export class AppService implements IAppService {
     this._AppConstructor = App;
   }
 
-  public registerApplication(props: AppProps): IApp {
+  public registerApplication(options: AppOptions): IApp {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    const app = new this._AppConstructor(props);
+    const app = new this._AppConstructor(options);
     return app;
   }
 }

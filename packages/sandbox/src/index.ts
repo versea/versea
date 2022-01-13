@@ -4,7 +4,7 @@ import {
   IAppService,
   IAppServiceKey,
   App,
-  AppProps,
+  AppOptions,
   IAppKey,
   provide,
   provideValue,
@@ -17,7 +17,7 @@ const parent = new Container();
 export class NewApp extends App {
   public path: string;
 
-  constructor(options: AppProps & { path: string }) {
+  constructor(options: AppOptions & { path: string }) {
     super(options);
     this.path = options.path;
   }
@@ -42,11 +42,11 @@ parent.rebind('TestData').toConstantValue('test2');
 const app1 = parent.get<IAppService>(IAppServiceKey).registerApplication({
   name: 'app1',
   path: 'app1_path',
-} as AppProps);
+} as AppOptions);
 const app2 = parent.get<IAppService>(IAppServiceKey).registerApplication({
   name: 'app2',
   path: 'app2_path',
-} as AppProps);
+} as AppOptions);
 const test = parent.get<Test>('Test');
 console.log(app1, app2);
 console.log(test);
