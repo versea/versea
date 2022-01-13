@@ -1,5 +1,5 @@
 .vscode
-.eslintrc.js
+!.vuepress
 typings
 node_modules
 lib

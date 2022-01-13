@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "**/*",
+    "docs/**/*.md",
+    "docs/.vuepress/**/*.js",
+    ".eslintrc.js"
+  ]
+}
