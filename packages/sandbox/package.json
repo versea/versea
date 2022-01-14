@@ -1,6 +1,6 @@
 {
   "name": "@versea/sandbox",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -23,7 +23,7 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@versea/core": "0.0.2",
+    "@versea/core": "0.0.3",
     "inversify": "^6.0.1"
   },
   "publishConfig": {
