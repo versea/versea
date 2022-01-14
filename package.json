@@ -19,6 +19,7 @@
     "version:preminor": "lerna version preminor --preid beta",
     "version:major": "lerna version major",
     "test": "jest --coverage --maxWorkers=8",
+    "test:prod": "jest --coverage --maxWorkers=8 --silent",
     "type:check": "lerna run type:check"
   },
   "devDependencies": {
