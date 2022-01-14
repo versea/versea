@@ -9,7 +9,7 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "lint": "eslint .",
-    "postinstall": "husky install",
+    "postinstall": "node ./scripts/husky.js",
     "release:force": "lerna publish from-package --yes",
     "version:alpha": "lerna version prerelease --preid alpha",
     "version:beta": "lerna version prerelease --preid beta",
