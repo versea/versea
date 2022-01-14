@@ -31,7 +31,7 @@
 
     "baseUrl": "./",
     "paths": {
-      "@bee/*": ["packages/*/src"]
+      "@versea/*": ["packages/*/src"]
     }
   }
 }

@@ -8,9 +8,9 @@ import { terser } from 'rollup-plugin-terser';
 const presets = () => {
   const externals = {
     inversify: 'inversify',
-    '@bee/core': 'Bee.Core',
-    '@bee/shared': 'Bee.Shared',
-    '@bee/sandbox': 'Bee.Sandbox',
+    '@versea/core': 'Versea.Core',
+    '@versea/shared': 'Versea.Shared',
+    '@versea/sandbox': 'Versea.Sandbox',
   };
 
   return [

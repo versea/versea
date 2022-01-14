@@ -1,0 +1,14 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignoreWords": [
+    "versea",
+    "Versea",
+    "autorun",
+    "Unmount",
+    "Lifecycles",
+    "Mixins",
+    "builtins",
+    "middlewares"
+  ]
+}

@@ -1,20 +1,20 @@
 {
-  "name": "@bee/sandbox",
+  "name": "@versea/sandbox",
   "version": "0.0.2",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
-  "umd:main": "dist/bee.sandbox.umd.production.js",
-  "unpkg": "dist/bee.sandbox.umd.production.js",
+  "umd:main": "dist/versea.sandbox.umd.production.js",
+  "unpkg": "dist/versea.sandbox.umd.production.js",
   "types": "esm/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chhu1/bee.git"
+    "url": "git+https://github.com/versea/versea.git"
   },
   "bugs": {
-    "url": "https://github.com/chhu1/bee/issues"
+    "url": "https://github.com/versea/versea/issues"
   },
-  "homepage": "https://github.com/chhu1/bee#readme",
+  "homepage": "https://github.com/versea/versea#readme",
   "scripts": {
     "build": "rimraf -rf lib esm dist && npm run build:cjs && npm run build:esm && npm run build:umd",
     "build:cjs": "tsc --project tsconfig.build.json",
@@ -23,12 +23,11 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@bee/core": "0.0.2",
-    "inversify": "^6.0.1",
-    "reflect-metadata": "^0.1.13"
+    "@versea/core": "0.0.2",
+    "inversify": "^6.0.1"
   },
   "publishConfig": {
     "access": "public"
   },
-  "gitHead": "f645443f26b2795c057cb9e78f84816a28c86164"
+  "gitHead": "1ef4c047fab816017e0a2b716abc326b95f53287"
 }

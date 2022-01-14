@@ -8,7 +8,7 @@ import {
   IAppKey,
   provide,
   provideValue,
-} from '@bee/core';
+} from '@versea/core';
 import { Container, inject } from 'inversify';
 
 const parent = new Container();

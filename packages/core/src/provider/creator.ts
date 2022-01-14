@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
-import { BeeError } from '@bee/shared';
+import { VerseaError } from '@versea/shared';
 import {
   decorate,
   injectable,
@@ -111,7 +111,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
       provideMetadata.map(({ serviceIdentifier, implementationType, bindingType }) => {
         if (bindingType === BindingTypeEnum.Factory) {
-          throw new BeeError('Auto Binding Module Error: can not auto bind factory.');
+          throw new VerseaError('Auto Binding Module Error: can not auto bind factory.');
         }
 
         if (bindingType === BindingTypeEnum.ConstantValue) {

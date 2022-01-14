@@ -18,4 +18,4 @@ export class BaseError extends Error {
   }
 }
 
-export class BeeError extends BaseError {}
+export class VerseaError extends BaseError {}

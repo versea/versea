@@ -68,7 +68,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chhu1/bee.git"
+    "url": "git+https://github.com/versea/versea.git"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

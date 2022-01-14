@@ -1,6 +1,6 @@
 module.exports = () => ({
   base: '/',
-  title: 'Bee 开发文档',
+  title: 'Versea 开发文档',
   lang: 'zh-CN',
   head: [
     ['meta', { name: 'theme-color', content: '#3eaf7c' }],
