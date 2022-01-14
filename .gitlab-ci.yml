@@ -1,0 +1,27 @@
+image: node:12.22.9
+
+stages:
+  - install
+  - type
+  - lint
+  - test
+
+install:
+  stage: install
+  script:
+    - yarn install
+
+type:
+  stage: type
+  script:
+    - yarn type:check
+
+lint:
+  stage: lint
+  script:
+    - yarn lint
+
+test:
+  stage: test
+  script:
+    - yarn test
