@@ -25,5 +25,6 @@
   "dependencies": {
     "inversify": "^6.0.1",
     "reflect-metadata": "^0.1.13"
-  }
+  },
+  "gitHead": "f645443f26b2795c057cb9e78f84816a28c86164"
 }
