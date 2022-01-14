@@ -25,3 +25,4 @@ package.zip
 .lerna-changelog
 .history
 .lint-report.log
+.npmrc
