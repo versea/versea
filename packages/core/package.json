@@ -1,6 +1,6 @@
 {
   "name": "@versea/core",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -23,7 +23,7 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@versea/shared": "0.0.4",
+    "@versea/shared": "0.0.5",
     "inversify": "^6.0.1",
     "path-to-regexp": "^6.2.0",
     "reflect-metadata": "^0.1.13"
