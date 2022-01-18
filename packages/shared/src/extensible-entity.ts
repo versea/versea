@@ -1,7 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { ExtensiblePropDescription, setPropWithDescription } from './props';
+import { VerseaError } from './error';
+
+export interface ExtensiblePropDescription {
+  required?: boolean;
+  default?: any;
+  validator?: (value: any) => boolean;
+}
+
+function getDefaultValue(key: string, defaultValue: any): any {
+  if (process.env.NODE_ENV !== 'production' && typeof defaultValue === 'object' && defaultValue !== null) {
+    console.warn(
+      `Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
+    );
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+}
 
 /**
  * 获取所有的派生类
@@ -28,11 +44,9 @@ function findAllDerivedClass(target: any, baseClass: any, currentValue: any[] = 
   return findAllDerivedClass(target.__proto__, baseClass, result);
 }
 
-/**
- * ExtensibleEntity 是可扩展实体类，可以在类上定义新的字段
- */
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class ExtensibleEntity {
+  [key: string]: any;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private static __extensiblePropDescriptions__: Record<string, ExtensiblePropDescription>;
 
@@ -42,11 +56,14 @@ export class ExtensibleEntity {
     constructors.reverse().forEach((ctor) => {
       const propDescriptions: Record<string, ExtensiblePropDescription> = ctor.__extensiblePropDescriptions__;
       Object.keys(propDescriptions).forEach((name: string) => {
-        setPropWithDescription(this, name, options[name], propDescriptions[name]);
+        this._setEntityProp(name, options[name], propDescriptions[name]);
       });
     });
   }
 
+  /**
+   * 在实体类上新增一个字段
+   */
   public static defineProp(name: string, description: ExtensiblePropDescription): void {
     // eslint-disable-next-line no-prototype-builtins
     if (!this.hasOwnProperty('__extensiblePropDescriptions__')) {
@@ -54,5 +71,23 @@ export class ExtensibleEntity {
     }
 
     this.__extensiblePropDescriptions__[name] = description;
+  }
+
+  private _setEntityProp(name: string, value: any, description: ExtensiblePropDescription): void {
+    if (value === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      value = getDefaultValue(name, description.default);
+    }
+
+    if (description.required && value === undefined) {
+      throw new VerseaError(`Missing required prop: "${name}"`);
+    }
+
+    if (description.validator && !description.validator(value)) {
+      throw new VerseaError(`Invalid prop: custom validator check failed for prop "${name}"`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    this[name] = value;
   }
 }
