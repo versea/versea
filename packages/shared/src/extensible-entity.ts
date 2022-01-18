@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -32,6 +31,7 @@ function findAllDerivedClass(target: any, baseClass: any, currentValue: any[] = 
 /**
  * ExtensibleEntity 是可扩展实体类，可以在类上定义新的字段
  */
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class ExtensibleEntity {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   private static __extensiblePropDescriptions__: Record<string, ExtensiblePropDescription>;

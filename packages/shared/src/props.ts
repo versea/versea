@@ -1,8 +1,5 @@
-/* eslint-disable no-prototype-builtins */
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { VerseaError } from './error';
 
@@ -19,7 +16,8 @@ function getDefaultValue(key: string, description: ExtensiblePropDescription): a
       `Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
     );
   }
-  return typeof def === 'function' ? (def as Function)() : def;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  return typeof def === 'function' ? def() : def;
 }
 
 export function setPropWithDescription(
@@ -40,5 +38,6 @@ export function setPropWithDescription(
     throw new VerseaError(`Invalid prop: custom validator check failed for prop "${key}"`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   instance[key] = value;
 }
