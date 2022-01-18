@@ -4,6 +4,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "devEngines": {
+    "node": ">=12.22"
+  },
   "scripts": {
     "build": "rimraf -rf packages/*/{lib,dist,esm} && lerna run build",
     "docs:dev": "vuepress dev docs",

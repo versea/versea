@@ -1,11 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ExtensibleEntity } from '@versea/shared';
+
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions, AppProps, FunctionalAppProps } from './interface';
 
 export * from './interface';
 
 @provide(IAppKey, 'Constructor')
-export class App implements IApp {
+export class App extends ExtensibleEntity implements IApp {
   public name: string;
 
   public path: string;
@@ -15,6 +17,7 @@ export class App implements IApp {
   protected props: AppProps;
 
   constructor(options: AppOptions) {
+    super(options);
     this.name = options.name;
     this.path = options.path;
     this.props = options.props ?? {};
