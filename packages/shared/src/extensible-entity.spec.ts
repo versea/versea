@@ -15,6 +15,15 @@ describe('ExtensibleEntity', () => {
     expect(test).toEqual({ key: 1 });
   });
 
+  test('新建一个类，继承 ExtensibleEntity，使用 defineProp 两次使用相同的 key，应该会报错', () => {
+    class Test extends ExtensibleEntity {}
+    Test.defineProp('key', { default: 1 });
+
+    expect(() => {
+      Test.defineProp('key', { default: 2 });
+    }).toThrowError('Duplicate prop');
+  });
+
   test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp，新建一个类 B 继承于 A，使用 defineProp，A 的实例应该仅仅包含 A defineProp 的属性', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { default: 1 });

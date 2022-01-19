@@ -64,10 +64,15 @@ export class ExtensibleEntity {
   /**
    * 在实体类上新增一个字段
    */
-  public static defineProp(key: string, description: ExtensiblePropDescription): void {
+  public static defineProp(key: string, description: ExtensiblePropDescription = {}): void {
     // eslint-disable-next-line no-prototype-builtins
     if (!this.hasOwnProperty('__extensiblePropDescriptions__')) {
       this.__extensiblePropDescriptions__ = {};
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (this.__extensiblePropDescriptions__[key]) {
+      throw new VerseaError(`Duplicate prop: ${key}`);
     }
 
     this.__extensiblePropDescriptions__[key] = description;
