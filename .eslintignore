@@ -1,10 +1,11 @@
 .vscode
 !.vuepress
+LICENSE
 typings
 node_modules
+esm
 lib
 dist
 build
-coverage
-esm
 public
+coverage
