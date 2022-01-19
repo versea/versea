@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ExtensibleEntity } from './extensible-entity';
 
 /**
@@ -22,10 +20,10 @@ describe('ExtensibleEntity', () => {
 
   test('新建一个类，继承 ExtensibleEntity，使用 defineProp 两次使用相同的 key，应该会报错', () => {
     class Test extends ExtensibleEntity {}
-    Test.defineProp('key', { default: 1 });
+    Test.defineProp('key');
 
     expect(() => {
-      Test.defineProp('key', { default: 2 });
+      Test.defineProp('key');
     }).toThrowError('Duplicate prop');
   });
 
@@ -73,7 +71,6 @@ describe('ExtensibleEntity', () => {
 
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { default: {} });
-    new A();
 
     expect(consoleWarnSpy).toHaveBeenCalled();
   });
