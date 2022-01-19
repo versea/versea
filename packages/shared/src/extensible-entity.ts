@@ -9,16 +9,6 @@ export interface ExtensiblePropDescription {
   validator?: (value: any) => boolean;
 }
 
-function getDefaultValue(key: string, defaultValue: any): any {
-  if (process.env.NODE_ENV !== 'production' && typeof defaultValue === 'object' && defaultValue !== null) {
-    console.warn(
-      `Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
-    );
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-  return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
-}
-
 /**
  * 获取所有的派生类
  * @param instance 派生类的实例
@@ -76,12 +66,24 @@ export class ExtensibleEntity {
       throw new VerseaError(`Duplicate prop: ${key}`);
     }
 
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      typeof description.default === 'object' &&
+      description.default !== null
+    ) {
+      console.warn(
+        `Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
+      );
+    }
+
     this.__extensiblePropDescriptions__[key] = description;
   }
 
   private _setEntityProp(key: string, value: any, description: ExtensiblePropDescription): void {
     if (value === undefined) {
-      value = getDefaultValue(key, description.default);
+      const defaultValue = description.default;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      value = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
     }
 
     if (description.required && value === undefined) {
