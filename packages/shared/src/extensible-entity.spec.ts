@@ -7,6 +7,11 @@ import { ExtensibleEntity } from './extensible-entity';
  * @author huchao
  */
 describe('ExtensibleEntity', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
   test('新建一个类，继承 ExtensibleEntity，使用 defineProp，实例化的这个类应该可以自动增加这个属性', () => {
     class Test extends ExtensibleEntity {}
     Test.defineProp('key', { default: 1 });
@@ -61,6 +66,16 @@ describe('ExtensibleEntity', () => {
 
     const c = new C();
     expect(c).toEqual({ keyA: 1, keyC: 3 });
+  });
+
+  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 default 是一个对象，应该有一条警告', () => {
+    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+    class A extends ExtensibleEntity {}
+    A.defineProp('keyA', { default: {} });
+    new A();
+
+    expect(consoleWarnSpy).toHaveBeenCalled();
   });
 
   test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 required，不传这个参数应该报错', () => {
