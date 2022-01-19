@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { VerseaError } from './error';
 
 export interface ExtensiblePropDescription {
@@ -46,9 +47,11 @@ export class ExtensibleEntity {
     // 从子类开始遍历，子类 -> 孙子类 -> ...
     constructors.reverse().forEach((ctor) => {
       const descriptions: Record<string, ExtensiblePropDescription> = ctor.__extensiblePropDescriptions__;
-      Object.keys(descriptions).forEach((key: string) => {
-        this._setEntityProp(key, options[key], descriptions[key]);
-      });
+      if (descriptions) {
+        Object.keys(descriptions).forEach((key: string) => {
+          this._setEntityProp(key, options[key], descriptions[key]);
+        });
+      }
     });
   }
 
@@ -61,7 +64,6 @@ export class ExtensibleEntity {
       this.__extensiblePropDescriptions__ = {};
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (this.__extensiblePropDescriptions__[key]) {
       throw new VerseaError(`Duplicate prop: ${key}`);
     }

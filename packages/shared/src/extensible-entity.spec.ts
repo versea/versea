@@ -10,6 +10,13 @@ describe('ExtensibleEntity', () => {
     jest.restoreAllMocks();
   });
 
+  test('新建一个类，继承 ExtensibleEntity，不调用 defineProp，应该不会报错', () => {
+    class Test extends ExtensibleEntity {}
+
+    const test = new Test();
+    expect(test).toEqual({});
+  });
+
   test('新建一个类，继承 ExtensibleEntity，使用 defineProp，实例化的这个类应该可以自动增加这个属性', () => {
     class Test extends ExtensibleEntity {}
     Test.defineProp('key', { default: 1 });
