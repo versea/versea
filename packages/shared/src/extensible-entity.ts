@@ -37,6 +37,7 @@ function findAllDerivedClass(instance: any, baseClass: any, currentValue: any[] 
     result.push(targetConstructor);
   }
 
+  /* istanbul ignore next */
   if (!instance.__proto__) {
     return result;
   }
