@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { VerseaError } from './error';
 
 export interface ExtensiblePropDescription {
@@ -40,13 +39,13 @@ export class ExtensibleEntity {
   [key: string]: any;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private static __extensiblePropDescriptions__: Record<string, ExtensiblePropDescription>;
+  private static __extensiblePropDescriptions__: Record<string, ExtensiblePropDescription | undefined>;
 
   constructor(options: Record<string, any> = {}) {
     const constructors = findAllDerivedClass(this, ExtensibleEntity);
     // 从子类开始遍历，子类 -> 孙子类 -> ...
     constructors.reverse().forEach((ctor) => {
-      const descriptions: Record<string, ExtensiblePropDescription> = ctor.__extensiblePropDescriptions__;
+      const descriptions: Record<string, ExtensiblePropDescription> | undefined = ctor.__extensiblePropDescriptions__;
       if (descriptions) {
         Object.keys(descriptions).forEach((key: string) => {
           this._setEntityProp(key, options[key], descriptions[key]);
@@ -59,8 +58,7 @@ export class ExtensibleEntity {
    * 在实体类上新增一个字段
    */
   public static defineProp(key: string, description: ExtensiblePropDescription = {}): void {
-    // eslint-disable-next-line no-prototype-builtins
-    if (!this.hasOwnProperty('__extensiblePropDescriptions__')) {
+    if (!Object.prototype.hasOwnProperty.call(this, '__extensiblePropDescriptions__')) {
       this.__extensiblePropDescriptions__ = {};
     }
 

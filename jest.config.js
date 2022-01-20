@@ -7,7 +7,6 @@ module.exports = {
   testEnvironment: 'jsdom',
   testMatch: ['**/*.spec.[jt]s?(x)'],
   watchPlugins: ['jest-watch-lerna-packages'],
-  collectCoverage: true,
   collectCoverageFrom: ['packages/*/src/**/*.{js,jsx,ts,tsx}'],
   setupFilesAfterEnv: [require.resolve('@testing-library/jest-dom/extend-expect')],
 };
