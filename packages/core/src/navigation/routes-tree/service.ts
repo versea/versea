@@ -18,10 +18,18 @@ export class RoutesTree implements IRoutesTree {
     this._RouteConstructor = Route;
   }
 
-  public createTree(options: RouteOptions, app: IApp): IRoute {
-    // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    const route = new this._RouteConstructor(options, app);
-    this.fragments.push(route);
-    return route;
+  public createTree(options: RouteOptions[], app: IApp): void {
+    options.forEach((routeOptions) => {
+      // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
+      const route = new this._RouteConstructor(routeOptions, app);
+      this.fragments.push(route);
+    });
+
+    this.mergeFragments();
+  }
+
+  // TODO: 合并两个路由树
+  protected mergeFragments(): void {
+    console.log(this.fragments);
   }
 }

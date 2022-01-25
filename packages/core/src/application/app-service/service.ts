@@ -27,10 +27,8 @@ export class AppService implements IAppService {
     this.apps.set(app.name, app);
 
     // 创建 routes
-    if (options.routes) {
-      options.routes.forEach((route) => {
-        this._routesTree.createTree(route, app);
-      });
+    if (options.routes?.length) {
+      this._routesTree.createTree(options.routes, app);
     }
 
     return app;
