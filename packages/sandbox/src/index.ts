@@ -8,10 +8,12 @@ import {
   IAppKey,
   provide,
   provideValue,
+  IRoutesTree,
+  IRoutesTreeKey,
 } from '@versea/core';
 import { Container, inject } from 'inversify';
 
-const parent = new Container();
+const parent = new Container({ defaultScope: 'Singleton' });
 
 @provide(IAppKey, 'Constructor')
 export class NewApp extends App {
@@ -46,7 +48,13 @@ const app1 = parent.get<IAppService>(IAppServiceKey).registerApplication({
 const app2 = parent.get<IAppService>(IAppServiceKey).registerApplication({
   name: 'app2',
   path: 'app2_path',
+  routes: [
+    {
+      path: 'a',
+    },
+  ],
 } as AppOptions);
+const routesTree = parent.get<IRoutesTree>(IRoutesTreeKey);
 const test = parent.get<Test>('Test');
-console.log(app1, app2);
+console.log(app1, app2, routesTree);
 console.log(test);

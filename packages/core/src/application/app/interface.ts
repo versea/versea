@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { RouteOptions } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
@@ -16,9 +17,6 @@ export interface IApp {
   /** 应用名称 */
   name: string;
 
-  /** 应用的路径 */
-  path: string;
-
   /** 加载应用的方法 */
   loadApp: () => Promise<AppHooks>;
 
@@ -30,12 +28,12 @@ export interface AppOptions {
   /** 应用名称 */
   name: string;
 
-  /** 应用的路径 */
-  path: string;
+  /** 应用的路由 */
+  routes?: RouteOptions[];
 
   /** 传给子应用的属性 */
   props?: AppProps;
 
   /** 加载应用的方法 */
-  loadApp: () => Promise<AppHooks>;
+  loadApp?: () => Promise<AppHooks>;
 }
