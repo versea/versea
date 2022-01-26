@@ -8,13 +8,14 @@ export interface IRoute {
   /** 匹配的路径 */
   path: string;
 
-  /** 子应用的名称 */
+  /** 配置的路由对应的应用 */
   apps: IApp[];
 
   /** route 额外参数 */
   meta?: Record<string, any>;
 
-  /** 子路由 */
+  parent: IRoute | null;
+
   children: IRoute[] | null;
 }
 
@@ -26,6 +27,5 @@ export interface RouteOptions {
   /** route 额外参数 */
   meta?: Record<string, any>;
 
-  /** 子路由 */
   children?: RouteOptions[];
 }

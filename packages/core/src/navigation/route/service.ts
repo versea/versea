@@ -11,22 +11,24 @@ export * from './interface';
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 
-  /** 子应用的名称 */
+  /** 配置的路由对应的应用 */
   public apps: IApp[];
+
+  public parent: IRoute | null;
 
   /** route 额外参数 */
   public meta?: Record<string, any>;
 
-  /** 子路由 */
   public children: IRoute[] | null;
 
-  constructor(options: RouteOptions, app: IApp) {
+  constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
     this.path = options.path;
     this.apps = [app];
-    this.meta = options.meta;
+    this.meta = options.meta ?? {};
+    this.parent = parent;
     this.children = options.children
-      ? options.children.map((child) => new (this.constructor as typeof Route)(child, app) as IRoute)
+      ? options.children.map((child) => new (this.constructor as typeof Route)(child, app, this) as IRoute)
       : null;
   }
 }

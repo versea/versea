@@ -22,7 +22,7 @@ export class App extends ExtensibleEntity implements IApp {
     this.loadApp = options.loadApp!;
   }
 
-  /** 获取最终传给子应用 loadApp 和 mount 方法的属性 */
+  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
   public getProps(): Record<string, any> {
     const props: Record<string, any> =
       typeof this.props === 'function' ? (this.props as FunctionalAppProps)(this.name) : this.props;

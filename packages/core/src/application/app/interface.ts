@@ -31,7 +31,7 @@ export interface AppOptions {
   /** 应用的路由 */
   routes?: RouteOptions[];
 
-  /** 传给子应用的属性 */
+  /** 传给应用的属性 */
   props?: AppProps;
 
   /** 加载应用的方法 */
