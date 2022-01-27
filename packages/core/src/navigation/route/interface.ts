@@ -16,7 +16,17 @@ export interface IRoute {
 
   parent: IRoute | null;
 
-  children: IRoute[] | null;
+  children: IRoute[];
+
+  /** 该 route 的 children 允许其他的应用的路由插入 */
+  slot?: string;
+
+  /** 该 route 的整个内容需要插入其他的应用的路由的 children */
+  fill?: string;
+
+  readonly slotRoutes: IRoute[];
+
+  flatten: () => IRoute[];
 }
 
 /** Route 实例化的参数 */
@@ -28,4 +38,10 @@ export interface RouteOptions {
   meta?: Record<string, any>;
 
   children?: RouteOptions[];
+
+  /** 该 route 的 children 允许其他的应用的路由插入 */
+  slot?: string;
+
+  /** 该 route 的整个内容需要插入其他的应用的路由的 children */
+  fill?: string;
 }
