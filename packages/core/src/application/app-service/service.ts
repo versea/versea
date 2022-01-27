@@ -1,6 +1,6 @@
 import { inject, interfaces } from 'inversify';
 
-import { IRoutesTreeKey, IRoutesTree } from '../../navigation/routes-tree/service';
+import { IRouteTreesKey, IRouteTrees } from '../../navigation/route-trees/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
@@ -11,14 +11,15 @@ export * from './interface';
 export class AppService implements IAppService {
   public apps: Map<string, IApp> = new Map();
 
-  private readonly _AppConstructor: interfaces.Newable<IApp>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
-  private readonly _routesTree: IRoutesTree;
+  protected readonly _routeTrees: IRouteTrees;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IRoutesTreeKey) routesTree: IRoutesTree) {
+  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IRouteTreesKey) routeTrees: IRouteTrees) {
     this._AppConstructor = App;
-    this._routesTree = routesTree;
+    this._routeTrees = routeTrees;
   }
 
   public registerApplication(options: AppOptions): IApp {
@@ -28,7 +29,7 @@ export class AppService implements IAppService {
 
     // 创建 routes
     if (options.routes?.length) {
-      this._routesTree.createTree(options.routes, app);
+      this._routeTrees.createTree(options.routes, app);
     }
 
     return app;

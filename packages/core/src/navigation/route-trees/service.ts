@@ -3,12 +3,12 @@ import { inject, interfaces } from 'inversify';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, RouteOptions } from '../route/service';
-import { IRoutesTree, IRoutesTreeKey } from './interface';
+import { IRouteTrees, IRouteTreesKey } from './interface';
 
 export * from './interface';
 
-@provide(IRoutesTreeKey)
-export class RoutesTree implements IRoutesTree {
+@provide(IRouteTreesKey)
+export class RouteTrees implements IRouteTrees {
   protected fragments: IRoute[] = [];
 
   private readonly _RouteConstructor: interfaces.Newable<IRoute>;

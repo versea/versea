@@ -3,8 +3,8 @@ import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
 import { RouteOptions } from '../route/service';
 
-export const IRoutesTreeKey = createServiceSymbol('IRoutesTree');
+export const IRouteTreesKey = createServiceSymbol('IRouteTrees');
 
-export interface IRoutesTree {
+export interface IRouteTrees {
   createTree: (options: RouteOptions[], app: IApp) => void;
 }
