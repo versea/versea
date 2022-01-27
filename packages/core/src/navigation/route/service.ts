@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExtensibleEntity } from '@versea/shared';
+import { ExtensibleEntity, VerseaError } from '@versea/shared';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
@@ -42,7 +42,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public get slotRoutes(): IRoute[] {
-    return this.flatten().filter((route) => Boolean(route.fill));
+    return this.flatten().filter((route) => Boolean(route.slot));
   }
 
   public flatten(): IRoute[] {
@@ -51,6 +51,63 @@ export class Route extends ExtensibleEntity implements IRoute {
       result.push(node);
     });
     return result;
+  }
+
+  public merge(route: IRoute): void {
+    if (this.path !== route.path) return;
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(`Merge same path route "${route.path}".`);
+    }
+
+    this.validSamePathRoute(route);
+
+    this.apps = [...this.apps, ...route.apps];
+    this.meta = { ...this.meta, ...route.meta };
+
+    if (this.children.length === 0) {
+      this.children = route.children;
+      this.children.forEach((child) => {
+        child.parent = this;
+      });
+    }
+  }
+
+  public appendChild(route: IRoute): void {
+    const sameChild = this.children.find((child) => child.path === route.path);
+    if (sameChild) {
+      sameChild.merge(route);
+      return;
+    }
+
+    route.parent = this;
+
+    if (this.children.length === 0) {
+      this.children.push(route);
+      return;
+    }
+
+    const wildChildIndex = this.children.findIndex((child) => ['.*', '(.*)'].includes(child.path));
+    if (wildChildIndex < 0) {
+      this.children.push(route);
+      return;
+    }
+
+    this.children.splice(wildChildIndex, 0, route);
+  }
+
+  protected validSamePathRoute(route: IRoute): void {
+    if (this.children.length > 0 && route.children.length > 0) {
+      throw new VerseaError('Can not Merge same path route with children');
+    }
+
+    if (this.slot || route.slot) {
+      throw new VerseaError('Can not Merge same path route with slot');
+    }
+
+    if (this.fill || route.fill) {
+      throw new VerseaError('Can not Merge same path route with fill');
+    }
   }
 
   protected toJSON(): Record<string, any> {

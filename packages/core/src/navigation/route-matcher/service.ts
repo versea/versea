@@ -27,7 +27,6 @@ export class RouteMatcher implements IRouteMatcher {
     if (params) {
       for (let i = 1, len = matchArray.length; i < len; ++i) {
         const key = keys[i - 1];
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (key) {
           // 匹配 wildcard(.*) 时，使用 pathMatch 表示
           params[key.name || 'pathMatch'] =

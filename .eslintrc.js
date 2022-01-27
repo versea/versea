@@ -4,6 +4,7 @@ const TypescriptRules = {
   '@typescript-eslint/strict-boolean-expressions': 'off',
   '@typescript-eslint/prefer-readonly-parameter-types': 'off',
   '@typescript-eslint/consistent-type-imports': 'off',
+  '@typescript-eslint/no-unnecessary-condition': 'off',
   '@typescript-eslint/explicit-member-accessibility': [
     'error',
     {

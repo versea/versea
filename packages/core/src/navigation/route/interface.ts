@@ -27,6 +27,10 @@ export interface IRoute {
   readonly slotRoutes: IRoute[];
 
   flatten: () => IRoute[];
+
+  merge: (route: IRoute) => void;
+
+  appendChild: (route: IRoute) => void;
 }
 
 /** Route 实例化的参数 */
