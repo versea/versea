@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IApp } from '../../application/app/service';
@@ -9,7 +11,7 @@ export * from './interface';
 
 @provide(IRouteTreesKey)
 export class RouteTrees implements IRouteTrees {
-  protected fragments: IRoute[] = [];
+  protected trees: IRoute[] = [];
 
   private readonly _RouteConstructor: interfaces.Newable<IRoute>;
 
@@ -22,14 +24,31 @@ export class RouteTrees implements IRouteTrees {
     options.forEach((routeOptions) => {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
       const route = new this._RouteConstructor(routeOptions, app);
-      this.fragments.push(route);
+      this.trees.push(route);
     });
 
-    this.mergeFragments();
+    this.mergeTrees();
   }
 
-  // TODO: 合并两个路由树
-  protected mergeFragments(): void {
-    console.log(this.fragments);
+  /** 合并路由树 */
+  protected mergeTrees(): void {
+    // 生成 slotMap，记录所有允许插入的节点
+    const slotMap: Record<string, IRoute> = {};
+    this.trees.forEach((tree) => {
+      tree.slotRoutes.forEach((route) => {
+        if (slotMap[route.slot!]) {
+          throw new VerseaError(`Duplicate slot key in route with path: "${route.path}"`);
+        }
+        slotMap[route.slot!] = route;
+      });
+    });
+
+    for (let i = this.trees.length - 1; i >= 0; i--) {
+      const tree = this.trees[i];
+      if (tree.fill && slotMap[tree.fill]) {
+        slotMap[tree.fill].appendChild(tree);
+        this.trees.splice(i, 1);
+      }
+    }
   }
 }
