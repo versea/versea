@@ -37,7 +37,7 @@ export class RouteTrees implements IRouteTrees {
     this.trees.forEach((tree) => {
       tree.slotRoutes.forEach((route) => {
         if (slotMap[route.slot!]) {
-          throw new VerseaError(`Duplicate slot key in route with path: "${route.path}"`);
+          throw new VerseaError(`Duplicate slot key in route with path: "${route.path}".`);
         }
         slotMap[route.slot!] = route;
       });
