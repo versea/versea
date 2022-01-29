@@ -57,10 +57,10 @@ export class Route extends ExtensibleEntity implements IRoute {
     if (this.path !== route.path) return;
 
     if (process.env.NODE_ENV !== 'production') {
-      console.warn(`Merge same path route "${route.path}".`);
+      console.warn(`Merge route with same path  "${route.path}".`);
     }
 
-    this.validSameRoute(route);
+    this.validRouteWithSamePath(route);
 
     this.apps = [...this.apps, ...route.apps];
     this.meta = { ...this.meta, ...route.meta };
@@ -74,9 +74,9 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public appendChild(route: IRoute): void {
-    const sameChild = this.children.find((child) => child.path === route.path);
-    if (sameChild) {
-      sameChild.merge(route);
+    const samePathChild = this.children.find((child) => child.path === route.path);
+    if (samePathChild) {
+      samePathChild.merge(route);
       return;
     }
 
@@ -96,13 +96,13 @@ export class Route extends ExtensibleEntity implements IRoute {
     this.children.splice(wildChildIndex, 0, route);
   }
 
-  protected validSameRoute(route: IRoute): void {
+  protected validRouteWithSamePath(route: IRoute): void {
     if (this.children.length > 0 && route.children.length > 0) {
-      throw new VerseaError('Can not Merge same route with children.');
+      throw new VerseaError('Can not Merge route(same path) with children.');
     }
 
     if (this.slot || route.slot) {
-      throw new VerseaError('Can not Merge same route with slot.');
+      throw new VerseaError('Can not Merge route(same path) with slot.');
     }
   }
 
