@@ -104,10 +104,6 @@ export class Route extends ExtensibleEntity implements IRoute {
     if (this.slot || route.slot) {
       throw new VerseaError('Can not Merge same route with slot.');
     }
-
-    if (this.fill || route.fill) {
-      throw new VerseaError('Can not Merge same route with fill.');
-    }
   }
 
   protected toJSON(): Record<string, any> {
