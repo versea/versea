@@ -13,7 +13,8 @@ export * from './interface';
 export class RouteTrees implements IRouteTrees {
   protected trees: IRoute[] = [];
 
-  private readonly _RouteConstructor: interfaces.Newable<IRoute>;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   constructor(@inject(IRouteKey) Route: interfaces.Newable<IRoute>) {

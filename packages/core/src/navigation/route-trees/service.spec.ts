@@ -272,7 +272,7 @@ describe('RouteTrees', () => {
 
       expect(() => {
         routeTrees.createTree([{ path: 'path2', fill: 'foo', children: [{ path: 'path4' }] }], app3);
-      }).toThrowError('Can not Merge same route');
+      }).toThrowError('Can not Merge route(same path)');
     });
 
     test('同上，合并路由时，任何一个 child 具有 slot 都应该 throw error。', () => {
@@ -285,7 +285,7 @@ describe('RouteTrees', () => {
 
       expect(() => {
         routeTrees.createTree([{ path: 'path2', fill: 'foo', slot: 'other' }], app3);
-      }).toThrowError('Can not Merge same route');
+      }).toThrowError('Can not Merge route(same path)');
     });
 
     test('声明两个具有相同插槽字段的路由节点，应当 throw error。', () => {
