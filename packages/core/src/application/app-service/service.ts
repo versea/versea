@@ -1,6 +1,6 @@
 import { inject, interfaces } from 'inversify';
 
-import { IRouteTreesKey, IRouteTrees } from '../../navigation/route-trees/service';
+import { IMatcherKey, IMatcher } from '../../navigation/matcher/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
@@ -14,12 +14,12 @@ export class AppService implements IAppService {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
-  protected readonly _routeTrees: IRouteTrees;
+  protected readonly _matcher: IMatcher;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IRouteTreesKey) routeTrees: IRouteTrees) {
+  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IMatcherKey) matcher: IMatcher) {
     this._AppConstructor = App;
-    this._routeTrees = routeTrees;
+    this._matcher = matcher;
   }
 
   public registerApplication(options: AppOptions): IApp {
@@ -29,7 +29,7 @@ export class AppService implements IAppService {
 
     // 创建 routes
     if (options.routes?.length) {
-      this._routeTrees.createTree(options.routes, app);
+      this._matcher.addRoutes(options.routes, app);
     }
 
     return app;
