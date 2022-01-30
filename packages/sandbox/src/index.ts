@@ -8,8 +8,8 @@ import {
   IAppKey,
   provide,
   provideValue,
-  IRouteTrees,
-  IRouteTreesKey,
+  IRouter,
+  IRouterKey,
 } from '@versea/core';
 import { Container, inject } from 'inversify';
 
@@ -54,7 +54,7 @@ const app2 = parent.get<IAppService>(IAppServiceKey).registerApplication({
     },
   ],
 } as AppOptions);
-const routesTree = parent.get<IRouteTrees>(IRouteTreesKey);
+const matcher = parent.get<IRouter>(IRouterKey);
 const test = parent.get<Test>('Test');
-console.log(app1, app2, routesTree);
+console.log(app1, app2, matcher);
 console.log(test);

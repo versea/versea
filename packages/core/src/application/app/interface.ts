@@ -20,6 +20,7 @@ export interface IApp {
   /** 加载应用的方法 */
   loadApp: () => Promise<AppHooks>;
 
+  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
   getProps: () => Record<string, any>;
 }
 

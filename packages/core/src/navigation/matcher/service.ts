@@ -5,12 +5,12 @@ import { inject, interfaces } from 'inversify';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, RouteOptions } from '../route/service';
-import { IRouteTrees, IRouteTreesKey } from './interface';
+import { IMatcher, IMatcherKey } from './interface';
 
 export * from './interface';
 
-@provide(IRouteTreesKey)
-export class RouteTrees implements IRouteTrees {
+@provide(IMatcherKey)
+export class Matcher implements IMatcher {
   protected trees: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -21,10 +21,10 @@ export class RouteTrees implements IRouteTrees {
     this._RouteConstructor = Route;
   }
 
-  public createTree(options: RouteOptions[], app: IApp): void {
-    options.forEach((routeOptions) => {
+  public addRoutes(routes: RouteOptions[], app: IApp): void {
+    routes.forEach((routeOption) => {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-      const route = new this._RouteConstructor(routeOptions, app);
+      const route = new this._RouteConstructor(routeOption, app);
       this.trees.push(route);
     });
 
