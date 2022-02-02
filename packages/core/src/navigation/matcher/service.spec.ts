@@ -8,13 +8,13 @@ import { buildProviderModule } from '../../provider';
 import { IMatcher, IMatcherKey } from './service';
 
 function getMatcher(): IMatcher {
-  const container = new Container();
+  const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
   return container.get<IMatcher>(IMatcherKey);
 }
 
 function getAppInstance(appName): IApp {
-  const container = new Container();
+  const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
   const App = container.get<interfaces.Newable<IApp>>(IAppKey);
   // @ts-expect-error 这里需要向 App 传入构造函数参数

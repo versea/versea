@@ -1,6 +1,6 @@
 import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
-import { MatchedRoute, RouteOptions } from '../route/service';
+import { IRoute, MatchedRoute, RouteOptions } from '../route/service';
 
 export const IMatcherKey = createServiceSymbol('IMatcher');
 
@@ -9,5 +9,5 @@ export interface IMatcher {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 匹配路由 */
-  match: (path: string) => MatchedRoute[];
+  match: (path: string, trees?: IRoute[], result?: MatchedRoute[]) => MatchedRoute[];
 }
