@@ -57,14 +57,19 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public toMatchedRoute(): MatchedRoute {
+    const extensibleObject: Record<string, unknown> = {};
+    Object.keys(this.extensiblePropDescriptions).forEach((key) => {
+      extensibleObject[key] = this[key];
+    });
+
     return {
+      ...extensibleObject,
       path: this.path,
       apps: this.apps,
       meta: this.meta,
       fullPath: this.fullPath,
       params: {},
       query: {},
-      hash: '',
     };
   }
 
@@ -77,6 +82,14 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     this.validRouteWithSamePath(route);
 
+    // 合并扩展属性
+    Object.keys(this.extensiblePropDescriptions).forEach((key: string) => {
+      if (this.extensiblePropDescriptions[key].onMerge) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
+        this[key] = this.extensiblePropDescriptions[key].onMerge!(this[key], (route as Record<string, any>)[key]);
+      }
+    });
+
     this.apps = [...this.apps, ...route.apps];
     this.meta = { ...this.meta, ...route.meta };
 
@@ -86,14 +99,6 @@ export class Route extends ExtensibleEntity implements IRoute {
         child.parent = this;
       });
     }
-
-    // 合并扩展属性
-    Object.keys(this.extensiblePropDescriptions).forEach((key: string) => {
-      if (this.extensiblePropDescriptions[key].onMerge) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
-        this[key] = this.extensiblePropDescriptions[key].onMerge!(this[key], (route as Record<string, any>)[key]);
-      }
-    });
   }
 
   public appendChild(route: IRoute): void {
