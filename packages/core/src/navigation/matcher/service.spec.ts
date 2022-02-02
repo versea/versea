@@ -34,7 +34,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -54,7 +54,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -62,7 +62,7 @@ describe('Matcher', () => {
           ],
           children: [
             {
-              path: 'path2',
+              path: '/path2',
               apps: [
                 {
                   name: 'name2',
@@ -83,7 +83,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -91,7 +91,7 @@ describe('Matcher', () => {
           ],
           children: [
             {
-              path: 'path2',
+              path: '/path2',
               apps: [
                 {
                   name: 'name2',
@@ -112,7 +112,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -120,7 +120,7 @@ describe('Matcher', () => {
           ],
         },
         {
-          path: 'path2',
+          path: '/path2',
           apps: [
             {
               name: 'name2',
@@ -139,7 +139,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -147,7 +147,7 @@ describe('Matcher', () => {
           ],
           children: [
             {
-              path: 'path1',
+              path: '/path1',
               apps: [
                 {
                   name: 'name1',
@@ -155,7 +155,7 @@ describe('Matcher', () => {
               ],
             },
             {
-              path: 'path2',
+              path: '/path2',
               apps: [
                 {
                   name: 'name2',
@@ -163,7 +163,7 @@ describe('Matcher', () => {
               ],
             },
             {
-              path: '.*',
+              path: '/.*',
               apps: [
                 {
                   name: 'name1',
@@ -186,7 +186,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -194,7 +194,7 @@ describe('Matcher', () => {
           ],
           children: [
             {
-              path: 'path2',
+              path: '/path2',
               apps: [
                 {
                   name: 'name2',
@@ -202,7 +202,7 @@ describe('Matcher', () => {
               ],
             },
             {
-              path: 'path3',
+              path: '/path3',
               apps: [
                 {
                   name: 'name3',
@@ -225,7 +225,7 @@ describe('Matcher', () => {
 
       expect((matcher as any).trees).toMatchObject([
         {
-          path: 'path1',
+          path: '/path1',
           apps: [
             {
               name: 'name1',
@@ -233,7 +233,7 @@ describe('Matcher', () => {
           ],
           children: [
             {
-              path: 'path2',
+              path: '/path2',
               apps: [
                 {
                   name: 'name2',
