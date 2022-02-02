@@ -32,14 +32,19 @@ export class Matcher implements IMatcher {
     this.mergeTrees();
   }
 
-  public match(path: string, trees: IRoute[] = this.trees, result: MatchedRoute[] = []): MatchedRoute[] {
+  public match(
+    path: string,
+    query: Record<string, string>,
+    trees: IRoute[] = this.trees,
+    result: MatchedRoute[] = [],
+  ): MatchedRoute[] {
     for (const route of trees) {
       const params: Record<string, string> = {};
       const isMatched = this.matchRoute(path, route, params);
       if (isMatched) {
         // TODO: 根据 path 解析出来 query
-        result.push(route.toMatchedRoute({ params, query: {} }));
-        return this.match(path, route.children, result);
+        result.push(route.toMatchedRoute({ params, query }));
+        return this.match(path, query, route.children, result);
       }
     }
     return result;
