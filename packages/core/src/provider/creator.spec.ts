@@ -18,7 +18,7 @@ describe('createProvider', () => {
     @provide('test')
     class Test {}
 
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     container.load(buildProviderModule());
     expect(container.get('test')).toBeInstanceOf(Test);
   });
@@ -32,7 +32,7 @@ describe('createProvider', () => {
     @provide('test')
     class OtherTest extends Test {}
 
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     container.load(buildProviderModule());
 
     expect(container.get('test')).toBeInstanceOf(OtherTest);
@@ -48,9 +48,9 @@ describe('createProvider', () => {
     @otherProvide('test')
     class OtherTest {}
 
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     container.load(buildProviderModule());
-    const otherContainer = new Container();
+    const otherContainer = new Container({ defaultScope: 'Singleton' });
     otherContainer.load(otherBuildProviderModule());
 
     expect(container.get('test')).toBeInstanceOf(Test);
@@ -61,7 +61,7 @@ describe('createProvider', () => {
     const { provideValue, buildProviderModule } = createProvider('metaKey');
 
     provideValue('foo', 'test');
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     container.load(buildProviderModule());
 
     expect(container.get('test')).toBe('foo');
@@ -72,7 +72,7 @@ describe('createProvider', () => {
 
     provideValue('foo', 'test');
     provideValue('bar', 'test');
-    const container = new Container();
+    const container = new Container({ defaultScope: 'Singleton' });
     container.load(buildProviderModule());
 
     expect(container.get('test')).toBe('bar');

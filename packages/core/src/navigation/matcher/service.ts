@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
+import { Key } from 'path-to-regexp';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
@@ -31,9 +32,50 @@ export class Matcher implements IMatcher {
     this.mergeTrees();
   }
 
-  public match(path: string): MatchedRoute[] {
-    console.log(path);
-    return [];
+  public match(path: string, trees: IRoute[] = this.trees, result: MatchedRoute[] = []): MatchedRoute[] {
+    for (const route of trees) {
+      const params: Record<string, string> = {};
+      const isMatched = this.matchRoute(path, route, params);
+      if (isMatched) {
+        // TODO: 根据 path 解析出来 query
+        result.push(route.toMatchedRoute({ params, query: {} }));
+        return this.match(path, route.children, result);
+      }
+    }
+    return result;
+  }
+
+  protected matchRoute(path: string, route: IRoute, params?: Record<string, string>): boolean {
+    const keys: Key[] = [];
+    const matchArray = route.compile(keys).exec(path);
+
+    // 检查路径是否具有重名的参数
+    if (process.env.NODE_ENV !== 'production') {
+      const keyMap = Object.create(null) as Record<string, boolean>;
+      keys.forEach((key) => {
+        if (keyMap[key.name]) {
+          console.warn(`Duplicate param keys in route with path: "${route.path}"`);
+        }
+        keyMap[key.name] = true;
+      });
+    }
+
+    if (!matchArray) {
+      return false;
+    }
+
+    if (params) {
+      for (let i = 1, len = matchArray.length; i < len; ++i) {
+        const key = keys[i - 1];
+        if (key) {
+          // 匹配 wildcard(.*) 时，使用 pathMatch 表示
+          params[key.name || 'pathMatch'] =
+            typeof matchArray[i] === 'string' ? decodeURIComponent(matchArray[i]) : matchArray[i];
+        }
+      }
+    }
+
+    return true;
   }
 
   /** 合并路由树 */

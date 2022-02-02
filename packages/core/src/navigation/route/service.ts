@@ -1,9 +1,10 @@
 import { ExtensibleEntity, VerseaError } from '@versea/shared';
+import { pathToRegexp, Key } from 'path-to-regexp';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { traverse } from '../../utils';
-import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from './interface';
+import { IRoute, IRouteKey, MatchedRoute, RouteOptions, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
 
 export * from './interface';
 
@@ -17,7 +18,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   public parent: IRoute | null;
 
   /** route 额外参数 */
-  public meta?: Record<string, unknown>;
+  public meta: Record<string, unknown>;
 
   public children: IRoute[];
 
@@ -27,6 +28,8 @@ export class Route extends ExtensibleEntity implements IRoute {
   /** 该 route 的整个内容需要插入其他的应用的路由的 children */
   public fill?: string;
 
+  public pathToRegexpOptions: PathToRegexpOptions;
+
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
     this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
@@ -35,6 +38,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     this.parent = parent;
     this.slot = options.slot;
     this.fill = options.fill;
+    this.pathToRegexpOptions = options.pathToRegexpOptions ?? {};
     this.children = options.children
       ? options.children.map((child) => new (this.constructor as typeof Route)(child, app, this) as IRoute)
       : [];
@@ -56,23 +60,6 @@ export class Route extends ExtensibleEntity implements IRoute {
     return result;
   }
 
-  public toMatchedRoute(): MatchedRoute {
-    const extensibleObject: Record<string, unknown> = {};
-    Object.keys(this.extensiblePropDescriptions).forEach((key) => {
-      extensibleObject[key] = this[key];
-    });
-
-    return {
-      ...extensibleObject,
-      path: this.path,
-      apps: this.apps,
-      meta: this.meta,
-      fullPath: this.fullPath,
-      params: {},
-      query: {},
-    };
-  }
-
   public merge(route: IRoute): void {
     if (this.path !== route.path) return;
 
@@ -92,6 +79,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     this.apps = [...this.apps, ...route.apps];
     this.meta = { ...this.meta, ...route.meta };
+    this.pathToRegexpOptions = { ...this.pathToRegexpOptions, ...route.pathToRegexpOptions };
 
     if (this.children.length === 0) {
       this.children = route.children;
@@ -122,6 +110,30 @@ export class Route extends ExtensibleEntity implements IRoute {
     }
 
     this.children.splice(wildChildIndex, 0, route);
+  }
+
+  public compile(keys: Key[]): RegExp {
+    return pathToRegexp(this.fullPath, keys, {
+      end: false,
+      ...this.pathToRegexpOptions,
+    });
+  }
+
+  public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
+    const extensibleObject: Record<string, unknown> = {};
+    Object.keys(this.extensiblePropDescriptions).forEach((key) => {
+      extensibleObject[key] = this[key];
+    });
+
+    return {
+      ...extensibleObject,
+      path: this.path,
+      apps: this.apps,
+      meta: this.meta,
+      fullPath: this.fullPath,
+      params: options.params ?? {},
+      query: options.query ?? {},
+    };
   }
 
   protected validRouteWithSamePath(route: IRoute): void {

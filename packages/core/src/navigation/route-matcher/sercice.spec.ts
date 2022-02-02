@@ -9,11 +9,6 @@ function getRouteMatch(): IRouteMatcher {
   return container.get<IRouteMatcher>(IRouteMatcherKey);
 }
 
-afterEach(() => {
-  Reflect.defineMetadata('metaKey', [], Reflect);
-  Reflect.defineMetadata('otherMetaKey', [], Reflect);
-});
-
 /**
  * unit
  * @author huchao
