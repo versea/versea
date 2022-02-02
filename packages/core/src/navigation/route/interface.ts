@@ -63,7 +63,6 @@ export interface RouteOptions {
 export interface MatchedRoute
   // eslint-disable-next-line @typescript-eslint/ban-types
   extends Omit<OmitSubType<IRoute, Function>, 'children' | 'fill' | 'parent' | 'slot' | 'slotRoutes'> {
-  params: Record<string, unknown>;
-  query: Record<string, unknown>;
-  hash: string;
+  params: Record<string, number | string>;
+  query: Record<string, number | string>;
 }
