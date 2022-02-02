@@ -4,7 +4,7 @@ import { inject, interfaces } from 'inversify';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { IRoute, IRouteKey, RouteOptions } from '../route/service';
+import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
 import { IMatcher, IMatcherKey } from './interface';
 
 export * from './interface';
@@ -29,6 +29,11 @@ export class Matcher implements IMatcher {
     });
 
     this.mergeTrees();
+  }
+
+  public match(path: string): MatchedRoute[] {
+    console.log(path);
+    return [];
   }
 
   /** 合并路由树 */

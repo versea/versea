@@ -1,17 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { RouteOptions } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
 
 export interface AppHooks {
-  bootstrap?: () => Promise<any>;
-  mount: () => Promise<any>;
-  unmount: () => Promise<any>;
+  bootstrap?: () => Promise<unknown>;
+  mount: () => Promise<unknown>;
+  unmount: () => Promise<unknown>;
 }
 
-export type FunctionalAppProps = (name: string) => Record<string, any>;
-export type AppProps = FunctionalAppProps | Record<string, any>;
+export type FunctionalAppProps = (name: string) => Record<string, unknown>;
+export type AppProps = FunctionalAppProps | Record<string, unknown>;
 
 export interface IApp {
   /** 应用名称 */
@@ -21,7 +20,7 @@ export interface IApp {
   loadApp: () => Promise<AppHooks>;
 
   /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
-  getProps: () => Record<string, any>;
+  getProps: () => Record<string, unknown>;
 }
 
 /** App 实例化的参数 */

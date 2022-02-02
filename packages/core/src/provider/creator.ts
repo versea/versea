@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import 'reflect-metadata';
 import { VerseaError } from '@versea/shared';
 import {
@@ -15,25 +12,24 @@ import {
 } from 'inversify';
 
 interface ProvideSyntax {
-  implementationType: any;
+  implementationType: unknown;
   bindingType: interfaces.BindingType;
-  serviceIdentifier: interfaces.ServiceIdentifier<any>;
+  serviceIdentifier: interfaces.ServiceIdentifier;
 }
-
 interface CreateProviderReturnType {
   provide: (
-    serviceIdentifier: interfaces.ServiceIdentifier<any>,
+    serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType?: 'Constructor' | 'Instance',
   ) => (target: any) => any;
   provideValue: (
     target: any,
-    serviceIdentifier: interfaces.ServiceIdentifier<any>,
+    serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType?: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider',
   ) => any;
   buildProviderModule: () => interfaces.ContainerModule;
 }
 
-function toString(serviceIdentifier: interfaces.ServiceIdentifier<any>): string {
+function toString(serviceIdentifier: interfaces.ServiceIdentifier): string {
   if (typeof serviceIdentifier === 'function') {
     return serviceIdentifier.name;
   }
@@ -69,11 +65,12 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function createProvider(MetaDataKey: string): CreateProviderReturnType {
   function provide(
-    serviceIdentifier: interfaces.ServiceIdentifier<any>,
+    serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType: 'Constructor' | 'Instance' = 'Instance',
   ) {
     return function (target: any): any {
-      const isAlreadyDecorated = Reflect.hasOwnMetadata(inversify_METADATA_KEY.PARAM_TYPES, target);
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      const isAlreadyDecorated = Reflect.hasOwnMetadata(inversify_METADATA_KEY.PARAM_TYPES, target as Object);
       if (!isAlreadyDecorated) {
         decorate(injectable(), target);
       }
@@ -92,7 +89,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
 
   function provideValue(
     target: any,
-    serviceIdentifier: interfaces.ServiceIdentifier<any>,
+    serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider' = 'ConstantValue',
   ): any {
     appendMetadata(
@@ -118,18 +115,18 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
           return bind(serviceIdentifier).toConstantValue(implementationType);
         }
         if (bindingType === BindingTypeEnum.Constructor) {
-          return bind(serviceIdentifier).toConstructor(implementationType);
+          return bind(serviceIdentifier).toConstructor(implementationType as interfaces.Newable<unknown>);
         }
         if (bindingType === BindingTypeEnum.DynamicValue) {
-          return bind(serviceIdentifier).toDynamicValue(implementationType);
+          return bind(serviceIdentifier).toDynamicValue(implementationType as interfaces.DynamicValue<unknown>);
         }
         if (bindingType === BindingTypeEnum.Function) {
           return bind(serviceIdentifier).toFunction(implementationType);
         }
         if (bindingType === BindingTypeEnum.Provider) {
-          return bind(serviceIdentifier).toProvider(implementationType);
+          return bind(serviceIdentifier).toProvider(implementationType as interfaces.ProviderCreator<unknown>);
         }
-        return bind(serviceIdentifier).to(implementationType);
+        return bind(serviceIdentifier).to(implementationType as new (...args: never[]) => unknown);
       });
     });
   }

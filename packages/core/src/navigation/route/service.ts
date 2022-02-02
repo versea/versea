@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExtensibleEntity, VerseaError } from '@versea/shared';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { traverse } from '../../utils';
-import { IRoute, IRouteKey, RouteOptions } from './interface';
+import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from './interface';
 
 export * from './interface';
 
@@ -18,7 +17,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   public parent: IRoute | null;
 
   /** route 额外参数 */
-  public meta?: Record<string, any>;
+  public meta?: Record<string, unknown>;
 
   public children: IRoute[];
 
@@ -30,7 +29,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
-    this.path = options.path;
+    this.path = options.path.replace(/(^\/*)|(\/*$)/g, '');
     this.apps = [app];
     this.meta = options.meta ?? {};
     this.parent = parent;
@@ -45,12 +44,28 @@ export class Route extends ExtensibleEntity implements IRoute {
     return this.flatten().filter((route) => Boolean(route.slot));
   }
 
+  public get fullPath(): string {
+    return this.parent ? `${this.parent.fullPath}/${this.path}` : this.path;
+  }
+
   public flatten(): IRoute[] {
     const result: IRoute[] = [];
     traverse<IRoute>(this, (node) => {
       result.push(node);
     });
     return result;
+  }
+
+  public toMatchedRoute(): MatchedRoute {
+    return {
+      path: `/${this.path}`,
+      apps: this.apps,
+      meta: this.meta,
+      fullPath: `/${this.fullPath}`,
+      params: {},
+      query: {},
+      hash: '',
+    };
   }
 
   public merge(route: IRoute): void {
@@ -71,6 +86,14 @@ export class Route extends ExtensibleEntity implements IRoute {
         child.parent = this;
       });
     }
+
+    // 合并扩展属性
+    Object.keys(this.extensiblePropDescriptions).forEach((key: string) => {
+      if (this.extensiblePropDescriptions[key].onMerge) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
+        this[key] = this.extensiblePropDescriptions[key].onMerge!(this[key], (route as Record<string, any>)[key]);
+      }
+    });
   }
 
   public appendChild(route: IRoute): void {
@@ -106,11 +129,11 @@ export class Route extends ExtensibleEntity implements IRoute {
     }
   }
 
-  protected toJSON(): Record<string, any> {
+  protected toJSON(): Record<string, unknown> {
     const props = Object.keys(this);
     return props
       .filter((key) => !['parent'].includes(key))
-      .reduce<Record<string, any>>((prev, key: keyof this) => {
+      .reduce<Record<string, unknown>>((prev, key: keyof this) => {
         // 序列化时，apps 只需要返回 app 的名称
         if (key === 'apps') {
           prev.apps = this.apps.map((app) => app.name);
