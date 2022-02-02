@@ -29,7 +29,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
-    this.path = options.path.replace(/(^\/*)|(\/*$)/g, '');
+    this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
     this.apps = [app];
     this.meta = options.meta ?? {};
     this.parent = parent;
@@ -45,7 +45,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public get fullPath(): string {
-    return this.parent ? `${this.parent.fullPath}/${this.path}` : this.path;
+    return this.parent ? `${this.parent.fullPath}${this.path}` : this.path;
   }
 
   public flatten(): IRoute[] {
@@ -58,10 +58,10 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   public toMatchedRoute(): MatchedRoute {
     return {
-      path: `/${this.path}`,
+      path: this.path,
       apps: this.apps,
       meta: this.meta,
-      fullPath: `/${this.fullPath}`,
+      fullPath: this.fullPath,
       params: {},
       query: {},
       hash: '',
@@ -110,7 +110,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       return;
     }
 
-    const wildChildIndex = this.children.findIndex((child) => ['.*', '(.*)'].includes(child.path));
+    const wildChildIndex = this.children.findIndex((child) => ['/.*', '/(.*)'].includes(child.path));
     if (wildChildIndex < 0) {
       this.children.push(route);
       return;
