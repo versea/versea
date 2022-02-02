@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ExtensibleEntity } from '@versea/shared';
 
 import { provide } from '../../provider';
-import { IApp, IAppKey, AppOptions, AppProps, FunctionalAppProps, AppHooks } from './interface';
+import { IApp, IAppKey, AppOptions, AppProps, AppHooks } from './interface';
 
 export * from './interface';
 
@@ -22,10 +21,8 @@ export class App extends ExtensibleEntity implements IApp {
     this.loadApp = options.loadApp!;
   }
 
-  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
-  public getProps(): Record<string, any> {
-    const props: Record<string, any> =
-      typeof this.props === 'function' ? (this.props as FunctionalAppProps)(this.name) : this.props;
+  public getProps(): Record<string, unknown> {
+    const props: Record<string, unknown> = typeof this.props === 'function' ? this.props(this.name) : this.props;
     return {
       ...props,
       name: this.name,
