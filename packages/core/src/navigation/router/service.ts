@@ -19,4 +19,9 @@ export class Router implements IRouter {
   public addRoutes(routes: RouteOptions[], app: IApp): void {
     this._matcher.addRoutes(routes, app);
   }
+
+  // TODO: add match method
+  // public match() {
+  //   return this._matcher.match();
+  // }
 }

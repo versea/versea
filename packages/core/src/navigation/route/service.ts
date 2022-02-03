@@ -103,7 +103,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       return;
     }
 
-    const wildChildIndex = this.children.findIndex((child) => ['/.*', '/(.*)'].includes(child.path));
+    const wildChildIndex = this.children.findIndex((child) => ['/(.*)'].includes(child.path));
     if (wildChildIndex < 0) {
       this.children.push(route);
       return;
