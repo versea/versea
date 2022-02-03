@@ -42,7 +42,6 @@ export class Matcher implements IMatcher {
       const params: Record<string, string> = {};
       const isMatched = this.matchRoute(path, route, params);
       if (isMatched) {
-        // TODO: 根据 path 解析出来 query
         result.push(route.toMatchedRoute({ params, query }));
         return this.match(path, query, route.children, result);
       }
