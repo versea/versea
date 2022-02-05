@@ -13,7 +13,7 @@ function getMatcher(): IMatcher {
   return container.get<IMatcher>(IMatcherKey);
 }
 
-function getAppInstance(appName): IApp {
+function getAppInstance(appName: string): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
   const App = container.get<interfaces.Newable<IApp>>(IAppKey);
