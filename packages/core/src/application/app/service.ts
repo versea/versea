@@ -101,14 +101,14 @@ export class App extends ExtensibleEntity implements IApp {
   // TODO: unmount parcel if needed.
   @memoizePromise()
   public async unmount(): Promise<void> {
-    if (!this.mountApp || this.status !== this._StatusEnum.NotMounted) {
+    if (!this.unmountApp || this.status !== this._StatusEnum.Mounted) {
       return;
     }
 
-    this.status = this._StatusEnum.Mounting;
+    this.status = this._StatusEnum.Unmounting;
     try {
-      await this.mountApp(this.getProps());
-      this.status = this._StatusEnum.Mounted;
+      await this.unmountApp(this.getProps());
+      this.status = this._StatusEnum.NotMounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
       throw error;
