@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Container, interfaces } from 'inversify';
 
-import { IApp, IAppKey } from '../../application/app/service';
+import { IApp, IAppKey, IStatusEnumKey } from '../../application/app/service';
 import { buildProviderModule } from '../../provider';
 import { IMatcher, IMatcherKey } from './service';
 
@@ -18,7 +18,7 @@ function getAppInstance(appName: string): IApp {
   container.load(buildProviderModule());
   const App = container.get<interfaces.Newable<IApp>>(IAppKey);
   // @ts-expect-error 这里需要向 App 传入构造函数参数
-  return new App({ name: appName });
+  return new App({ name: appName }, { StatusEnum: container.get(IStatusEnumKey) });
 }
 
 /**
