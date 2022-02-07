@@ -1,14 +1,22 @@
-export enum AppStatus {
-  NOT_LOADED = 'NOT_LOADED',
-  LOADING_SOURCE_CODE = 'LOADING_SOURCE_CODE',
-  NOT_BOOTSTRAPPED = 'NOT_BOOTSTRAPPED',
-  BOOTSTRAPPING = 'BOOTSTRAPPING',
-  NOT_MOUNTED = 'NOT_MOUNTED',
-  MOUNTING = 'MOUNTING',
-  MOUNTED = 'MOUNTED',
-  UPDATING = 'UPDATING',
-  UNMOUNTING = 'UNMOUNTING',
-  UNLOADING = 'UNLOADING',
-  LOAD_ERROR = 'LOAD_ERROR',
-  SKIP_BECAUSE_BROKEN = 'SKIP_BECAUSE_BROKEN',
-}
+import { provideValue } from '../../provider';
+import { createServiceSymbol } from '../../utils';
+
+export const IStatusEnumKey = createServiceSymbol('IStatusEnum');
+
+const StatusEnum = {
+  NotLoaded: 'NotLoaded',
+  LoadingSourceCode: 'LoadingSourceCode',
+  NotBootstrapped: 'NotBootstrapped',
+  Bootstrapping: 'Bootstrapping',
+  NotMounted: 'NotMounted',
+  Mounting: 'Mounting',
+  Mounted: 'Mounted',
+  Unmounting: 'Unmounting',
+  Unloading: 'Unloading',
+  LoadError: 'LoadError',
+  SkipBecauseBroken: 'SkipBecauseBroken',
+} as const;
+
+export type IStatusEnum = typeof StatusEnum;
+
+provideValue(StatusEnum, IStatusEnumKey);

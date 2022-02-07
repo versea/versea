@@ -44,6 +44,10 @@ const TypescriptRules = {
       selector: 'typeLike',
       format: ['PascalCase'],
     },
+    {
+      selector: 'objectLiteralProperty',
+      format: ['camelCase', 'PascalCase'],
+    },
   ],
   'import/order': [
     'error',

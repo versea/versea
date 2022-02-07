@@ -8,6 +8,7 @@ import {
   IAppKey,
   provide,
   provideValue,
+  AppDependencies,
   IRouter,
   IRouterKey,
 } from '@versea/core';
@@ -19,8 +20,8 @@ const parent = new Container({ defaultScope: 'Singleton' });
 export class NewApp extends App {
   public path: string;
 
-  constructor(options: AppOptions & { path: string }) {
-    super(options);
+  constructor(options: AppOptions & { path: string }, dependencies: AppDependencies) {
+    super(options, dependencies);
     this.path = options.path;
   }
 }
@@ -41,11 +42,11 @@ parent.rebind('TestData').toConstantValue('test2');
 
 // parent.rebind(IAppKey).toConstructor(NewApp);
 
-const app1 = parent.get<IAppService>(IAppServiceKey).registerApplication({
+const app1 = parent.get<IAppService>(IAppServiceKey).registerApp({
   name: 'app1',
   path: 'app1_path',
 } as AppOptions);
-const app2 = parent.get<IAppService>(IAppServiceKey).registerApplication({
+const app2 = parent.get<IAppService>(IAppServiceKey).registerApp({
   name: 'app2',
   path: 'app2_path',
   routes: [
