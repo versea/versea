@@ -1,6 +1,6 @@
+import { IStatusEnum } from '../../constants/status';
 import { RouteOptions } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
-import { IStatusEnum } from './constants';
 
 export const IAppKey = createServiceSymbol('IApp');
 

@@ -3,7 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Container, interfaces } from 'inversify';
 
-import { IApp, IAppKey, IStatusEnumKey } from '../../application/app/service';
+import { IApp, IAppKey } from '../../application/app/service';
+import { IStatusEnumKey } from '../../constants/status';
 import { buildProviderModule } from '../../provider';
 import { IMatcher, IMatcherKey } from './service';
 

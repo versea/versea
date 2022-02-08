@@ -2,9 +2,10 @@
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
+import { IStatusEnum, IStatusEnumKey } from '../../constants/status';
 import { IMatcherKey, IMatcher } from '../../navigation/matcher/service';
 import { provide } from '../../provider';
-import { IApp, IAppKey, AppOptions, IStatusEnum, IStatusEnumKey } from '../app/service';
+import { IApp, IAppKey, AppOptions } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
 
 export * from './interface';
