@@ -1,9 +1,9 @@
-import { provideValue } from '../../provider';
-import { createServiceSymbol } from '../../utils';
+import { provideValue } from '../provider';
+import { createServiceSymbol } from '../utils';
 
 export const IStatusEnumKey = createServiceSymbol('IStatusEnum');
 
-const StatusEnum = {
+export const StatusEnum = {
   NotLoaded: 'NotLoaded',
   LoadingSourceCode: 'LoadingSourceCode',
   NotBootstrapped: 'NotBootstrapped',

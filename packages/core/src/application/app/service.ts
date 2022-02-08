@@ -1,11 +1,10 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
+import { IStatusEnum } from '../../constants/status';
 import { provide } from '../../provider';
-import { IStatusEnum } from './constants';
 import { IApp, IAppKey, AppOptions, AppDependencies, AppProps, AppHooks } from './interface';
 
 export * from './interface';
-export * from './constants';
 
 @provide(IAppKey, 'Constructor')
 export class App extends ExtensibleEntity implements IApp {
