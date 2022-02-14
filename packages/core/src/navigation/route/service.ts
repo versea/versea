@@ -3,13 +3,15 @@ import { pathToRegexp, Key } from 'path-to-regexp';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { traverse } from '../../utils';
+import { traverse, guid } from '../../utils';
 import { IRoute, IRouteKey, MatchedRoute, RouteOptions, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
 
 export * from './interface';
 
 @provide(IRouteKey, 'Constructor')
 export class Route extends ExtensibleEntity implements IRoute {
+  public id: string;
+
   public path: string;
 
   /** 配置的路由对应的应用 */
@@ -32,6 +34,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
+    this.id = guid();
     this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
     this.apps = [app];
     this.meta = options.meta ?? {};
@@ -127,6 +130,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     return {
       ...extensibleObject,
+      id: this.id,
       path: this.path,
       apps: this.apps,
       meta: this.meta,
