@@ -1,6 +1,7 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
 import { IStatusEnum } from '../../constants/status';
+import { IPerformanceContext } from '../../performance/performance-context/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions, AppDependencies, AppProps, AppHooks } from './interface';
 
@@ -42,7 +43,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async load(): Promise<void> {
+  public async load(context: IPerformanceContext): Promise<void> {
     if (this.status !== this._StatusEnum.NotLoaded && this.status !== this._StatusEnum.LoadError) {
       return;
     }
@@ -54,7 +55,7 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._StatusEnum.LoadingSourceCode;
     try {
-      const hooks = await this.loadApp(this.getProps());
+      const hooks = await this.loadApp(this.getProps(context));
       this.status = this._StatusEnum.NotBootstrapped;
       this.setHooks(hooks);
     } catch (error) {
@@ -64,14 +65,14 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async bootstrap(): Promise<void> {
+  public async bootstrap(context: IPerformanceContext): Promise<void> {
     if (!this.bootstrapApp || this.status !== this._StatusEnum.NotBootstrapped) {
       return;
     }
 
     this.status = this._StatusEnum.Bootstrapping;
     try {
-      await this.bootstrapApp(this.getProps());
+      await this.bootstrapApp(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -80,14 +81,14 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async mount(): Promise<void> {
+  public async mount(context: IPerformanceContext): Promise<void> {
     if (!this.mountApp || this.status !== this._StatusEnum.NotMounted) {
       return;
     }
 
     this.status = this._StatusEnum.Mounting;
     try {
-      await this.mountApp(this.getProps());
+      await this.mountApp(this.getProps(context));
       this.status = this._StatusEnum.Mounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -97,14 +98,14 @@ export class App extends ExtensibleEntity implements IApp {
 
   // TODO: unmount parcel if needed.
   @memoizePromise()
-  public async unmount(): Promise<void> {
+  public async unmount(context: IPerformanceContext): Promise<void> {
     if (!this.unmountApp || this.status !== this._StatusEnum.Mounted) {
       return;
     }
 
     this.status = this._StatusEnum.Unmounting;
     try {
-      await this.unmountApp(this.getProps());
+      await this.unmountApp(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -112,11 +113,13 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  public getProps(): Record<string, unknown> {
+  public getProps(context: IPerformanceContext): Record<string, unknown> {
     const props: Record<string, unknown> = typeof this.props === 'function' ? this.props(this.name) : this.props;
     return {
       ...props,
       name: this.name,
+      app: this,
+      context,
     };
   }
 
