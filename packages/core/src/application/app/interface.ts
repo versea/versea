@@ -1,5 +1,6 @@
 import { IStatusEnum } from '../../constants/status';
 import { RouteOptions } from '../../navigation/route/service';
+import { IPerformanceContext } from '../../performance/performance-context/service';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
@@ -17,19 +18,19 @@ export interface IApp {
   name: string;
 
   /** 加载应用 */
-  load: () => Promise<void>;
+  load: (context: IPerformanceContext) => Promise<void>;
 
   /** 引导，应用内容首次挂载到页面前调用 */
-  bootstrap: () => Promise<void>;
+  bootstrap: (context: IPerformanceContext) => Promise<void>;
 
   /** 挂载应用 */
-  mount: () => Promise<void>;
+  mount: (context: IPerformanceContext) => Promise<void>;
 
   /** 卸载应用 */
-  unmount: () => Promise<void>;
+  unmount: (context: IPerformanceContext) => Promise<void>;
 
   /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
-  getProps: () => Record<string, unknown>;
+  getProps: (context: IPerformanceContext) => Record<string, unknown>;
 }
 
 /** App 实例化的参数 */
