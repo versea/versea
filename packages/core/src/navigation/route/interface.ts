@@ -77,4 +77,6 @@ export type MatchedRoute = Omit<
   OmitSubType<IRoute, Function>,
   'children' | 'fill' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
-  ToMatchedRouteOptions;
+  ToMatchedRouteOptions & {
+    getRoute: () => IRoute;
+  };
