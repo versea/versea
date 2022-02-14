@@ -68,8 +68,8 @@ export interface RouteOptions {
 }
 
 export interface ToMatchedRouteOptions {
-  params?: Record<string, string>;
-  query?: Record<string, string>;
+  params: Record<string, string>;
+  query: Record<string, string>;
 }
 
 export type MatchedRoute = Omit<
