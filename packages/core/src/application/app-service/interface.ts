@@ -7,6 +7,4 @@ export interface IAppService {
   registerApp: (options: AppOptions) => IApp;
 
   getApp: (name: string) => IApp;
-
-  loadApp: (name: string) => Promise<IApp>;
 }

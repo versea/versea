@@ -54,10 +54,4 @@ export class AppService implements IAppService {
     }
     return app;
   }
-
-  public async loadApp(name: string): Promise<IApp> {
-    const app = this.getApp(name);
-    await app.load();
-    return Promise.resolve(app);
-  }
 }

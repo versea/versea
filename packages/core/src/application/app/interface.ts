@@ -8,7 +8,6 @@ export interface AppHooks {
   bootstrap?: (props: Record<string, unknown>) => Promise<unknown>;
   mount?: (props: Record<string, unknown>) => Promise<unknown>;
   unmount?: (props: Record<string, unknown>) => Promise<unknown>;
-  unload?: (props: Record<string, unknown>) => Promise<unknown>;
 }
 
 export type AppProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
