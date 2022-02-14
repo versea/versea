@@ -133,6 +133,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       fullPath: this.fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
+      getRoute: (): IRoute => this,
     };
   }
 
