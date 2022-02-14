@@ -3,7 +3,7 @@ import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IStatusEnum, IStatusEnumKey } from '../../constants/status';
-import { IMatcherKey, IMatcher } from '../../navigation/matcher/service';
+import { IRouterKey, IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
@@ -16,17 +16,17 @@ export class AppService implements IAppService {
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
-  protected readonly _matcher: IMatcher;
+  protected readonly _router: IRouter;
 
   protected readonly _StatusEnum: IStatusEnum;
 
   constructor(
     @inject(IAppKey) App: interfaces.Newable<IApp>,
-    @inject(IMatcherKey) matcher: IMatcher,
+    @inject(IRouterKey) router: IRouter,
     @inject(IStatusEnumKey) StatusEnum: IStatusEnum,
   ) {
     this._AppConstructor = App;
-    this._matcher = matcher;
+    this._router = router;
     this._StatusEnum = StatusEnum;
   }
 
@@ -41,7 +41,7 @@ export class AppService implements IAppService {
 
     // 创建 routes
     if (options.routes?.length) {
-      this._matcher.addRoutes(options.routes, app);
+      this._router.addRoutes(options.routes, app);
     }
 
     return app;
