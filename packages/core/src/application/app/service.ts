@@ -18,8 +18,6 @@ export class App extends ExtensibleEntity implements IApp {
 
   protected unmountApp?: (props: Record<string, unknown>) => Promise<unknown>;
 
-  protected unloadApp?: (props: Record<string, unknown>) => Promise<unknown>;
-
   protected props: AppProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -138,6 +136,5 @@ export class App extends ExtensibleEntity implements IApp {
     this.bootstrapApp = hooks.bootstrap;
     this.mountApp = hooks.mount;
     this.unmountApp = hooks.unmount;
-    this.unloadApp = hooks.unload;
   }
 }
