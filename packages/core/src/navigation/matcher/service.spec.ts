@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Container, interfaces } from 'inversify';
 
 import { IApp, IAppKey } from '../../application/app/service';
@@ -324,6 +323,23 @@ describe('Matcher', () => {
           meta: {},
         },
       ]);
+    });
+
+    test('节点路由信息与传入的路由相同，应该可以匹配，反查匹配的 route 节点，应该能正确返回信息', () => {
+      const matcher = getMatcher();
+      const app = getAppInstance('name1');
+      matcher.addRoutes([{ path: 'path1' }], app);
+
+      const matchedRoutes = matcher.match('/path1', {});
+      expect(matchedRoutes[0].getRoute()).toMatchObject({
+        path: '/path1',
+        apps: [
+          {
+            name: 'name1',
+          },
+        ],
+        meta: {},
+      });
     });
 
     test('节点路由信息与传入的路由不同，应该不可以匹配', () => {

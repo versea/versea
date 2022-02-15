@@ -3,7 +3,7 @@ import { inject } from 'inversify';
 import { IApp } from '../../application/app/service';
 import { IPerformanceKey, IPerformance } from '../../performance/performance/service';
 import { provide } from '../../provider';
-import { IMatcher, IMatcherKey } from '../matcher/interface';
+import { IMatcher, IMatcherKey } from '../matcher/service';
 import { RouteOptions } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
 
