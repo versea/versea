@@ -18,7 +18,7 @@ function getAppInstance(options: AppOptions): IApp {
   return appService.registerApp(options);
 }
 
-function getAppWithLoadApp(options: AppOptions, hooks: AppHooks = {}): IApp {
+function getAppWithLoadOptions(options: AppOptions, hooks: AppHooks = {}): IApp {
   return getAppInstance({
     loadApp: async () => {
       return Promise.resolve({
@@ -92,7 +92,7 @@ describe('App', () => {
 
   describe('App.bootstrap', () => {
     test('bootstrap 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' });
+      const app = getAppWithLoadOptions({ name: 'app' });
       await app.load({});
 
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
@@ -103,7 +103,7 @@ describe('App', () => {
     });
 
     test('没有 bootstrap 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' }, { bootstrap: undefined });
+      const app = getAppWithLoadOptions({ name: 'app' }, { bootstrap: undefined });
       await app.load({});
 
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
@@ -112,7 +112,7 @@ describe('App', () => {
     });
 
     test('bootstrap 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadApp(
+      const app = getAppWithLoadOptions(
         { name: 'app' },
         {
           bootstrap: async () => {
@@ -133,7 +133,7 @@ describe('App', () => {
 
   describe('App.mount', () => {
     test('mount 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' });
+      const app = getAppWithLoadOptions({ name: 'app' });
       await app.load({});
       await app.bootstrap({});
 
@@ -145,7 +145,7 @@ describe('App', () => {
     });
 
     test('没有 mount 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' }, { mount: undefined });
+      const app = getAppWithLoadOptions({ name: 'app' }, { mount: undefined });
       await app.load({});
       await app.bootstrap({});
 
@@ -155,7 +155,7 @@ describe('App', () => {
     });
 
     test('mount 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadApp(
+      const app = getAppWithLoadOptions(
         { name: 'app' },
         {
           mount: async () => {
@@ -177,7 +177,7 @@ describe('App', () => {
 
   describe('App.unmount', () => {
     test('unmount 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' });
+      const app = getAppWithLoadOptions({ name: 'app' });
       await app.load({});
       await app.bootstrap({});
       await app.mount({});
@@ -190,7 +190,7 @@ describe('App', () => {
     });
 
     test('没有 unmount 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadApp({ name: 'app' }, { unmount: undefined });
+      const app = getAppWithLoadOptions({ name: 'app' }, { unmount: undefined });
       await app.load({});
       await app.bootstrap({});
       await app.mount({});
@@ -201,7 +201,7 @@ describe('App', () => {
     });
 
     test('unmount 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadApp(
+      const app = getAppWithLoadOptions(
         { name: 'app' },
         {
           unmount: async () => {
