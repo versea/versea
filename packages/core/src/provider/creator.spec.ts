@@ -38,6 +38,34 @@ describe('createProvider', () => {
     expect(container.get('test')).toBeInstanceOf(OtherTest);
   });
 
+  test('新建一个类，使用 provide 装饰，然后不继承该类，也使用 provide 装饰并使用相同的 key，应当报错。', () => {
+    const { provide } = createProvider('metaKey');
+
+    @provide('test')
+    class Test {}
+
+    expect(() => {
+      @provide('test')
+      class OtherTest {}
+
+      console.log(Test, OtherTest);
+    }).toThrowError('Provide Error: replace serviceIdentifier');
+  });
+
+  test('新建一个类，使用 provide 装饰，然后继承该类，也使用 provide 装饰并使用相同的 key 和不同的绑定类型，应当报错。', () => {
+    const { provide } = createProvider('metaKey');
+
+    @provide('test')
+    class Test {}
+
+    expect(() => {
+      @provide('test', 'Constructor')
+      class OtherTest extends Test {}
+
+      console.log(Test, OtherTest);
+    }).toThrowError('Provide Error: replace serviceIdentifier');
+  });
+
   test('创建两个不同的 provide，绑定相同的 provide key，应该互不干扰。', () => {
     const { provide, buildProviderModule } = createProvider('metaKey');
     const { provide: otherProvide, buildProviderModule: otherBuildProviderModule } = createProvider('otherMetaKey');

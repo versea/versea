@@ -48,6 +48,27 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
   if (index < 0) {
     newMetadata = [...previousMetadata, metadata];
   } else {
+    const previousBindingType = previousMetadata[index].bindingType;
+    const currentBindingType = metadata.bindingType;
+
+    if (previousBindingType !== currentBindingType) {
+      throw new VerseaError(
+        `Provide Error: replace serviceIdentifier ${toString(metadata.serviceIdentifier)} with different bindingType.`,
+      );
+    }
+
+    if (currentBindingType === 'Constructor' || currentBindingType === 'Instance') {
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      const previousTarget = previousMetadata[index].implementationType as Function;
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      const currentTarget = metadata.implementationType as Function;
+      if (!(currentTarget.prototype instanceof previousTarget)) {
+        throw new VerseaError(
+          `Provide Error: replace serviceIdentifier ${toString(metadata.serviceIdentifier)} with different instance.`,
+        );
+      }
+    }
+
     if (process.env.NODE_ENV !== 'production') {
       console.warn(
         `Provide Warning: duplicated serviceIdentifier ${toString(
@@ -55,6 +76,7 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
         )}, use new value to replace old value.`,
       );
     }
+
     newMetadata = [...previousMetadata];
     newMetadata[index] = metadata;
   }

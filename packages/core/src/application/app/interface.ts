@@ -17,6 +17,8 @@ export interface IApp {
   /** 应用名称 */
   name: string;
 
+  status: IStatusEnum[keyof IStatusEnum];
+
   /** 加载应用 */
   load: (context: IPerformanceContext) => Promise<void>;
 
