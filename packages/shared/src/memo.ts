@@ -6,7 +6,7 @@ export function memoizePromise(): (_target: unknown, _propertyKey: string, descr
       if (promise) {
         return promise;
       }
-      promise = originValue(...args);
+      promise = originValue.call(this, ...args);
       return promise.finally(() => {
         promise = null;
       });
