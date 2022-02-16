@@ -63,7 +63,7 @@ describe('App', () => {
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
     });
 
-    test('实例化是没有 loadApp 参数，加载应用时会报错', () => {
+    test('实例化时没有 loadApp 参数，加载应用时会报错', () => {
       const app = getAppInstance({ name: 'app' });
 
       expect(app.status).toBe(StatusEnum.NotLoaded);

@@ -16,7 +16,7 @@ export class Router implements IRouter {
   protected readonly _performance: IPerformance;
 
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
-  protected hasSetRouter = false;
+  protected hasBindRouter = false;
 
   constructor(@inject(IMatcherKey) matcher: IMatcher, @inject(IPerformanceKey) performance: IPerformance) {
     this._matcher = matcher;
@@ -25,9 +25,9 @@ export class Router implements IRouter {
 
   public addRoutes(routes: RouteOptions[], app: IApp): void {
     // 将 router 传给 navigationEvent
-    if (!this.hasSetRouter) {
+    if (!this.hasBindRouter) {
       // TODO: setRouter to navigationEvent
-      this.hasSetRouter = true;
+      this.hasBindRouter = true;
     }
 
     this._matcher.addRoutes(routes, app);

@@ -12,7 +12,7 @@ export * from './interface';
 
 @provide(IAppServiceKey)
 export class AppService implements IAppService {
-  protected apps: Map<string, IApp> = new Map();
+  protected appMap: Map<string, IApp> = new Map();
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
@@ -31,13 +31,13 @@ export class AppService implements IAppService {
   }
 
   public registerApp(options: AppOptions): IApp {
-    if (this.apps.has(options.name)) {
+    if (this.appMap.has(options.name)) {
       throw new VerseaError(`Duplicate app name: "${options.name}".`);
     }
 
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     const app = new this._AppConstructor(options, { StatusEnum: this._StatusEnum });
-    this.apps.set(app.name, app);
+    this.appMap.set(app.name, app);
 
     // 创建 routes
     if (options.routes?.length) {
@@ -48,7 +48,7 @@ export class AppService implements IAppService {
   }
 
   public getApp(name: string): IApp {
-    const app = this.apps.get(name);
+    const app = this.appMap.get(name);
     if (!app) {
       throw new VerseaError(`Can not find app by name "${name}".`);
     }
