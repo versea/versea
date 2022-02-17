@@ -3,7 +3,7 @@ import { Container } from 'inversify';
 import { StatusEnum } from '../../constants/status';
 import { buildProviderModule } from '../../provider';
 import { AppHooks, AppOptions, IApp } from '../app/service';
-import { IAppService, IAppServiceKey } from './service';
+import { IAppController, IAppControllerKey } from './service';
 
 async function delay(time: number): Promise<void> {
   return new Promise((resolve) => {
@@ -14,8 +14,8 @@ async function delay(time: number): Promise<void> {
 function getAppInstance(options: AppOptions): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
-  const appService = container.get<IAppService>(IAppServiceKey);
-  return appService.registerApp(options);
+  const appController = container.get<IAppController>(IAppControllerKey);
+  return appController.registerApp(options);
 }
 
 function getAppWithLoadOptions(options: AppOptions, hooks: AppHooks = {}): IApp {
