@@ -26,7 +26,8 @@
     "@versea/shared": "0.0.5",
     "inversify": "^6.0.1",
     "path-to-regexp": "^6.2.0",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "tslib": "^2.3.1"
   },
   "publishConfig": {
     "access": "public"
