@@ -17,6 +17,10 @@ export const StatusEnum = {
   SkipBecauseBroken: 'SkipBecauseBroken',
 } as const;
 
-export type IStatusEnum = typeof StatusEnum;
+type IStatusEnumTyped = typeof StatusEnum;
+
+// 将 IStatusEnum 转换成 interface 导出，方便外部合并类型
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IStatusEnum extends IStatusEnumTyped {}
 
 provideValue(StatusEnum, IStatusEnumKey);

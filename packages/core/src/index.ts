@@ -1,4 +1,5 @@
 export * from './application/app/service';
+export * from './application/app-controller/service';
 export * from './application/app-service/service';
 export * from './constants/container-module';
 export * from './constants/status';

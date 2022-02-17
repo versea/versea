@@ -1,4 +1,4 @@
-import { IApp } from '../../application/app/interface';
+import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
 import { IRoute, MatchedRoute, RouteOptions } from '../route/service';
 
