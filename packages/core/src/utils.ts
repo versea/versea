@@ -14,13 +14,3 @@ export function traverse<T extends Tree>(node: T, callback: (node: T) => void): 
     });
   }
 }
-
-export function guid(): string {
-  const uidStr = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
-  return uidStr.replace(/[xy]/g, (c) => {
-    /* eslint-disable @typescript-eslint/no-magic-numbers */
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
