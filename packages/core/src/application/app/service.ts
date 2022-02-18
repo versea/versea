@@ -1,9 +1,9 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
+import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
 import { IStatusEnum } from '../../constants/status';
-import { IPerformanceContext } from '../../performance/performance-context/service';
 import { provide } from '../../provider';
-import { IApp, IAppKey, AppOptions, AppDependencies, AppProps, AppHooks } from './interface';
+import { IApp, IAppKey, AppOptions, AppDependencies, AppProps, AppHooks, AppOptionsProps } from './interface';
 
 export * from './interface';
 
@@ -13,15 +13,11 @@ export class App extends ExtensibleEntity implements IApp {
 
   public status: IStatusEnum[keyof IStatusEnum];
 
-  protected loadApp?: (props: Record<string, unknown>) => Promise<AppHooks>;
+  protected loadApp?: (props: AppProps) => Promise<AppHooks>;
 
-  protected bootstrapApp?: (props: Record<string, unknown>) => Promise<unknown>;
+  protected hooks: AppHooks = {};
 
-  protected mountApp?: (props: Record<string, unknown>) => Promise<unknown>;
-
-  protected unmountApp?: (props: Record<string, unknown>) => Promise<unknown>;
-
-  protected props: AppProps;
+  protected props: AppOptionsProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected _StatusEnum: IStatusEnum;
@@ -43,7 +39,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async load(context: IPerformanceContext): Promise<void> {
+  public async load(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._StatusEnum.NotLoaded && this.status !== this._StatusEnum.LoadError) {
       throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
     }
@@ -65,19 +61,19 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async bootstrap(context: IPerformanceContext): Promise<void> {
+  public async bootstrap(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._StatusEnum.NotBootstrapped) {
       throw new VerseaError(`Can not bootstrap app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this.bootstrapApp) {
+    if (!this.hooks.bootstrap) {
       this.status = this._StatusEnum.NotMounted;
       return;
     }
 
     this.status = this._StatusEnum.Bootstrapping;
     try {
-      await this.bootstrapApp(this.getProps(context));
+      await this.hooks.bootstrap(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -86,19 +82,19 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async mount(context: IPerformanceContext): Promise<void> {
+  public async mount(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._StatusEnum.NotMounted) {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this.mountApp) {
+    if (!this.hooks.mount) {
       this.status = this._StatusEnum.Mounted;
       return;
     }
 
     this.status = this._StatusEnum.Mounting;
     try {
-      await this.mountApp(this.getProps(context));
+      await this.hooks.mount(this.getProps(context));
       this.status = this._StatusEnum.Mounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -108,19 +104,19 @@ export class App extends ExtensibleEntity implements IApp {
 
   // TODO: unmount parcel if needed.
   @memoizePromise()
-  public async unmount(context: IPerformanceContext): Promise<void> {
+  public async unmount(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._StatusEnum.Mounted) {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this.unmountApp) {
+    if (!this.hooks.unmount) {
       this.status = this._StatusEnum.NotMounted;
       return;
     }
 
     this.status = this._StatusEnum.Unmounting;
     try {
-      await this.unmountApp(this.getProps(context));
+      await this.hooks.unmount(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
       this.status = this._StatusEnum.SkipBecauseBroken;
@@ -128,7 +124,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  public getProps(context: IPerformanceContext): Record<string, unknown> {
+  public getProps(context: IAppSwitcherContext): AppProps {
     const props: Record<string, unknown> = typeof this.props === 'function' ? this.props(this.name) : this.props;
     return {
       ...props,
@@ -151,8 +147,6 @@ export class App extends ExtensibleEntity implements IApp {
       }
     }
 
-    this.bootstrapApp = hooks.bootstrap;
-    this.mountApp = hooks.mount;
-    this.unmountApp = hooks.unmount;
+    this.hooks = hooks;
   }
 }

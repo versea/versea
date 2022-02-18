@@ -1,17 +1,23 @@
+import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
 import { IStatusEnum } from '../../constants/status';
 import { RouteOptions } from '../../navigation/route/service';
-import { IPerformanceContext } from '../../performance/performance-context/service';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
 
-export interface AppHooks {
-  bootstrap?: (props: Record<string, unknown>) => Promise<unknown>;
-  mount?: (props: Record<string, unknown>) => Promise<unknown>;
-  unmount?: (props: Record<string, unknown>) => Promise<unknown>;
+export type AppOptionsProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
+
+export interface AppProps extends Record<string, unknown> {
+  name: string;
+  app: IApp;
+  context: IAppSwitcherContext;
 }
 
-export type AppProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
+export interface AppHooks {
+  bootstrap?: (props: AppProps) => Promise<unknown>;
+  mount?: (props: AppProps) => Promise<unknown>;
+  unmount?: (props: AppProps) => Promise<unknown>;
+}
 
 export interface IApp {
   /** 应用名称 */
@@ -20,19 +26,19 @@ export interface IApp {
   status: IStatusEnum[keyof IStatusEnum];
 
   /** 加载应用 */
-  load: (context: IPerformanceContext) => Promise<void>;
+  load: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 引导，应用内容首次挂载到页面前调用 */
-  bootstrap: (context: IPerformanceContext) => Promise<void>;
+  bootstrap: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 挂载应用 */
-  mount: (context: IPerformanceContext) => Promise<void>;
+  mount: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 卸载应用 */
-  unmount: (context: IPerformanceContext) => Promise<void>;
+  unmount: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
-  getProps: (context: IPerformanceContext) => Record<string, unknown>;
+  getProps: (context: IAppSwitcherContext) => AppProps;
 }
 
 /** App 实例化的参数 */
@@ -44,13 +50,13 @@ export interface AppOptions {
   routes?: RouteOptions[];
 
   /** 传给应用的属性 */
-  props?: AppProps;
+  props?: AppOptionsProps;
 
   /**
    * 加载应用的方法
    * @description 必须传入，这里设计成可选参数，因为某些插件会生成这个函数。
    */
-  loadApp?: (props: Record<string, unknown>) => Promise<AppHooks>;
+  loadApp?: (props: AppProps) => Promise<AppHooks>;
 }
 
 export interface AppDependencies {

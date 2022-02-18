@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 
+import { IAppSwitcherKey, IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
-import { IPerformanceKey, IPerformance } from '../../performance/performance/service';
 import { provide } from '../../provider';
 import { IMatcher, IMatcherKey } from '../matcher/service';
 import { RouteOptions } from '../route/service';
@@ -13,14 +13,14 @@ export * from './interface';
 export class Router implements IRouter {
   protected readonly _matcher: IMatcher;
 
-  protected readonly _performance: IPerformance;
+  protected readonly _appSwitcher: IAppSwitcher;
 
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
   protected hasBindRouter = false;
 
-  constructor(@inject(IMatcherKey) matcher: IMatcher, @inject(IPerformanceKey) performance: IPerformance) {
+  constructor(@inject(IMatcherKey) matcher: IMatcher, @inject(IAppSwitcherKey) appSwitcher: IAppSwitcher) {
     this._matcher = matcher;
-    this._performance = performance;
+    this._appSwitcher = appSwitcher;
   }
 
   public addRoutes(routes: RouteOptions[], app: IApp): void {

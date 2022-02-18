@@ -6,6 +6,6 @@ export * from './constants/status';
 export * from './navigation/route/service';
 export * from './navigation/matcher/service';
 export * from './navigation/router/service';
-export * from './performance/performance/service';
-export * from './performance/performance-context/service';
+export * from './app-switcher/app-switcher/service';
+export * from './app-switcher/app-switcher-context/service';
 export * from './provider';
