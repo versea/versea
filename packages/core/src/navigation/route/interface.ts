@@ -9,9 +9,6 @@ export const IRouteKey = createServiceSymbol('IRoute');
 export type PathToRegexpOptions = ParseOptions & TokensToRegexpOptions;
 
 export interface IRoute {
-  /** 匹配的ID，用于查找 */
-  id: string;
-
   /** 匹配的路径 */
   path: string;
 

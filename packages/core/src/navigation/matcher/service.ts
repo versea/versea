@@ -49,17 +49,6 @@ export class Matcher implements IMatcher {
     return result;
   }
 
-  public matchRouteById(id: string, result: IRoute, trees: IRoute[] = this.trees): IRoute {
-    for (const route of trees) {
-      if (route.id === id) {
-        result = route;
-      } else {
-        return this.matchRouteById(id, result, route.children);
-      }
-    }
-    return result;
-  }
-
   protected matchRoute(path: string, route: IRoute, params?: Record<string, string>): boolean {
     const keys: Key[] = [];
     const matchArray = route.compile(keys).exec(path);

@@ -10,8 +10,6 @@ export * from './interface';
 
 @provide(IRouteKey, 'Constructor')
 export class Route extends ExtensibleEntity implements IRoute {
-  public id: string;
-
   public path: string;
 
   /** 配置的路由对应的应用 */
@@ -130,7 +128,6 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     return {
       ...extensibleObject,
-      id: this.id,
       path: this.path,
       apps: this.apps,
       meta: this.meta,
