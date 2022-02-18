@@ -1,5 +1,5 @@
-import { OmitSubType } from '@versea/shared';
 import { TokensToRegexpOptions, ParseOptions, Key } from 'path-to-regexp';
+import { object } from 'typescript-lodash';
 
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
@@ -74,7 +74,7 @@ export interface ToMatchedRouteOptions {
 
 export type MatchedRoute = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
-  OmitSubType<IRoute, Function>,
+  object.ExcludeValues<IRoute, Function>,
   'children' | 'fill' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
