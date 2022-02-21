@@ -28,7 +28,8 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   protected getAppsToLoad(): IApp[][] {
-    return [Array.from(new Set(this.routes.map((route) => route.apps).flat()))];
+    const apps = Array.from(new Set(this.routes.map((route) => route.apps).flat()));
+    return [apps];
   }
 
   protected getAppsToMount(): IApp[][] {
