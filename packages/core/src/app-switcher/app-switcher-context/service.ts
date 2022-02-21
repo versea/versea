@@ -32,6 +32,9 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     return [apps];
   }
 
+  /**
+   * 获取需要渲染的应用
+   */
   protected getAppsToMount(): IApp[][] {
     const appMap: WeakMap<IApp, boolean> = new WeakMap();
     return this.routes
