@@ -3,10 +3,10 @@ import { createServiceSymbol } from '../../utils';
 
 export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
 
-export interface AppSwitcherOptions {
+export interface SwitcherOptions {
   routes: MatchedRoute[];
 }
 
 export interface IAppSwitcher {
-  switch: (options: AppSwitcherOptions) => Promise<void>;
+  switch: (options: SwitcherOptions) => Promise<void>;
 }
