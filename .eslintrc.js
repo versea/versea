@@ -73,6 +73,11 @@ module.exports = {
     fetch: true,
     FormData: true,
   },
+  settings: {
+    'import/resolver': {
+      typescript: {},
+    },
+  },
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint', 'jest', 'json', 'prettier', 'markdown'],
   parserOptions: {
