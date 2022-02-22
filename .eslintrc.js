@@ -67,6 +67,7 @@ const TypescriptRules = {
 module.exports = {
   env: {
     node: true,
+    browser: true,
   },
   extends: ['eslint:recommended', 'plugin:prettier/recommended', 'plugin:import/recommended'],
   globals: {

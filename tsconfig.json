@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "allowJs": false,
     "isolatedModules": true,
     "skipLibCheck": true,
