@@ -13,10 +13,12 @@ export interface AppProps extends Record<string, unknown> {
   context: IAppSwitcherContext;
 }
 
+export type HookFunction<T = unknown> = (props: AppProps) => Promise<T>;
+
 export interface AppHooks {
-  bootstrap?: (props: AppProps) => Promise<unknown>;
-  mount?: (props: AppProps) => Promise<unknown>;
-  unmount?: (props: AppProps) => Promise<unknown>;
+  bootstrap?: HookFunction;
+  mount?: HookFunction<Record<string, HookFunction>> | HookFunction<void>;
+  unmount?: HookFunction;
 }
 
 export interface IApp {
@@ -33,6 +35,8 @@ export interface IApp {
 
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext) => Promise<void>;
+
+  waitForChildContainer: (name: string, context: IAppSwitcherContext) => Promise<void>;
 
   /** 卸载应用 */
   unmount: (context: IAppSwitcherContext) => Promise<void>;

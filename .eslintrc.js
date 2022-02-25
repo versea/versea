@@ -31,18 +31,18 @@ const TypescriptRules = {
       leadingUnderscore: 'allow',
     },
     {
-      selector: 'memberLike',
-      modifiers: ['private'],
-      format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
-      leadingUnderscore: 'require',
-    },
-    {
       selector: 'enumMember',
       format: ['UPPER_CASE'],
     },
     {
       selector: 'typeLike',
       format: ['PascalCase'],
+    },
+    {
+      selector: 'memberLike',
+      modifiers: ['protected'],
+      format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+      leadingUnderscore: 'require',
     },
     {
       selector: 'objectLiteralProperty',

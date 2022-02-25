@@ -16,7 +16,7 @@ export class Router implements IRouter {
   protected readonly _appSwitcher: IAppSwitcher;
 
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
-  protected hasBindRouter = false;
+  protected _hasBindRouter = false;
 
   constructor(@inject(IMatcherKey) matcher: IMatcher, @inject(IAppSwitcherKey) appSwitcher: IAppSwitcher) {
     this._matcher = matcher;
@@ -25,9 +25,9 @@ export class Router implements IRouter {
 
   public addRoutes(routes: RouteOptions[], app: IApp): void {
     // 将 router 传给 navigationEvent
-    if (!this.hasBindRouter) {
+    if (!this._hasBindRouter) {
       // TODO: setRouter to navigationEvent
-      this.hasBindRouter = true;
+      this._hasBindRouter = true;
     }
 
     this._matcher.addRoutes(routes, app);

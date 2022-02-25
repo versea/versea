@@ -32,7 +32,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -52,7 +52,7 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -81,7 +81,7 @@ describe('Matcher', () => {
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -110,7 +110,7 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'other' }], app2);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -137,7 +137,7 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -184,7 +184,7 @@ describe('Matcher', () => {
       const app3 = getAppInstance('name3');
       matcher.addRoutes([{ path: 'path3', fill: 'foo' }], app3);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -223,7 +223,7 @@ describe('Matcher', () => {
       const app3 = getAppInstance('name3');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app3);
 
-      expect((matcher as any).trees).toMatchObject([
+      expect((matcher as any)._trees).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -257,7 +257,7 @@ describe('Matcher', () => {
       const app3 = getAppInstance('name3');
       matcher.addRoutes([{ path: 'path2', fill: 'foo', children: [{ path: 'path3' }] }], app3);
 
-      expect((matcher as any).trees[0].children[0].children[0].parent).toBe((matcher as any).trees[0].children[0]);
+      expect((matcher as any)._trees[0].children[0].children[0].parent).toBe((matcher as any)._trees[0].children[0]);
     });
 
     test('同上，合并路由时，都具有 children 的 路由合并应该 throw error。', () => {
@@ -302,7 +302,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', children: [{ path: 'path2' }] }], app);
 
-      expect(() => JSON.stringify((matcher as any).trees)).not.toThrowError();
+      expect(() => JSON.stringify((matcher as any)._trees)).not.toThrowError();
     });
   });
 

@@ -1,8 +1,9 @@
 import { Container } from 'inversify';
 
+import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
 import { StatusEnum } from '../../constants/status';
 import { buildProviderModule } from '../../provider';
-import { AppHooks, AppOptions, IApp } from '../app/service';
+import { AppHooks, AppOptions, IApp, HookFunction } from '../app/service';
 import { IAppController, IAppControllerKey } from './service';
 
 async function delay(time: number): Promise<void> {
@@ -18,7 +19,11 @@ function getAppInstance(options: AppOptions): IApp {
   return appController.registerApp(options);
 }
 
-function getAppWithLoadOptions(options: AppOptions, hooks: AppHooks = {}): IApp {
+function getAppWithLoadOptions(
+  options: AppOptions,
+  hooks: AppHooks = {},
+  mountHooks?: Record<string, HookFunction>,
+): IApp {
   return getAppInstance({
     loadApp: async () => {
       return Promise.resolve({
@@ -28,7 +33,7 @@ function getAppWithLoadOptions(options: AppOptions, hooks: AppHooks = {}): IApp 
         },
         mount: async () => {
           await delay(1);
-          return;
+          return mountHooks;
         },
         unmount: async () => {
           await delay(1);
@@ -57,7 +62,7 @@ describe('App', () => {
       });
 
       expect(app.status).toBe(StatusEnum.NotLoaded);
-      const promise = app.load({});
+      const promise = app.load({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.LoadingSourceCode);
       await promise;
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
@@ -68,7 +73,7 @@ describe('App', () => {
 
       expect(app.status).toBe(StatusEnum.NotLoaded);
       void expect(async () => {
-        await app.load({});
+        await app.load({} as IAppSwitcherContext);
       }).rejects.toThrowError('Can not find loadApp prop');
       expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
     });
@@ -83,7 +88,7 @@ describe('App', () => {
       });
 
       try {
-        await app.load({});
+        await app.load({} as IAppSwitcherContext);
       } catch (error) {
         expect(app.status).toBe(StatusEnum.LoadError);
       }
@@ -93,10 +98,10 @@ describe('App', () => {
   describe('App.bootstrap', () => {
     test('bootstrap 应用之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadOptions({ name: 'app' });
-      await app.load({});
+      await app.load({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
-      const promise = app.bootstrap({});
+      const promise = app.bootstrap({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.Bootstrapping);
       await promise;
       expect(app.status).toBe(StatusEnum.NotMounted);
@@ -104,10 +109,10 @@ describe('App', () => {
 
     test('没有 bootstrap 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadOptions({ name: 'app' }, { bootstrap: undefined });
-      await app.load({});
+      await app.load({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.NotBootstrapped);
-      await app.bootstrap({});
+      await app.bootstrap({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.NotMounted);
     });
 
@@ -121,10 +126,10 @@ describe('App', () => {
           },
         },
       );
-      await app.load({});
+      await app.load({} as IAppSwitcherContext);
 
       try {
-        await app.bootstrap({});
+        await app.bootstrap({} as IAppSwitcherContext);
       } catch (error) {
         expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
       }
@@ -134,11 +139,11 @@ describe('App', () => {
   describe('App.mount', () => {
     test('mount 应用之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadOptions({ name: 'app' });
-      await app.load({});
-      await app.bootstrap({});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.NotMounted);
-      const promise = app.mount({});
+      const promise = app.mount({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.Mounting);
       await promise;
       expect(app.status).toBe(StatusEnum.Mounted);
@@ -146,11 +151,11 @@ describe('App', () => {
 
     test('没有 mount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadOptions({ name: 'app' }, { mount: undefined });
-      await app.load({});
-      await app.bootstrap({});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.NotMounted);
-      await app.mount({});
+      await app.mount({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.Mounted);
     });
 
@@ -164,26 +169,49 @@ describe('App', () => {
           },
         },
       );
-      await app.load({});
-      await app.bootstrap({});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
 
       try {
-        await app.mount({});
+        await app.mount({} as IAppSwitcherContext);
       } catch (error) {
         expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
       }
     });
   });
 
+  describe('App.waitForChildContainer', () => {
+    test('mount 应之后，可以等待该应用的子容器渲染完成。', async () => {
+      const test = jest.fn(() => 1);
+      const app = getAppWithLoadOptions(
+        { name: 'app' },
+        {},
+        {
+          foo: async () => {
+            await delay(1);
+            return test();
+          },
+        },
+      );
+
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
+      await app.mount({} as IAppSwitcherContext);
+      await app.waitForChildContainer('foo', {} as IAppSwitcherContext);
+
+      expect(test).toHaveBeenCalled();
+    });
+  });
+
   describe('App.unmount', () => {
     test('unmount 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' });
-      await app.load({});
-      await app.bootstrap({});
-      await app.mount({});
+      const app = getAppWithLoadOptions({ name: 'app' }, {});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
+      await app.mount({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.Mounted);
-      const promise = app.unmount({});
+      const promise = app.unmount({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.Unmounting);
       await promise;
       expect(app.status).toBe(StatusEnum.NotMounted);
@@ -191,12 +219,12 @@ describe('App', () => {
 
     test('没有 unmount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadOptions({ name: 'app' }, { unmount: undefined });
-      await app.load({});
-      await app.bootstrap({});
-      await app.mount({});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
+      await app.mount({} as IAppSwitcherContext);
 
       expect(app.status).toBe(StatusEnum.Mounted);
-      await app.unmount({});
+      await app.unmount({} as IAppSwitcherContext);
       expect(app.status).toBe(StatusEnum.NotMounted);
     });
 
@@ -210,12 +238,12 @@ describe('App', () => {
           },
         },
       );
-      await app.load({});
-      await app.bootstrap({});
-      await app.mount({});
+      await app.load({} as IAppSwitcherContext);
+      await app.bootstrap({} as IAppSwitcherContext);
+      await app.mount({} as IAppSwitcherContext);
 
       try {
-        await app.unmount({});
+        await app.unmount({} as IAppSwitcherContext);
       } catch (error) {
         expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
       }
