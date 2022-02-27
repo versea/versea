@@ -5,6 +5,7 @@ export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
 
 export interface SwitcherOptions {
   routes: MatchedRoute[];
+  eventArguments?: unknown[];
 }
 
 export interface IAppSwitcher {

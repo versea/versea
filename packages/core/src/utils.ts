@@ -14,3 +14,17 @@ export function traverse<T extends Tree>(node: T, callback: (node: T) => void): 
     });
   }
 }
+
+export function getQuery(): Record<string, string> {
+  const url: string = window.location.search; //获取url中"?"符后的字串
+  const theRequest: Record<string, string> = {};
+  if (url.includes('?')) {
+    const str: string = url.substring(1);
+    const strAry: string[] = str.split('&');
+    for (const i of strAry) {
+      const splitAry: string[] = i.split('=');
+      theRequest[splitAry[0]] = splitAry[1];
+    }
+  }
+  return theRequest;
+}
