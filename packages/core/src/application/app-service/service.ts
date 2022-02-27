@@ -12,6 +12,8 @@ export * from './interface';
 
 @provide(IAppServiceKey)
 export class AppService implements IAppService {
+  public isStarted = false;
+
   protected appMap: Map<string, IApp> = new Map();
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
@@ -46,5 +48,10 @@ export class AppService implements IAppService {
       throw new VerseaError(`Can not find app by name "${name}".`);
     }
     return app;
+  }
+
+  public start(router: IRouter): void {
+    this.isStarted = true;
+    router.reroute();
   }
 }

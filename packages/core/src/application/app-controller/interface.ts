@@ -13,4 +13,9 @@ export interface IAppController {
    * 获取已经注册的应用
    */
   getApp: (name: string) => IApp;
+
+  /**
+   * start
+   */
+  start: () => void;
 }
