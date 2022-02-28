@@ -2,13 +2,11 @@
   "version": "0.2",
   "language": "en",
   "ignoreWords": [
+    "swcrc",
     "versea",
     "Versea",
-    "autorun",
-    "Unmount",
-    "Lifecycles",
-    "Mixins",
-    "builtins",
+    "inversify",
+    "unmount",
     "middlewares"
   ]
 }

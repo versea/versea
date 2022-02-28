@@ -10,7 +10,10 @@
       "legacyDecorator": true,
       "decoratorMetadata": true
     },
-    "target": "es2018"
+    "target": "es2018",
+    "paths": {
+      "@versea/*": ["./packages/*/src/index.ts"]
+    }
   },
   "module": {
     "type": "commonjs",
