@@ -10,7 +10,7 @@ export interface IRouter {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 增加路由拦截 */
-  reroute: (args?: unknown[]) => void;
+  reroute: (navigationEvent?: Event) => void;
 
   _appService: IAppService;
 }

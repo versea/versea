@@ -1,4 +1,5 @@
 import { TokensToRegexpOptions, ParseOptions, Key } from 'path-to-regexp';
+import queryString from 'query-string';
 import { object } from 'typescript-lodash';
 
 import { IApp } from '../../application/app/service';
@@ -69,7 +70,7 @@ export interface RouteOptions {
 
 export interface ToMatchedRouteOptions {
   params: Record<string, string>;
-  query: Record<string, string>;
+  query: queryString.ParsedQuery;
 }
 
 export type MatchedRoute = Omit<

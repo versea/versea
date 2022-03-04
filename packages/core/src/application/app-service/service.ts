@@ -51,6 +51,12 @@ export class AppService implements IAppService {
   }
 
   public start(router: IRouter): void {
+    if (this.isStarted) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('app is already started and should not repeat start');
+        return;
+      }
+    }
     this.isStarted = true;
     router.reroute();
   }

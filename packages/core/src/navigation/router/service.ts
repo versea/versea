@@ -1,13 +1,13 @@
 import { inject } from 'inversify';
+import queryString from 'query-string';
 
 import { IAppSwitcherKey, IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IAppService, IAppServiceKey } from '../../application/app-service/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { getQuery } from '../../utils';
 import { IMatcher, IMatcherKey } from '../matcher/service';
 import { setRouter, capturedEventListeners, routingEventsListeningTo } from '../navigation-events';
-import { EventName } from '../navigation-events/interface';
+import { EventName } from '../navigation-events/types';
 import { MatchedRoute } from '../route/interface';
 import { RouteOptions } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
@@ -46,18 +46,16 @@ export class Router implements IRouter {
   }
 
   public match(): MatchedRoute[] {
-    /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-    /* eslint-disable @typescript-eslint/no-unsafe-member-access */
     const path: string = location.pathname;
-    const query: Record<string, string> = getQuery();
+    const query: queryString.ParsedQuery = queryString.parse(location.search);
     return this._matcher.match(path, query);
   }
 
-  public reroute(eventArguments?: unknown[]): void {
+  public reroute(navigationEvent?: Event): void {
     const matched = this.match();
     void this._appSwitcher.switch({
       routes: matched,
-      eventArguments,
+      navigationEvent,
     });
   }
 
@@ -65,11 +63,13 @@ export class Router implements IRouter {
     if (eventArguments) {
       const eventType = eventArguments[0].type as EventName;
       if (routingEventsListeningTo.includes(eventType)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        capturedEventListeners[eventType].forEach((listener) => {
+        capturedEventListeners[eventType].forEach((listener: EventListener) => {
           try {
             listener.apply(this, eventArguments);
           } catch (e) {
+            /**
+             * event listener错误不应该中断versea的执行.
+             */
             setTimeout(() => {
               throw e;
             });

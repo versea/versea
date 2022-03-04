@@ -6,7 +6,7 @@ import { Key } from 'path-to-regexp';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
-import { IMatcher, IMatcherKey } from './interface';
+import { IMatcher, IMatcherKey, ParsedQuery } from './interface';
 
 export * from './interface';
 
@@ -34,7 +34,7 @@ export class Matcher implements IMatcher {
 
   public match(
     path: string,
-    query: Record<string, string>,
+    query: ParsedQuery,
     trees: IRoute[] = this.trees,
     result: MatchedRoute[] = [],
   ): MatchedRoute[] {

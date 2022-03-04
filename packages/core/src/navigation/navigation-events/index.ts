@@ -1,16 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { IRouter } from '../router/interface';
-import { HistoryEventName, EventName, HistoryEventListenersType } from './interface';
+import { HistoryEventName, EventName, HistoryEventListenersType } from './types';
 
 let router: IRouter | null = null;
-const handleUrlChange = (...args: unknown[]): void => {
-  if (router) {
-    router.reroute(args);
-    return;
-  }
-  // ....
-};
-
 export function setRouter(iRouter: IRouter): void {
   router = iRouter;
 }
@@ -20,6 +12,28 @@ export const capturedEventListeners: Record<EventName, EventListener[]> = {
 };
 
 export const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
+
+const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): void => {
+  if (router) {
+    router.reroute(navigationEvent);
+    return;
+  }
+  if (navigationEvent) {
+    const eventType = navigationEvent.type as EventName;
+    capturedEventListeners[eventType].forEach((listener: EventListener) => {
+      try {
+        listener.apply(navigationEvent.target, [navigationEvent]);
+      } catch (e) {
+        /**
+         * event listener错误不应该中断versea的执行.
+         */
+        setTimeout(() => {
+          throw e;
+        });
+      }
+    });
+  }
+};
 
 window.addEventListener('hashchange', handleUrlChange);
 
@@ -50,7 +64,7 @@ window.removeEventListener = function (
   listenerFn: EventListenerOrEventListenerObject,
   options?: AddEventListenerOptions | boolean,
 ): void {
-  if (typeof listenerFn === 'function' && router) {
+  if (typeof listenerFn === 'function') {
     if (routingEventsListeningTo.includes(eventName as EventName)) {
       capturedEventListeners[eventName as EventName] = capturedEventListeners[eventName as EventName].filter(
         (fn: EventListener) => fn !== listenerFn,
