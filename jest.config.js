@@ -1,7 +1,12 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { readFileSync } = require('fs');
+
+const swcrc = readFileSync('.swcrc', { encoding: 'utf-8' });
+
 module.exports = {
   verbose: true,
   transform: {
-    '^.+\\.(t|j)sx?$': '@swc/jest',
+    '^.+\\.(t|j)sx?$': ['@swc/jest', JSON.parse(swcrc)],
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   testEnvironment: 'jsdom',

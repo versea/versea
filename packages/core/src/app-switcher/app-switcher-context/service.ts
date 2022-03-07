@@ -14,30 +14,30 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   public appsToMount: IApp[][] = [];
 
-  protected routes: MatchedRoute[];
+  protected _routes: MatchedRoute[];
 
   constructor(options: SwitcherOptions) {
     super();
-    this.routes = options.routes;
-    this.appsToLoad = this.getAppsToLoad();
-    this.appsToMount = this.getAppsToMount();
+    this._routes = options.routes;
+    this.appsToLoad = this._getAppsToLoad();
+    this.appsToMount = this._getAppsToMount();
   }
 
   public get appsToUnmount(): IApp[][] {
     return this.appsToMount.reverse();
   }
 
-  protected getAppsToLoad(): IApp[][] {
-    const apps = Array.from(new Set(this.routes.map((route) => route.apps).flat()));
+  protected _getAppsToLoad(): IApp[][] {
+    const apps = Array.from(new Set(this._routes.map((route) => route.apps).flat()));
     return [apps];
   }
 
   /**
    * 获取需要渲染的应用
    */
-  protected getAppsToMount(): IApp[][] {
+  protected _getAppsToMount(): IApp[][] {
     const appMap: WeakMap<IApp, boolean> = new WeakMap();
-    return this.routes
+    return this._routes
       .map((route) => {
         return route.apps
           .map((app) => {

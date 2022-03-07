@@ -67,13 +67,13 @@ export class Route extends ExtensibleEntity implements IRoute {
       console.warn(`Merge route with same path  "${route.path}".`);
     }
 
-    this.validRouteWithSamePath(route);
+    this._validRouteWithSamePath(route);
 
     // 合并扩展属性
-    Object.keys(this.extensiblePropDescriptions).forEach((key: string) => {
-      if (this.extensiblePropDescriptions[key].onMerge) {
+    Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
+      if (this._extensiblePropDescriptions[key].onMerge) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
-        this[key] = this.extensiblePropDescriptions[key].onMerge!(this[key], (route as Record<string, any>)[key]);
+        this[key] = this._extensiblePropDescriptions[key].onMerge!(this[key], (route as Record<string, any>)[key]);
       }
     });
 
@@ -121,7 +121,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
     const extensibleObject: Record<string, unknown> = {};
-    Object.keys(this.extensiblePropDescriptions).forEach((key) => {
+    Object.keys(this._extensiblePropDescriptions).forEach((key) => {
       extensibleObject[key] = this[key];
     });
 
@@ -137,7 +137,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     };
   }
 
-  protected validRouteWithSamePath(route: IRoute): void {
+  protected _validRouteWithSamePath(route: IRoute): void {
     if (this.children.length > 0 && route.children.length > 0) {
       throw new VerseaError('Can not Merge route(same path) with children.');
     }
@@ -147,6 +147,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   protected toJSON(): Record<string, unknown> {
     const props = Object.keys(this);
     return props

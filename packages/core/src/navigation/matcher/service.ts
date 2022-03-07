@@ -12,7 +12,7 @@ export * from './interface';
 
 @provide(IMatcherKey)
 export class Matcher implements IMatcher {
-  protected trees: IRoute[] = [];
+  protected _trees: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
@@ -26,10 +26,10 @@ export class Matcher implements IMatcher {
     routes.forEach((routeOption) => {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
       const route = new this._RouteConstructor(routeOption, app);
-      this.trees.push(route);
+      this._trees.push(route);
     });
 
-    this.mergeTrees();
+    this._mergeTrees();
   }
 
   public match(
@@ -40,7 +40,7 @@ export class Matcher implements IMatcher {
   ): MatchedRoute[] {
     for (const route of trees) {
       const params: Record<string, string> = {};
-      const isMatched = this.matchRoute(path, route, params);
+      const isMatched = this._matchRoute(path, route, params);
       if (isMatched) {
         result.push(route.toMatchedRoute({ params, query }));
         return this.match(path, query, route.children, result);
@@ -49,7 +49,7 @@ export class Matcher implements IMatcher {
     return result;
   }
 
-  protected matchRoute(path: string, route: IRoute, params?: Record<string, string>): boolean {
+  protected _matchRoute(path: string, route: IRoute, params?: Record<string, string>): boolean {
     const keys: Key[] = [];
     const matchArray = route.compile(keys).exec(path);
 
@@ -83,10 +83,10 @@ export class Matcher implements IMatcher {
   }
 
   /** 合并路由树 */
-  protected mergeTrees(): void {
+  protected _mergeTrees(): void {
     // 生成 slotMap，记录所有允许插入的节点
     const slotMap: Record<string, IRoute> = {};
-    this.trees.forEach((tree) => {
+    this._trees.forEach((tree) => {
       tree.slotRoutes.forEach((route) => {
         if (slotMap[route.slot!]) {
           throw new VerseaError(`Duplicate slot key in route with path: "${route.path}".`);
@@ -95,11 +95,11 @@ export class Matcher implements IMatcher {
       });
     });
 
-    for (let i = this.trees.length - 1; i >= 0; i--) {
-      const tree = this.trees[i];
+    for (let i = this._trees.length - 1; i >= 0; i--) {
+      const tree = this._trees[i];
       if (tree.fill && slotMap[tree.fill]) {
         slotMap[tree.fill].appendChild(tree);
-        this.trees.splice(i, 1);
+        this._trees.splice(i, 1);
       }
     }
   }

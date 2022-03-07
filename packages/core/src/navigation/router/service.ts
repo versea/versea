@@ -23,7 +23,7 @@ export class Router implements IRouter {
   protected readonly _appSwitcher: IAppSwitcher;
 
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
-  protected hasBindRouter = false;
+  protected _hasBindRouter = false;
 
   constructor(
     @inject(IMatcherKey) matcher: IMatcher,

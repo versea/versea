@@ -34,6 +34,29 @@ describe('memoizePromise', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
+  test('新建一个类，其中异步函数使用 memoizePromise 装饰，在 promise settled 之前调用，但使用不同的参数，内部逻辑应该只会调用多次', async () => {
+    class Test {
+      @memoizePromise()
+      public async func(a: number): Promise<void> {
+        this.func2(a);
+        return delay(1);
+      }
+
+      public func2(a: number): number {
+        return a;
+      }
+    }
+
+    const spy = jest.spyOn(Test.prototype, 'func2');
+    const test = new Test();
+    void test.func(1);
+    await delay(0.5);
+    void test.func(2);
+    await delay(1);
+
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
   test('新建一个类，其中异步函数使用 memoizePromise 装饰，在 promise settled 之后调用，内部逻辑应该会调用多次', async () => {
     class Test {
       @memoizePromise()

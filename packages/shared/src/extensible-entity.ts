@@ -46,7 +46,7 @@ export class ExtensibleEntity {
   private static __ExtensiblePropDescriptions__: Record<string, ExtensiblePropDescription> | undefined;
 
   /** 实例上所有可扩展的属性和该属性的描述 */
-  protected extensiblePropDescriptions: Record<string, ExtensiblePropDescription> = {};
+  protected _extensiblePropDescriptions: Record<string, ExtensiblePropDescription> = {};
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(options: Record<string, any> = {}) {
@@ -56,13 +56,13 @@ export class ExtensibleEntity {
       const descriptions: Record<string, ExtensiblePropDescription> | undefined = ctor.__ExtensiblePropDescriptions__;
       if (descriptions) {
         Object.keys(descriptions).forEach((key: string) => {
-          this.extensiblePropDescriptions[key] = descriptions[key];
+          this._extensiblePropDescriptions[key] = descriptions[key];
         });
       }
     });
 
-    Object.keys(this.extensiblePropDescriptions).forEach((key: string) => {
-      this._setEntityProp(key, options[key], this.extensiblePropDescriptions[key]);
+    Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
+      this._setEntityProp(key, options[key], this._extensiblePropDescriptions[key]);
     });
   }
 
