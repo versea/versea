@@ -13,4 +13,9 @@ export interface IAppController {
    * 获取已经注册的应用
    */
   getApp: (name: string) => IApp;
+
+  /**
+   * 注册应用后需要执行start，标记状态
+   */
+  start: () => void;
 }
