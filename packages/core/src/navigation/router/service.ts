@@ -60,6 +60,14 @@ export class Router implements IRouter {
   }
 
   public start(appSwitcher: IAppSwitcher): void {
+    if (this.isStarted) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('app is already started and should not repeat start');
+        return;
+      }
+    }
+
+    this.isStarted = true;
     this.reroute(appSwitcher);
   }
 }
