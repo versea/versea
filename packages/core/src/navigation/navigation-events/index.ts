@@ -90,7 +90,7 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
     const urlAfter = window.location.href;
 
     if (urlBefore !== urlAfter) {
-      if (routerController?.isStarted) {
+      if (routerController?._router.isStarted) {
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
         handleUrlChange();

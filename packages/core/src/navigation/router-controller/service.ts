@@ -10,11 +10,9 @@ import { IRouterController, IRouterControllerKey } from './interface';
 
 @provide(IRouterControllerKey)
 export class RouterController implements IRouterController {
-  public isStarted = false;
+  public readonly _router: IRouter;
 
   protected readonly _appSwitcher: IAppSwitcher;
-
-  protected readonly _router: IRouter;
 
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
   protected _hasBindRouter = false;
@@ -38,14 +36,6 @@ export class RouterController implements IRouterController {
   }
 
   public start(): void {
-    if (this.isStarted) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('app is already started and should not repeat start');
-        return;
-      }
-    }
-
-    this.isStarted = true;
     this._router.start(this._appSwitcher);
   }
 }
