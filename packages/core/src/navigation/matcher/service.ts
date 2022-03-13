@@ -2,11 +2,12 @@
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 import { Key } from 'path-to-regexp';
+import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
-import { IMatcher, IMatcherKey, ParsedQuery } from './interface';
+import { IMatcher, IMatcherKey } from './interface';
 
 export * from './interface';
 
@@ -34,7 +35,7 @@ export class Matcher implements IMatcher {
 
   public match(
     path: string,
-    query: ParsedQuery,
+    query: queryString.ParsedQuery,
     trees: IRoute[] = this._trees,
     result: MatchedRoute[] = [],
   ): MatchedRoute[] {

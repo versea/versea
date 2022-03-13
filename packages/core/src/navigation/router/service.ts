@@ -6,7 +6,7 @@ import { IAppService, IAppServiceKey } from '../../application/app-service/servi
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IMatcher, IMatcherKey } from '../matcher/service';
-import { setRouter, capturedEventListeners, routingEventsListeningTo } from '../navigation-events';
+import { bindRouter, capturedEventListeners, routingEventsListeningTo } from '../navigation-events';
 import { EventName } from '../navigation-events/types';
 import { MatchedRoute } from '../route/interface';
 import { RouteOptions } from '../route/service';
@@ -39,15 +39,15 @@ export class Router implements IRouter {
     // 将 router 传给 navigationEvent
     if (!this._hasBindRouter) {
       this._hasBindRouter = true;
-      setRouter(this);
+      bindRouter(this);
     }
 
     this._matcher.addRoutes(routes, app);
   }
 
   public match(): MatchedRoute[] {
-    const path: string = location.pathname;
-    const query: queryString.ParsedQuery = queryString.parse(location.search);
+    const path = location.pathname;
+    const query = queryString.parse(location.search);
     return this._matcher.match(path, query);
   }
 
@@ -67,9 +67,7 @@ export class Router implements IRouter {
           try {
             listener.apply(this, eventArguments);
           } catch (e) {
-            /**
-             * event listener错误不应该中断versea的执行.
-             */
+            // event listener错误不应该中断versea的执行.
             setTimeout(() => {
               throw e;
             });

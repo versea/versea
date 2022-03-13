@@ -57,6 +57,7 @@ export class AppService implements IAppService {
         return;
       }
     }
+
     this.isStarted = true;
     router.reroute();
   }

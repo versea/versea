@@ -6,12 +6,10 @@ import { IRoute, MatchedRoute, RouteOptions } from '../route/service';
 
 export const IMatcherKey = createServiceSymbol('IMatcher');
 
-export type ParsedQuery = queryString.ParsedQuery;
-
 export interface IMatcher {
   /** 增加路由配置信息 */
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 匹配路由 */
-  match: (path: string, query: ParsedQuery, trees?: IRoute[], result?: MatchedRoute[]) => MatchedRoute[];
+  match: (path: string, query: queryString.ParsedQuery, trees?: IRoute[], result?: MatchedRoute[]) => MatchedRoute[];
 }

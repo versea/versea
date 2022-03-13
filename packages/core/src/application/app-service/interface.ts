@@ -6,7 +6,7 @@ export const IAppServiceKey = createServiceSymbol('IAppService');
 
 export interface IAppService {
   /**
-   * 用于标记是否已经执行start
+   * 是否已经执行 start
    */
   isStarted: boolean;
 
@@ -14,8 +14,5 @@ export interface IAppService {
 
   getApp: (name: string) => IApp;
 
-  /**
-   * 应用注册后需要执行start方法，只能执行一次，标记versea 主应用start状态
-   */
   start: (router: IRouter) => void;
 }

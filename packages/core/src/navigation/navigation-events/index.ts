@@ -3,7 +3,7 @@ import { IRouter } from '../router/interface';
 import { HistoryEventName, EventName, HistoryEventListenersType } from './types';
 
 let router: IRouter | null = null;
-export function setRouter(iRouter: IRouter): void {
+export function bindRouter(iRouter: IRouter): void {
   router = iRouter;
 }
 export const capturedEventListeners: Record<EventName, EventListener[]> = {
