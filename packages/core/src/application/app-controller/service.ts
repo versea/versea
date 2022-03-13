@@ -26,8 +26,4 @@ export class AppController implements IAppController {
   public getApp(name: string): IApp {
     return this._appService.getApp(name);
   }
-
-  public start(): void {
-    this._appService.start(this._router);
-  }
 }

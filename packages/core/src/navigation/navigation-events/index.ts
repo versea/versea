@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { IRouter } from '../router/interface';
+import { IRouterController } from '../router-controller/interface';
 import { HistoryEventName, EventName, HistoryEventListenersType } from './types';
 
-let router: IRouter | null = null;
-export function bindRouter(iRouter: IRouter): void {
-  router = iRouter;
+let routerController: IRouterController | null = null;
+export function bindRouter(iRouterController: IRouterController): void {
+  routerController = iRouterController;
 }
 export const capturedEventListeners: Record<EventName, EventListener[]> = {
   hashchange: [],
@@ -14,8 +14,8 @@ export const capturedEventListeners: Record<EventName, EventListener[]> = {
 export const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
 
 const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): void => {
-  if (router) {
-    router.reroute(navigationEvent);
+  if (routerController) {
+    routerController.reroute(navigationEvent);
     return;
   }
   if (navigationEvent) {
@@ -24,9 +24,7 @@ const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): voi
       try {
         listener.apply(navigationEvent.target, [navigationEvent]);
       } catch (e) {
-        /**
-         * event listener错误不应该中断versea的执行.
-         */
+        // event listener错误不应该中断versea的执行.
         setTimeout(() => {
           throw e;
         });
@@ -92,7 +90,7 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
     const urlAfter = window.location.href;
 
     if (urlBefore !== urlAfter) {
-      if (router?._appService.isStarted) {
+      if (routerController?.isStarted) {
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
         handleUrlChange();
