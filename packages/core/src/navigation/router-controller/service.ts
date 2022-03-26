@@ -1,16 +1,16 @@
 import { inject } from 'inversify';
 
-import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/interface';
-import { IApp } from '../../application/app/interface';
+import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/service';
+import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { bindRouter } from '../navigation-events';
-import { IRouteKey, RouteOptions } from '../route/interface';
-import { IRouter } from '../router/interface';
+import { IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
+import { IRouter } from '../router/service';
 import { IRouterController, IRouterControllerKey } from './interface';
 
 @provide(IRouterControllerKey)
 export class RouterController implements IRouterController {
-  public readonly _router: IRouter;
+  protected readonly _router: IRouter;
 
   protected readonly _appSwitcher: IAppSwitcher;
 
@@ -22,6 +22,10 @@ export class RouterController implements IRouterController {
     this._router = router;
   }
 
+  public get isStarted(): boolean {
+    return this._router.isStarted;
+  }
+
   public addRoutes(routes: RouteOptions[], app: IApp): void {
     // 将 router 传给 navigationEvent
     if (!this._hasBindRouter) {
@@ -31,11 +35,15 @@ export class RouterController implements IRouterController {
     this._router.addRoutes(routes, app);
   }
 
-  public reroute(navigationEvent?: Event | undefined): void {
-    this._router.reroute(this._appSwitcher, navigationEvent);
+  public match(): MatchedRoute[] {
+    return this._router.match();
   }
 
-  public start(): void {
-    this._router.start(this._appSwitcher);
+  public async reroute(navigationEvent?: Event): Promise<void> {
+    return this._router.reroute(this._appSwitcher, navigationEvent);
+  }
+
+  public async start(): Promise<void> {
+    return this._router.start(this._appSwitcher);
   }
 }

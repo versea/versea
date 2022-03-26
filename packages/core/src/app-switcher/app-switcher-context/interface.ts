@@ -24,4 +24,16 @@ export interface IAppSwitcherContext {
    * 在本次 context 销毁之前需要 unmount 的应用
    */
   readonly appsToUnmount: IApp[][];
+
+  /**
+   * 开始执行切换应用
+   * @description 仅仅执行一次，如果多次调用，返回第一次调用的结果
+   */
+  run: () => Promise<void>;
+
+  /**
+   * 取消执行切换应用
+   * @description 仅仅执行一次，如果多次调用，返回第一次调用的结果
+   */
+  cancel: () => Promise<void>;
 }

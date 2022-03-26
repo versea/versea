@@ -1,42 +1,27 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { IRouterController } from '../router-controller/interface';
-import { HistoryEventName, EventName, HistoryEventListenersType } from './types';
+import { HistoryFunctionName, EventName, HistoryEventListenersType } from './types';
 
-let routerController: IRouterController | null = null;
-export function bindRouter(iRouterController: IRouterController): void {
-  routerController = iRouterController;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+let _routerController: IRouterController | null = null;
+export function bindRouter(routerController: IRouterController): void {
+  _routerController = routerController;
 }
+
 export const capturedEventListeners: Record<EventName, EventListener[]> = {
   hashchange: [],
   popstate: [],
 };
+const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
 
-export const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
-
+// 监听路由事件
 const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): void => {
-  if (routerController) {
-    routerController.reroute(navigationEvent);
-    return;
-  }
-  if (navigationEvent) {
-    const eventType = navigationEvent.type as EventName;
-    capturedEventListeners[eventType].forEach((listener: EventListener) => {
-      try {
-        listener.apply(navigationEvent.target, [navigationEvent]);
-      } catch (e) {
-        // event listener错误不应该中断versea的执行.
-        setTimeout(() => {
-          throw e;
-        });
-      }
-    });
-  }
+  void _routerController?.reroute(navigationEvent);
 };
-
+window.addEventListener('popstate', handleUrlChange);
 window.addEventListener('hashchange', handleUrlChange);
 
-window.addEventListener('popstate', handleUrlChange);
-
+// 重写 addEventListener 和 removeEventListener，当增加 popstate 或 hashchange 事件监听函数，把他们存储起来，在 versea 切换应用的合适的时机调用
 const originalAddEventListener = window.addEventListener;
 const originalRemoveEventListener = window.removeEventListener;
 
@@ -74,7 +59,8 @@ window.removeEventListener = function (
   originalRemoveEventListener.call(this, eventName, listenerFn, options);
 };
 
-function createPopStateEvent(state: PopStateEventInit, originalMethodName: HistoryEventName): Event {
+/** 创建 popstate 事件 */
+function createPopStateEvent(state: PopStateEventInit, originalMethodName: HistoryFunctionName): Event {
   const evt = new PopStateEvent('popstate', { state });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
   (evt as any).versea = true;
@@ -83,14 +69,17 @@ function createPopStateEvent(state: PopStateEventInit, originalMethodName: Histo
   return evt;
 }
 
-function patchedUpdateState(updateState: HistoryEventListenersType, methodName: HistoryEventName) {
+// 重写 pushState 和 replaceState 方法
+function patchedUpdateState(updateState: HistoryEventListenersType, methodName: HistoryFunctionName) {
   return function (this: History, ...args: Parameters<HistoryEventListenersType>): void {
     const urlBefore = window.location.href;
     updateState.apply(this, args);
     const urlAfter = window.location.href;
 
     if (urlBefore !== urlAfter) {
-      if (routerController?._router.isStarted) {
+      if (_routerController?.isStarted) {
+        // 如果已经启动应用，需要触发一个 popstate 事件，这个那些已经注册的应用可以知晓路由变更，他们的路由状态和页面状态才会发生变更。
+        // 如果不触发 popstate 事件，可能会导致路由切换了，但是注册应用的页面未发生变更
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
         handleUrlChange();
@@ -99,7 +88,5 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
 window.history.pushState = patchedUpdateState(window.history.pushState, 'pushState');
-// eslint-disable-next-line @typescript-eslint/unbound-method
 window.history.replaceState = patchedUpdateState(window.history.replaceState, 'replaceState');

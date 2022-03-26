@@ -2,6 +2,7 @@
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
+import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IStatusEnum, IStatusEnumKey } from '../../constants/status';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
@@ -23,7 +24,7 @@ export class AppService implements IAppService {
     this._StatusEnum = StatusEnum;
   }
 
-  public registerApp(options: AppOptions, router: IRouter): IApp {
+  public registerApp(options: AppOptions, router: IRouter, appSwitcher?: IAppSwitcher): IApp {
     if (this.appMap.has(options.name)) {
       throw new VerseaError(`Duplicate app name: "${options.name}".`);
     }
@@ -37,7 +38,17 @@ export class AppService implements IAppService {
       router.addRoutes(options.routes, app);
     }
 
+    if (appSwitcher) {
+      void router.reroute(appSwitcher);
+    }
+
     return app;
+  }
+
+  public registerApps(optionsList: AppOptions[], router: IRouter, appSwitcher: IAppSwitcher): IApp[] {
+    const apps = optionsList.map((options) => this.registerApp(options, router));
+    void router.reroute(appSwitcher);
+    return apps;
   }
 
   public getApp(name: string): IApp {

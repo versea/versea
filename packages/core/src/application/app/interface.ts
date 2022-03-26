@@ -25,6 +25,7 @@ export interface IApp {
   /** 应用名称 */
   name: string;
 
+  /** 当前应用的状态 */
   status: IStatusEnum[keyof IStatusEnum];
 
   /** 加载应用 */
@@ -36,6 +37,11 @@ export interface IApp {
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext) => Promise<void>;
 
+  /**
+   * 等待容器渲染完成
+   * @description 参考 issue https://github.com/versea/versea/issues/8
+   * @param name - 嵌套的应用的名称
+   */
   waitForChildContainer: (name: string, context: IAppSwitcherContext) => Promise<void>;
 
   /** 卸载应用 */

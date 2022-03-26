@@ -1,14 +1,13 @@
 import { inject } from 'inversify';
-import queryString from 'query-string';
+import { parse } from 'query-string';
 
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IMatcher, IMatcherKey } from '../matcher/service';
-import { capturedEventListeners, routingEventsListeningTo } from '../navigation-events';
+import { capturedEventListeners } from '../navigation-events';
 import { EventName } from '../navigation-events/types';
-import { MatchedRoute } from '../route/interface';
-import { RouteOptions } from '../route/service';
+import { RouteOptions, MatchedRoute } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
 
 export * from './interface';
@@ -28,46 +27,44 @@ export class Router implements IRouter {
   }
 
   public match(): MatchedRoute[] {
-    const path = location.pathname;
-    const query = queryString.parse(location.search);
+    const path = window.location.pathname;
+    const query = parse(window.location.search);
     return this._matcher.match(path, query);
   }
 
-  public reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): void {
-    const matched = this.match();
-    void appSwitcher.switch({
-      routes: matched,
+  public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
+    const matchedRoutes = this.match();
+    return appSwitcher.switch({
+      routes: matchedRoutes,
       navigationEvent,
     });
   }
 
-  public callCapturedEventListeners(eventArguments: [Event]): void {
-    if (eventArguments) {
-      const eventType = eventArguments[0].type as EventName;
-      if (routingEventsListeningTo.includes(eventType)) {
-        capturedEventListeners[eventType].forEach((listener: EventListener) => {
-          try {
-            listener.apply(this, eventArguments);
-          } catch (e) {
-            // event listener错误不应该中断versea的执行.
-            setTimeout(() => {
-              throw e;
-            });
-          }
-        });
-      }
+  public callCapturedEventListeners(navigationEvent?: Event): void {
+    if (navigationEvent) {
+      const eventType = navigationEvent.type as EventName;
+      capturedEventListeners[eventType]?.forEach((listener: EventListener) => {
+        try {
+          listener.apply(navigationEvent.target, [navigationEvent]);
+        } catch (e) {
+          // event listener 执行可能会报错，但这些错误不应该中断 versea 的执行逻辑.
+          setTimeout(() => {
+            throw e;
+          });
+        }
+      });
     }
   }
 
-  public start(appSwitcher: IAppSwitcher): void {
+  public async start(appSwitcher: IAppSwitcher): Promise<void> {
     if (this.isStarted) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('app is already started and should not repeat start');
+        console.warn('Versea has already started, it should not start again.');
         return;
       }
     }
 
     this.isStarted = true;
-    this.reroute(appSwitcher);
+    return this.reroute(appSwitcher);
   }
 }
