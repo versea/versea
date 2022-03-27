@@ -96,11 +96,24 @@ export class Matcher implements IMatcher {
       });
     });
 
+    /** 根据 slot 和 fill 合并树 */
     for (let i = this._trees.length - 1; i >= 0; i--) {
       const tree = this._trees[i];
       if (tree.fill && slotMap[tree.fill]) {
         slotMap[tree.fill].appendChild(tree);
         this._trees.splice(i, 1);
+      }
+    }
+
+    /** 合并拫节点 */
+    for (let i = 0; i < this._trees.length; i++) {
+      const tree = this._trees[i];
+      for (let j = this._trees.length - 1; j > i; j--) {
+        const otherTree = this._trees[j];
+        if (tree.path === otherTree.path) {
+          tree.merge(otherTree);
+          this._trees.splice(j, 1);
+        }
       }
     }
   }

@@ -9,6 +9,12 @@ export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext')
  */
 export interface IAppSwitcherContext {
   /**
+   * 当前已经 Mounted 的应用
+   * @description 二维数组表示并列和嵌套关系
+   */
+  currentMountedApps: IApp[][];
+
+  /**
    * 需要加载的应用
    * @description 二维数组表示串行和并行，如 [[A], [B, C]] 是先加载 A，再同时加载 B 和 C
    */
@@ -20,9 +26,7 @@ export interface IAppSwitcherContext {
    */
   appsToMount: IApp[][];
 
-  /**
-   * 在本次 context 销毁之前需要 unmount 的应用
-   */
+  /** 在本次 context 销毁之前需要 unmount 的应用 */
   readonly appsToUnmount: IApp[][];
 
   /**
@@ -36,4 +40,6 @@ export interface IAppSwitcherContext {
    * @description 仅仅执行一次，如果多次调用，返回第一次调用的结果
    */
   cancel: () => Promise<void>;
+
+  syncMountedApps: (apps: IApp[][]) => void;
 }
