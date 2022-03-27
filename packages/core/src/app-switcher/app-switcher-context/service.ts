@@ -15,6 +15,8 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   public appsToMount: IApp[][] = [];
 
+  public currentMountedApps: IApp[][] = [];
+
   protected _routes: MatchedRoute[];
 
   constructor({ routes }: SwitcherOptions) {
@@ -36,6 +38,11 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   public async cancel(): Promise<void> {
     console.log(1);
     return Promise.resolve();
+  }
+
+  public syncMountedApps(apps: IApp[][]): void {
+    this.currentMountedApps = apps;
+    // TODO: 在这里计算需要渲染和加载的信息
   }
 
   protected _getAppsToLoad(): IApp[][] {

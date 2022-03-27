@@ -122,9 +122,6 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (!this._waitForChildrenContainerHooks[name]) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
-      }
       return;
     }
 

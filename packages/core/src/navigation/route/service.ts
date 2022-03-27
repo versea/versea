@@ -77,8 +77,14 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    this.apps = [...this.apps, ...route.apps];
+    // 具有 children 或 slot 的节点放在前面
+    if (route.slot || route.children.length > 0) {
+      this.apps = [...route.apps, ...this.apps];
+    } else {
+      this.apps = [...this.apps, ...route.apps];
+    }
     this.meta = { ...this.meta, ...route.meta };
+    this.slot = this.slot ?? route.slot;
     this.pathToRegexpOptions = { ...this.pathToRegexpOptions, ...route.pathToRegexpOptions };
 
     if (this.children.length === 0) {
@@ -142,7 +148,11 @@ export class Route extends ExtensibleEntity implements IRoute {
       throw new VerseaError('Can not Merge route(same path) with children.');
     }
 
-    if (this.slot || route.slot) {
+    if (
+      (this.slot && route.slot) ||
+      (this.children.length > 0 && route.slot) ||
+      (this.slot && route.children.length > 0)
+    ) {
       throw new VerseaError('Can not Merge route(same path) with slot.');
     }
   }
