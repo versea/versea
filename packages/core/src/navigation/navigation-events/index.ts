@@ -8,15 +8,35 @@ export function bindRouter(routerController: IRouterController): void {
   _routerController = routerController;
 }
 
-export const capturedEventListeners: Record<EventName, EventListener[]> = {
+const capturedEventListeners: Record<EventName, EventListener[]> = {
   hashchange: [],
   popstate: [],
 };
 const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
 
+export function callCapturedEventListeners(navigationEvent?: Event): void {
+  if (navigationEvent) {
+    const eventType = navigationEvent.type as EventName;
+    capturedEventListeners[eventType]?.forEach((listener: EventListener) => {
+      try {
+        listener.apply(navigationEvent.target, [navigationEvent]);
+      } catch (e) {
+        // event listener 执行可能会报错，但这些错误不应该中断 versea 的执行逻辑.
+        setTimeout(() => {
+          throw e;
+        });
+      }
+    });
+  }
+}
+
 // 监听路由事件
 const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): void => {
-  void _routerController?.reroute(navigationEvent);
+  if (_routerController) {
+    void _routerController.reroute(navigationEvent);
+    return;
+  }
+  callCapturedEventListeners(navigationEvent);
 };
 window.addEventListener('popstate', handleUrlChange);
 window.addEventListener('hashchange', handleUrlChange);
@@ -82,7 +102,7 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
         // 如果不触发 popstate 事件，可能会导致路由切换了，但是注册应用的页面未发生变更
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
-        handleUrlChange();
+        void _routerController?.reroute();
       }
     }
   };

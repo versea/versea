@@ -5,8 +5,7 @@ import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IMatcher, IMatcherKey } from '../matcher/service';
-import { capturedEventListeners } from '../navigation-events';
-import { EventName } from '../navigation-events/types';
+import { callCapturedEventListeners } from '../navigation-events';
 import { RouteOptions, MatchedRoute } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
 
@@ -41,19 +40,7 @@ export class Router implements IRouter {
   }
 
   public callCapturedEventListeners(navigationEvent?: Event): void {
-    if (navigationEvent) {
-      const eventType = navigationEvent.type as EventName;
-      capturedEventListeners[eventType]?.forEach((listener: EventListener) => {
-        try {
-          listener.apply(navigationEvent.target, [navigationEvent]);
-        } catch (e) {
-          // event listener 执行可能会报错，但这些错误不应该中断 versea 的执行逻辑.
-          setTimeout(() => {
-            throw e;
-          });
-        }
-      });
-    }
+    callCapturedEventListeners(navigationEvent);
   }
 
   public async start(appSwitcher: IAppSwitcher): Promise<void> {

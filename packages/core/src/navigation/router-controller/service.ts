@@ -8,6 +8,8 @@ import { IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
 import { IRouter } from '../router/service';
 import { IRouterController, IRouterControllerKey } from './interface';
 
+export * from './interface';
+
 @provide(IRouterControllerKey)
 export class RouterController implements IRouterController {
   protected readonly _router: IRouter;
