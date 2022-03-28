@@ -1,11 +1,12 @@
-import { ExtensibleEntity } from '@versea/shared';
+import { ExtensibleEntity, createPromiseMonitor } from '@versea/shared';
 import { flatten } from 'ramda';
 
 import { IApp } from '../../application/app/service';
+import { ISwitcherStatusEnum } from '../../constants/status';
 import { MatchedRoute } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/interface';
-import { IAppSwitcherContext, IAppSwitcherContextKey } from './interface';
+import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies } from './interface';
 
 export * from './interface';
 
@@ -17,11 +18,19 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   public currentMountedApps: IApp[][] = [];
 
-  protected _routes: MatchedRoute[];
+  /** 匹配的路由 */
+  protected readonly _routes: MatchedRoute[];
 
-  constructor({ routes }: SwitcherOptions) {
+  /** cancel 任务的 promise */
+  protected readonly _cancelledMonitor = createPromiseMonitor<boolean>();
+
+  /** SwitcherContext 运行状态 */
+  protected readonly _SwitcherStatusEnum: ISwitcherStatusEnum;
+
+  constructor({ routes }: SwitcherOptions, dependencies: AppSwitcherContextDependencies) {
     super();
     this._routes = routes;
+    this._SwitcherStatusEnum = dependencies.SwitcherStatusEnum;
     this.appsToLoad = this._getAppsToLoad();
     this.appsToMount = this._getAppsToMount();
   }
@@ -31,12 +40,10 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   public async run(): Promise<void> {
-    console.log(1);
     return Promise.resolve();
   }
 
   public async cancel(): Promise<void> {
-    console.log(1);
     return Promise.resolve();
   }
 

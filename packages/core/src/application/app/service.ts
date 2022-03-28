@@ -57,7 +57,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (!this._loadApp) {
-      this.status = this._StatusEnum.SkipBecauseBroken;
+      this.status = this._StatusEnum.Broken;
       throw new VerseaError(`Can not find loadApp prop on app "${this.name}".`);
     }
 
@@ -88,7 +88,7 @@ export class App extends ExtensibleEntity implements IApp {
       await this._hooks.bootstrap(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
-      this.status = this._StatusEnum.SkipBecauseBroken;
+      this.status = this._StatusEnum.Broken;
       throw error;
     }
   }
@@ -110,7 +110,7 @@ export class App extends ExtensibleEntity implements IApp {
       this._waitForChildrenContainerHooks = result ?? {};
       this.status = this._StatusEnum.Mounted;
     } catch (error) {
-      this.status = this._StatusEnum.SkipBecauseBroken;
+      this.status = this._StatusEnum.Broken;
       throw error;
     }
   }
@@ -122,6 +122,9 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (!this._waitForChildrenContainerHooks[name]) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
+      }
       return;
     }
 
@@ -146,7 +149,7 @@ export class App extends ExtensibleEntity implements IApp {
       await this._hooks.unmount(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
     } catch (error) {
-      this.status = this._StatusEnum.SkipBecauseBroken;
+      this.status = this._StatusEnum.Broken;
       throw error;
     }
   }
