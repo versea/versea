@@ -1,4 +1,5 @@
 import { IApp } from '../../application/app/service';
+import { ISwitcherStatusEnum } from '../../constants/status';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
@@ -41,5 +42,11 @@ export interface IAppSwitcherContext {
    */
   cancel: () => Promise<void>;
 
+  /** 同步已经渲染的应用给 context */
   syncMountedApps: (apps: IApp[][]) => void;
+}
+
+export interface AppSwitcherContextDependencies {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  SwitcherStatusEnum: ISwitcherStatusEnum;
 }

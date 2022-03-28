@@ -75,7 +75,7 @@ describe('App', () => {
       void expect(async () => {
         await app.load({} as IAppSwitcherContext);
       }).rejects.toThrowError('Can not find loadApp prop');
-      expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
+      expect(app.status).toBe(StatusEnum.Broken);
     });
 
     test('load 应用失败，应用的状态变化为 LoadError', async () => {
@@ -131,7 +131,7 @@ describe('App', () => {
       try {
         await app.bootstrap({} as IAppSwitcherContext);
       } catch (error) {
-        expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
+        expect(app.status).toBe(StatusEnum.Broken);
       }
     });
   });
@@ -175,7 +175,7 @@ describe('App', () => {
       try {
         await app.mount({} as IAppSwitcherContext);
       } catch (error) {
-        expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
+        expect(app.status).toBe(StatusEnum.Broken);
       }
     });
   });
@@ -245,7 +245,7 @@ describe('App', () => {
       try {
         await app.unmount({} as IAppSwitcherContext);
       } catch (error) {
-        expect(app.status).toBe(StatusEnum.SkipBecauseBroken);
+        expect(app.status).toBe(StatusEnum.Broken);
       }
     });
   });
