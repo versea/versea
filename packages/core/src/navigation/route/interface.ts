@@ -13,6 +13,9 @@ export interface IRoute {
   /** 匹配的路径 */
   path: string;
 
+  /** 是否是一个主路由，在没有 children 和 slot 时，用这个字段判断 */
+  isMainRoute: boolean;
+
   /** 配置的路由对应的应用 */
   apps: IApp[];
 
@@ -56,6 +59,9 @@ export interface RouteOptions {
   /** route 额外参数 */
   meta?: Record<string, unknown>;
 
+  /** 是否是一个主路由，在没有 children 和 slot 时，用这个字段判断 */
+  isMainRoute?: boolean;
+
   children?: RouteOptions[];
 
   /** 该 route 的 children 允许其他的应用的路由插入 */
@@ -76,7 +82,7 @@ export interface ToMatchedRouteOptions {
 export type MatchedRoute = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
   object.ExcludeValues<IRoute, Function>,
-  'children' | 'fill' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
+  'children' | 'fill' | 'isMainRoute' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
     getRoute: () => IRoute;

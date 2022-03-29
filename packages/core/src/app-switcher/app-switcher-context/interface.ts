@@ -25,10 +25,10 @@ export interface IAppSwitcherContext {
    * 需要 mount 的应用
    * @description 二维数组表示串行和并行，如 [[A], [B, C]] 是先 mount A，再同时 mount B 和 C
    */
-  appsToMount: IApp[][];
+  readonly appsToMount: IApp[][];
 
   /** 在本次 context 销毁之前需要 unmount 的应用 */
-  readonly appsToUnmount: IApp[][];
+  appsToUnmount: IApp[][];
 
   /**
    * 开始执行切换应用
@@ -43,7 +43,7 @@ export interface IAppSwitcherContext {
   cancel: () => Promise<void>;
 
   /** 同步已经渲染的应用给 context */
-  syncMountedApps: (apps: IApp[][]) => void;
+  syncMountedApps: (mountedApps: IApp[][]) => void;
 }
 
 export interface AppSwitcherContextDependencies {
