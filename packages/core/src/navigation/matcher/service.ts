@@ -13,7 +13,7 @@ export * from './interface';
 
 @provide(IMatcherKey)
 export class Matcher implements IMatcher {
-  protected _trees: IRoute[] = [];
+  protected readonly _trees: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
@@ -96,7 +96,7 @@ export class Matcher implements IMatcher {
       });
     });
 
-    /** 根据 slot 和 fill 合并树 */
+    // 根据 slot 和 fill 合并树
     for (let i = this._trees.length - 1; i >= 0; i--) {
       const tree = this._trees[i];
       if (tree.fill && slotMap[tree.fill]) {
@@ -105,7 +105,7 @@ export class Matcher implements IMatcher {
       }
     }
 
-    /** 合并拫节点 */
+    // 合并拫节点
     for (let i = 0; i < this._trees.length; i++) {
       const tree = this._trees[i];
       for (let j = this._trees.length - 1; j > i; j--) {

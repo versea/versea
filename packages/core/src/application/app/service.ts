@@ -18,18 +18,22 @@ export * from './interface';
 
 @provide(IAppKey, 'Constructor')
 export class App extends ExtensibleEntity implements IApp {
-  public name: string;
+  public readonly name: string;
 
   public status: IStatusEnum[keyof IStatusEnum];
 
-  protected _loadApp?: (props: AppProps) => Promise<AppHooks>;
+  public isLoaded = false;
 
-  protected _hooks: AppHooks = {};
+  public isBootstrapped = false;
 
-  protected _props: AppOptionsProps;
+  protected readonly _loadApp?: (props: AppProps) => Promise<AppHooks>;
+
+  protected readonly _props: AppOptionsProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  protected _StatusEnum: IStatusEnum;
+  protected readonly _StatusEnum: IStatusEnum;
+
+  protected _hooks: AppHooks = {};
 
   /** mount 嵌套的子应用的等待函数 */
   protected _waitForChildrenContainerHooks: Record<string, HookFunction> = {};
@@ -41,12 +45,12 @@ export class App extends ExtensibleEntity implements IApp {
    */
   constructor(options: AppOptions, dependencies: AppDependencies) {
     super(options);
+    // 绑定依赖
+    this._StatusEnum = dependencies.StatusEnum;
+
     this.name = options.name;
     this._props = options.props ?? {};
     this._loadApp = options.loadApp;
-
-    // 绑定依赖
-    this._StatusEnum = dependencies.StatusEnum;
     this.status = this._StatusEnum.NotLoaded;
   }
 
@@ -65,6 +69,7 @@ export class App extends ExtensibleEntity implements IApp {
     try {
       const hooks = await this._loadApp(this.getProps(context));
       this.status = this._StatusEnum.NotBootstrapped;
+      this.isLoaded = true;
       this._setHooks(hooks);
     } catch (error) {
       this.status = this._StatusEnum.LoadError;
@@ -87,6 +92,7 @@ export class App extends ExtensibleEntity implements IApp {
     try {
       await this._hooks.bootstrap(this.getProps(context));
       this.status = this._StatusEnum.NotMounted;
+      this.isBootstrapped = true;
     } catch (error) {
       this.status = this._StatusEnum.Broken;
       throw error;

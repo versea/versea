@@ -23,10 +23,16 @@ export interface AppHooks {
 
 export interface IApp {
   /** 应用名称 */
-  name: string;
+  readonly name: string;
 
   /** 当前应用的状态 */
   status: IStatusEnum[keyof IStatusEnum];
+
+  /** 应用是否已经加载 */
+  isLoaded: boolean;
+
+  /** 应用是否已经 Bootstrap */
+  isBootstrapped: boolean;
 
   /** 加载应用 */
   load: (context: IAppSwitcherContext) => Promise<void>;

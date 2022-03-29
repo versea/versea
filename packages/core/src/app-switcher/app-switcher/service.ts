@@ -48,9 +48,10 @@ export class AppSwitcher implements IAppSwitcher {
 
     if (context) {
       await context.cancel();
-      // 同步当前 context 的信息给 nextContext
-      nextContext.syncMountedApps(context.currentMountedApps);
     }
+    // 无论当前是否有 context，都需要同步当前已经渲染的应用给将要运行的 nextContext
+    nextContext.syncMountedApps(context ? context.currentMountedApps : []);
+
     this.currentContext = nextContext;
     return nextContext?.run();
   }

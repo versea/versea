@@ -13,7 +13,7 @@ export * from './interface';
 
 @provide(IAppServiceKey)
 export class AppService implements IAppService {
-  protected appMap: Map<string, IApp> = new Map();
+  protected readonly appMap: Map<string, IApp> = new Map();
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 

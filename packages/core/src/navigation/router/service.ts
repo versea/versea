@@ -33,6 +33,7 @@ export class Router implements IRouter {
 
   public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
     const matchedRoutes = this.match();
+
     return appSwitcher.switch({
       routes: matchedRoutes,
       navigationEvent,

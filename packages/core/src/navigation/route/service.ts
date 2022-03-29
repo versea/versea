@@ -12,6 +12,8 @@ export * from './interface';
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 
+  public isMainRoute: boolean;
+
   /** 配置的路由对应的应用 */
   public apps: IApp[];
 
@@ -33,6 +35,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
     this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
+    this.isMainRoute = options.isMainRoute ?? false;
     this.apps = [app];
     this.meta = options.meta ?? {};
     this.parent = parent;
@@ -49,7 +52,7 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public get fullPath(): string {
-    return this.parent ? `${this.parent.fullPath}${this.path}` : this.path;
+    return this.parent ? `${this.parent.fullPath}${this.path}`.replace(/(\/+)/g, '/') : this.path;
   }
 
   public flatten(): IRoute[] {
@@ -67,7 +70,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       console.warn(`Merge route with same path  "${route.path}".`);
     }
 
-    this._validRouteWithSamePath(route);
+    this._ensureRouteWithSamePath(route);
 
     // 合并扩展属性
     Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
@@ -78,11 +81,12 @@ export class Route extends ExtensibleEntity implements IRoute {
     });
 
     // 具有 children 或 slot 的节点放在前面
-    if (route.slot || route.children.length > 0) {
+    if (route.slot || route.children.length > 0 || route.isMainRoute) {
       this.apps = [...route.apps, ...this.apps];
     } else {
       this.apps = [...this.apps, ...route.apps];
     }
+    this.isMainRoute = this.isMainRoute || route.isMainRoute;
     this.meta = { ...this.meta, ...route.meta };
     this.slot = this.slot ?? route.slot;
     this.pathToRegexpOptions = { ...this.pathToRegexpOptions, ...route.pathToRegexpOptions };
@@ -143,7 +147,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     };
   }
 
-  protected _validRouteWithSamePath(route: IRoute): void {
+  protected _ensureRouteWithSamePath(route: IRoute): void {
     if (this.children.length > 0 && route.children.length > 0) {
       throw new VerseaError('Can not Merge route(same path) with children.');
     }
