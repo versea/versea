@@ -1,6 +1,7 @@
 import { IApp } from '../../application/app/service';
 import { ISwitcherStatusEnum } from '../../constants/status';
 import { MatchedRoute } from '../../navigation/route/interface';
+import { IRouter } from '../../navigation/router/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
@@ -14,16 +15,13 @@ export interface IAppSwitcherContext {
   readonly routes: MatchedRoute[];
 
   /**
-   * 当前已经 Mounted 的应用
-   * @description 二维数组表示并列和嵌套关系
-   */
-  currentMountedApps: IApp[][];
-
-  /**
    * 需要加载的应用
    * @description 二维数组表示串行和并行，如 [[A], [B, C]] 是先加载 A，再同时加载 B 和 C
    */
   appsToLoad: IApp[][];
+
+  /** 在本次 context 销毁之前需要 unmount 的应用 */
+  appsToUnmount: IApp[][];
 
   /**
    * 需要 mount 的应用
@@ -31,8 +29,11 @@ export interface IAppSwitcherContext {
    */
   readonly appsToMount: IApp[][];
 
-  /** 在本次 context 销毁之前需要 unmount 的应用 */
-  appsToUnmount: IApp[][];
+  /**
+   * 当前已经 Mounted 的应用
+   * @description 二维数组表示并列和嵌套关系
+   */
+  currentMountedApps: IApp[][];
 
   /**
    * 开始执行切换应用
@@ -53,4 +54,5 @@ export interface IAppSwitcherContext {
 export interface AppSwitcherContextDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   SwitcherStatusEnum: ISwitcherStatusEnum;
+  router: IRouter;
 }

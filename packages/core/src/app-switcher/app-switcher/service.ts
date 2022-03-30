@@ -2,6 +2,7 @@ import { inject, interfaces } from 'inversify';
 
 import { IApp } from '../../application/app/service';
 import { ISwitcherStatusEnum, ISwitcherStatusEnumKey } from '../../constants/status';
+import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
@@ -18,14 +19,18 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _SwitcherStatusEnum: ISwitcherStatusEnum;
 
+  protected readonly _router: IRouter;
+
   constructor(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     @inject(ISwitcherStatusEnumKey) SwitcherStatusEnum: ISwitcherStatusEnum,
+    @inject(IRouterKey) router: IRouter,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatusEnum = SwitcherStatusEnum;
+    this._router = router;
   }
 
   public get currentMountedApps(): IApp[][] {
@@ -60,6 +65,7 @@ export class AppSwitcher implements IAppSwitcher {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._AppSwitcherContext(options, {
       SwitcherStatusEnum: this._SwitcherStatusEnum,
+      router: this._router,
     });
   }
 }

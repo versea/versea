@@ -29,10 +29,12 @@ export const SwitcherStatusEnum = {
   LoadingApps: 'LoadingApps',
   NotUnmounted: 'NotUnmounted',
   Unmounting: 'Unmounting',
+  NotMounted: 'NotMounted',
   Mounting: 'Mounting',
   Done: 'Done',
   WaitForCancel: 'WaitForCancel',
   Canceled: 'Canceled',
+  Broken: 'Broken',
 } as const;
 provideValue(SwitcherStatusEnum, ISwitcherStatusEnumKey);
 
