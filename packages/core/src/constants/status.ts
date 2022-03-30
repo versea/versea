@@ -27,10 +27,8 @@ export const ISwitcherStatusEnumKey = createServiceSymbol('ISwitcherStatusEnum')
 export const SwitcherStatusEnum = {
   NotStart: 'NotStart',
   LoadingApps: 'LoadingApps',
-  NotUnmount: 'NotUnmount',
+  NotUnmounted: 'NotUnmounted',
   Unmounting: 'Unmounting',
-  NotCallEvent: 'NotCallEvent',
-  CalledEvent: 'CalledEvent',
   Mounting: 'Mounting',
   Done: 'Done',
   WaitForCancel: 'WaitForCancel',
