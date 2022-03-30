@@ -1,5 +1,6 @@
 import { IApp } from '../../application/app/service';
 import { ISwitcherStatusEnum } from '../../constants/status';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
@@ -9,6 +10,9 @@ export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext')
  * @description 决定 load、mount 和 unmount 哪些应用
  */
 export interface IAppSwitcherContext {
+  /** 匹配的路由 */
+  readonly routes: MatchedRoute[];
+
   /**
    * 当前已经 Mounted 的应用
    * @description 二维数组表示并列和嵌套关系

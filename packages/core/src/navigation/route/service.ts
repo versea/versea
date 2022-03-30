@@ -80,7 +80,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    // 具有 children 或 slot 的节点放在前面
+    // 主路由应用放在前面
     if (route.slot || route.children.length > 0 || route.isMainRoute) {
       this.apps = [...route.apps, ...this.apps];
     } else {

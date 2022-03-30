@@ -1,4 +1,10 @@
-import { ExtensibleEntity, VerseaError, createPromiseMonitor, memoizePromise } from '@versea/shared';
+import {
+  ExtensibleEntity,
+  VerseaError,
+  VerseaCanceledError,
+  createPromiseMonitor,
+  memoizePromise,
+} from '@versea/shared';
 import { flatten } from 'ramda';
 
 import { IApp } from '../../application/app/service';
@@ -23,10 +29,10 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   public status: ISwitcherStatusEnum[keyof ISwitcherStatusEnum];
 
   /** 匹配的路由 */
-  protected readonly _routes: MatchedRoute[];
+  public readonly routes: MatchedRoute[];
 
   /** cancel 任务的 promise */
-  protected readonly _cancelledMonitor = createPromiseMonitor<boolean>();
+  protected readonly _canceledMonitor = createPromiseMonitor<boolean>();
 
   /** SwitcherContext 运行状态 */
   protected readonly _SwitcherStatusEnum: ISwitcherStatusEnum;
@@ -36,7 +42,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     // 绑定依赖
     this._SwitcherStatusEnum = dependencies.SwitcherStatusEnum;
 
-    this._routes = options.routes;
+    this.routes = options.routes;
     this.appsToMount = this._getAppsToMount();
 
     this.status = this._SwitcherStatusEnum.NotStart;
@@ -58,6 +64,38 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     this.appsToUnmount = this._getAppsToUnmount();
   }
 
+  protected async _loadApps(): Promise<void> {
+    this.status = this._SwitcherStatusEnum.LoadingApps;
+    await this._runSingleTask(this.appsToLoad, async (app) => app.load(this));
+    this.status = this._SwitcherStatusEnum.NotUnmounted;
+  }
+
+  protected async _runSingleTask(appsList: IApp[][], fn: (app: IApp) => Promise<void>): Promise<void> {
+    for (const apps of appsList) {
+      this._ensureNoCancel();
+      try {
+        await Promise.all(apps.map(fn));
+      } catch (error) {
+        this._ensureCalledEvent();
+        this._canceledMonitor.resolve(false);
+        throw error;
+      }
+    }
+  }
+
+  protected _ensureNoCancel(): void {
+    if (this.status === this._SwitcherStatusEnum.WaitForCancel) {
+      this._ensureCalledEvent();
+      this._canceledMonitor.resolve(true);
+      this.status = this._SwitcherStatusEnum.Canceled;
+      throw new VerseaCanceledError('Cancel switcher task.');
+    }
+  }
+
+  protected _ensureCalledEvent(): void {
+    console.log(1);
+  }
+
   protected _getAppsToLoad(): IApp[][] {
     const toLoadApps = Array.from(new Set(flatten(this.appsToMount)));
     // 过滤所有没有被加载的应用
@@ -66,12 +104,12 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   /**
    * 获取需要 unmount 的应用
-   * @description 根据 currentMountedApps 和 appsToMount 计算得出，得到倒序的结果
+   * @description 根据 currentMountedApps 和 appsToMount 计算差值，然后再倒序的结果
    * ------
-   * 不能直接 unmount 所有当前已经 mounted 的 apps，需要计算差值进行 unmount，这里是计算两个二维数组的差值
+   * 不能直接 unmount 所有当前已经 mounted 的 apps，这样每一次切换路由，cost 很高，我们应该保证最大可复用。也就是尽量减少 unmount 和 mount 的应用。
    *
-   * 定义如下减法规则（这里方便理解，不进行倒序）
-   * - 同行减法，每个二维数组同一行的第一个元素比较，如果不同，则之后的行全部输出
+   * 定义如下差值计算规则（这里方便理解，不进行倒序）
+   * - 同行差值法，每个二维数组同一行的第一个元素比较，如果不同，则之后的行全部输出
    *
    * ```
    * [
@@ -79,7 +117,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    *   [B],
    *   [C],
    * ]
-   * // 减
+   * // 差值
    * [
    *   [A],
    *   [D],
@@ -99,7 +137,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    *   [A, B, C],
    *   [D],
    * ]
-   * // 减
+   * // 差值
    * [
    *   [A, C, E],
    *   [D],
@@ -118,7 +156,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    *   [A],
    *   [B],
    * ]
-   * // 减
+   * // 差值
    * [
    *   [A],
    *   [C],
@@ -134,7 +172,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    *   [C],
    *   [C]
    * ]
-   * // 减
+   * // 差值
    * [
    *   [A],
    *   [A],
@@ -212,14 +250,14 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   protected _getAppsToMount(): IApp[][] {
-    const appsList = this._routes.map((route) => route.apps);
+    const appsList = this.routes.map((route) => route.apps);
     this._ensureAppsToMount(appsList);
     return appsList;
   }
 
   /**
    * 确保 appsToMount 是可以被正确 mount 的
-   * @description 仅仅允许第一列的 App 可以连续重复，不允许间断重复，也不允许其他列有重复的 App
+   * @description 仅仅允许第一列主路由应用可以连续重复，不允许间断重复，也不允许其他列有重复的 App
    * ```
    * [
    *   [A, B],

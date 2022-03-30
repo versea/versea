@@ -13,10 +13,13 @@ export interface IRoute {
   /** 匹配的路径 */
   path: string;
 
-  /** 是否是一个主路由，在没有 children 和 slot 时，用这个字段判断 */
+  /** 是否是一个主路由，仅仅在没有 children 和 slot 时生效 */
   isMainRoute: boolean;
 
-  /** 配置的路由对应的应用 */
+  /**
+   * 配置的路由对应的应用
+   * @description 数组第一个是主路由应用，其他是碎片应用（仅仅控制某一区域的展示内容，不能继续嵌套路由）
+   */
   apps: IApp[];
 
   /** route 额外参数 */
@@ -59,7 +62,7 @@ export interface RouteOptions {
   /** route 额外参数 */
   meta?: Record<string, unknown>;
 
-  /** 是否是一个主路由，在没有 children 和 slot 时，用这个字段判断 */
+  /** 是否是一个主路由，仅仅在没有 children 和 slot 时生效 */
   isMainRoute?: boolean;
 
   children?: RouteOptions[];
