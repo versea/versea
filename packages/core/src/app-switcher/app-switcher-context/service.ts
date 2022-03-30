@@ -4,12 +4,15 @@ import {
   VerseaCanceledError,
   createPromiseMonitor,
   memoizePromise,
+  minusMatrixWithBaseColumn,
+  ensureDiffMatrixWithBaseColumn,
 } from '@versea/shared';
 import { flatten } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { ISwitcherStatusEnum } from '../../constants/status';
 import { MatchedRoute } from '../../navigation/route/service';
+import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/interface';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies } from './interface';
@@ -20,9 +23,9 @@ export * from './interface';
 export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcherContext {
   public appsToLoad: IApp[][] = [];
 
-  public readonly appsToMount: IApp[][] = [];
-
   public appsToUnmount: IApp[][] = [];
+
+  public readonly appsToMount: IApp[][];
 
   public currentMountedApps: IApp[][] = [];
 
@@ -34,15 +37,23 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   /** cancel 任务的 promise */
   protected readonly _canceledMonitor = createPromiseMonitor<boolean>();
 
+  /** 是否已经 */
+  protected _navigationEvent?: Event;
+
   /** SwitcherContext 运行状态 */
   protected readonly _SwitcherStatusEnum: ISwitcherStatusEnum;
 
-  constructor(options: SwitcherOptions, dependencies: AppSwitcherContextDependencies) {
+  protected readonly _router: IRouter;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  constructor(options: SwitcherOptions, { SwitcherStatusEnum, router }: AppSwitcherContextDependencies) {
     super(options);
     // 绑定依赖
-    this._SwitcherStatusEnum = dependencies.SwitcherStatusEnum;
+    this._SwitcherStatusEnum = SwitcherStatusEnum;
+    this._router = router;
 
     this.routes = options.routes;
+    this._navigationEvent = options.navigationEvent;
     this.appsToMount = this._getAppsToMount();
 
     this.status = this._SwitcherStatusEnum.NotStart;
@@ -50,8 +61,8 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   @memoizePromise(0, false)
   public async run(): Promise<void> {
-    console.log(1);
-    return Promise.resolve();
+    await this._loadApps();
+    await this._unmountApps();
   }
 
   public async cancel(): Promise<void> {
@@ -65,35 +76,67 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   protected async _loadApps(): Promise<void> {
+    this._ensureWithoutCancel();
+
+    const StatusEnum = this._SwitcherStatusEnum;
+    if (this.status !== StatusEnum.NotStart) {
+      throw new VerseaError(`Can not unmount apps with status "${this.status}".`);
+    }
+
     this.status = this._SwitcherStatusEnum.LoadingApps;
     await this._runSingleTask(this.appsToLoad, async (app) => app.load(this));
     this.status = this._SwitcherStatusEnum.NotUnmounted;
   }
 
+  protected async _unmountApps(): Promise<void> {
+    this._ensureWithoutCancel();
+
+    const StatusEnum = this._SwitcherStatusEnum;
+    if (this.status !== StatusEnum.NotUnmounted) {
+      throw new VerseaError(`Can not unmount apps with status "${this.status}".`);
+    }
+
+    this.status = StatusEnum.Unmounting;
+    await this._runSingleTask(this.appsToLoad, async (app) => {
+      // TODO: add desc currentMountApps
+      return app.unmount(this);
+    });
+    this.status = StatusEnum.NotMounted;
+  }
+
   protected async _runSingleTask(appsList: IApp[][], fn: (app: IApp) => Promise<void>): Promise<void> {
     for (const apps of appsList) {
-      this._ensureNoCancel();
+      this._ensureWithoutCancel();
       try {
         await Promise.all(apps.map(fn));
       } catch (error) {
-        this._ensureCalledEvent();
-        this._canceledMonitor.resolve(false);
+        this._resolveCanceledMonitor(false);
+        this.status = this._SwitcherStatusEnum.Broken;
         throw error;
       }
     }
   }
 
-  protected _ensureNoCancel(): void {
+  protected _ensureWithoutCancel(): void {
     if (this.status === this._SwitcherStatusEnum.WaitForCancel) {
-      this._ensureCalledEvent();
-      this._canceledMonitor.resolve(true);
-      this.status = this._SwitcherStatusEnum.Canceled;
+      this._resolveCanceledMonitor(true);
       throw new VerseaCanceledError('Cancel switcher task.');
     }
   }
 
-  protected _ensureCalledEvent(): void {
-    console.log(1);
+  protected _resolveCanceledMonitor(cancel: boolean): void {
+    this._callEvent();
+    this._canceledMonitor.resolve(cancel);
+    if (cancel) {
+      this.status = this._SwitcherStatusEnum.Canceled;
+    }
+  }
+
+  protected _callEvent(): void {
+    if (this._navigationEvent) {
+      this._router.callCapturedEventListeners(this._navigationEvent);
+      this._navigationEvent = undefined;
+    }
   }
 
   protected _getAppsToLoad(): IApp[][] {
@@ -104,149 +147,12 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   /**
    * 获取需要 unmount 的应用
-   * @description 根据 currentMountedApps 和 appsToMount 计算差值，然后再倒序的结果
-   * ------
-   * 不能直接 unmount 所有当前已经 mounted 的 apps，这样每一次切换路由，cost 很高，我们应该保证最大可复用。也就是尽量减少 unmount 和 mount 的应用。
+   * @description 根据 currentMountedApps 和 appsToMount 计算差集的倒序
    *
-   * 定义如下差值计算规则（这里方便理解，不进行倒序）
-   * - 同行差值法，每个二维数组同一行的第一个元素比较，如果不同，则之后的行全部输出
-   *
-   * ```
-   * [
-   *   [A],
-   *   [B],
-   *   [C],
-   * ]
-   * // 差值
-   * [
-   *   [A],
-   *   [D],
-   *   [E],
-   * ]
-   * // 等于
-   * [
-   *   [B],
-   *   [C],
-   * ]
-   * ```
-   *
-   * - 比较同一行的非第一个元素，得出差集
-   *
-   * ```
-   * [
-   *   [A, B, C],
-   *   [D],
-   * ]
-   * // 差值
-   * [
-   *   [A, C, E],
-   *   [D],
-   * ]
-   * // 等于
-   * [
-   *   [B],
-   * ]
-   * ```
-   *
-   * - 输出结果去除第一列重复的元素
-   *
-   * ```
-   * [
-   *   [A],
-   *   [A],
-   *   [B],
-   * ]
-   * // 差值
-   * [
-   *   [A],
-   *   [C],
-   *   [D],
-   * ]
-   * // 等于 [[B]]，而不是 [[A], [B]]，因为 A 在上面已经判断相等，所以这里要把 A 去除
-   *
-   * [
-   *   [A],
-   *   [A],
-   *   [B],
-   *   [B],
-   *   [C],
-   *   [C]
-   * ]
-   * // 差值
-   * [
-   *   [A],
-   *   [A],
-   *   [A],
-   * ]
-   * // 等于 [[B], [C]]
-   * ```
+   * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
    */
   protected _getAppsToUnmount(): IApp[][] {
-    const appsToUnmount: IApp[][] = [];
-
-    if (!this.currentMountedApps.length) {
-      return appsToUnmount;
-    }
-
-    // 记录从某一行开始需要全部 unmount 的位置
-    let breakIndex = -1;
-
-    // 记录上一行第一列相同的 App
-    let lastApp: IApp | null = null;
-
-    for (let i = 0; i < this.currentMountedApps.length; i++) {
-      const mountedApps = this.currentMountedApps[i];
-      const toMountApps = this.appsToMount[i];
-      // 同行比较，发现某一行没有 toMountApps，则该行以及之后的行全部加入 unmount 数组
-      if (!toMountApps) {
-        breakIndex = i;
-        break;
-      }
-
-      const toUnmountApps: IApp[] = [];
-      mountedApps.forEach((app, index) => {
-        if (index >= 1 && !toMountApps.includes(app)) {
-          toUnmountApps.push(app);
-        }
-      });
-
-      let toBreak = false;
-      // 同行比较，只要发现某一行第一个 App 不一样，则下一行以及之后的行全部加入 unmount 数组
-      if (mountedApps[0] !== toMountApps[0]) {
-        if (!lastApp || lastApp !== mountedApps[0]) {
-          toUnmountApps.unshift(mountedApps[0]);
-        }
-        breakIndex = i + 1;
-        toBreak = true;
-      }
-
-      lastApp = mountedApps[0];
-      if (toUnmountApps.length) {
-        appsToUnmount.push(toUnmountApps);
-      }
-
-      if (toBreak) {
-        break;
-      }
-    }
-
-    // breakIndex 开始的行以及之后每一行全部加入 unmount 数组
-    if (breakIndex >= 0 && breakIndex < this.currentMountedApps.length) {
-      for (let i = breakIndex; i < this.currentMountedApps.length; i++) {
-        const mountedApps = this.currentMountedApps[i];
-        if (lastApp === mountedApps[0]) {
-          const unmountApps = mountedApps.slice(1);
-          if (unmountApps.length) {
-            appsToUnmount.push(unmountApps);
-          }
-        } else {
-          lastApp = mountedApps[0];
-          appsToUnmount.push(mountedApps.slice());
-        }
-      }
-    }
-
-    return appsToUnmount.reverse();
+    return minusMatrixWithBaseColumn(this.currentMountedApps, this.appsToMount).reverse();
   }
 
   protected _getAppsToMount(): IApp[][] {
@@ -257,68 +163,13 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   /**
    * 确保 appsToMount 是可以被正确 mount 的
-   * @description 仅仅允许第一列主路由应用可以连续重复，不允许间断重复，也不允许其他列有重复的 App
-   * ```
-   * [
-   *   [A, B],
-   *   [A],
-   *   [C],
-   *   [C, D],
-   * ] // 正确
-   *
-   * [
-   *   [A, B],
-   *   [A],
-   *   [C],
-   *   [A, D],
-   * ] // 不正确，不允许间断重复
-   *
-   * [
-   *   [A, B],
-   *   [A],
-   *   [C],
-   *   [C, A],
-   * ] // 不正确，不允许其他列有重复的 App
-   * ```
+   * @description 只有具有基准列的不重复二维应用数组才能被正确 mount
    */
   protected _ensureAppsToMount(appsList: IApp[][]): void {
-    if (appsList.length == 0) {
-      return;
-    }
-
-    const map: WeakMap<IApp, boolean> = new WeakMap();
-
-    function add(app: IApp): void {
-      if (map.has(app)) {
-        throw new VerseaError(`Matched Routes is invalid, please check routesTree.`);
-      }
-      map.set(app, true);
-    }
-
-    // 获取最大列数
-    const length = Math.max.apply(
-      null,
-      appsList.map((apps) => apps.length),
-    );
-
-    // 第一列的 App 可以连续重复
-    let lastApp = appsList[0][0];
-    appsList.forEach((apps) => {
-      const app = apps[0];
-      if (app !== lastApp) {
-        add(lastApp);
-        lastApp = app;
-      }
-    });
-    add(lastApp);
-
-    // 第二列开始不允许重复
-    for (let i = 1; i < length; i++) {
-      for (const apps of appsList) {
-        if (apps[i]) {
-          add(apps[i]);
-        }
-      }
+    try {
+      ensureDiffMatrixWithBaseColumn(appsList);
+    } catch {
+      throw new VerseaError(`Matched Routes is invalid, please check routesTree.`);
     }
   }
 }
