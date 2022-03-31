@@ -11,5 +11,10 @@ export interface IMatcher {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 匹配路由 */
-  match: (path: string, query: queryString.ParsedQuery, trees?: IRoute[], result?: MatchedRoute[]) => MatchedRoute[];
+  match: (path: string, query: queryString.ParsedQuery, trees?: IRoute[], result?: MatchedResult) => MatchedResult;
+}
+
+export interface MatchedResult {
+  routes: MatchedRoute[];
+  fragments: MatchedRoute[];
 }

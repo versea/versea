@@ -6,14 +6,24 @@ import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { IRoute, IRouteKey, MatchedRoute, RouteOptions } from '../route/service';
-import { IMatcher, IMatcherKey } from './interface';
+import { IRoute, IRouteKey, RouteOptions, MatchedRoute } from '../route/service';
+import { IMatcher, IMatcherKey, MatchedResult } from './interface';
 
 export * from './interface';
 
 @provide(IMatcherKey)
 export class Matcher implements IMatcher {
+  /**
+   * 路由树
+   * @description 数组的每一项都是树结构。
+   */
   protected readonly _trees: IRoute[] = [];
+
+  /**
+   * 顶层碎片路由数组
+   * @description 数组的每一项都是一个没有 children 的 Route。
+   */
+  protected readonly _rootFragmentArray: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
@@ -27,13 +37,24 @@ export class Matcher implements IMatcher {
     routes.forEach((routeOption) => {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
       const route = new this._RouteConstructor(routeOption, app);
-      this._trees.push(route);
+      if (routeOption.isRootFragment) {
+        this._rootFragmentArray.push(route);
+      } else {
+        this._trees.push(route);
+      }
     });
 
     this._mergeTrees();
   }
 
-  public match(
+  public match(path: string, query: queryString.ParsedQuery): MatchedResult {
+    return {
+      routes: this._matchTree(path, query),
+      fragments: this._matchFragment(path, query),
+    };
+  }
+
+  protected _matchTree(
     path: string,
     query: queryString.ParsedQuery,
     trees: IRoute[] = this._trees,
@@ -44,9 +65,22 @@ export class Matcher implements IMatcher {
       const isMatched = this._matchRoute(path, route, params);
       if (isMatched) {
         result.push(route.toMatchedRoute({ params, query }));
-        return this.match(path, query, route.children, result);
+        return this._matchTree(path, query, route.children, result);
       }
     }
+
+    return result;
+  }
+
+  protected _matchFragment(path: string, query: queryString.ParsedQuery): MatchedRoute[] {
+    const result: MatchedRoute[] = [];
+    this._rootFragmentArray.forEach((route) => {
+      const params: Record<string, string> = {};
+      const isMatched = this._matchRoute(path, route, params);
+      if (isMatched) {
+        result.push(route.toMatchedRoute({ params, query }));
+      }
+    });
     return result;
   }
 

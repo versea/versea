@@ -50,7 +50,7 @@ describe('Matcher', () => {
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app1);
       const app2 = getAppInstance('name2');
-      matcher.addRoutes([{ path: 'path1' }], app2);
+      matcher.addRoutes([{ path: 'path1', isFragment: true }], app2);
 
       expect((matcher as any)._trees).toMatchObject([
         {
@@ -74,9 +74,9 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2' }], app2);
       const app3 = getAppInstance('name3');
-      matcher.addRoutes([{ path: 'path2' }], app3);
+      matcher.addRoutes([{ path: 'path2', isFragment: true }], app3);
       const app4 = getAppInstance('name4');
-      matcher.addRoutes([{ path: 'path1' }], app4);
+      matcher.addRoutes([{ path: 'path1', isFragment: true }], app4);
       const app5 = getAppInstance('name5');
       matcher.addRoutes([{ path: 'path3' }], app5);
 
@@ -290,7 +290,7 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
       const app3 = getAppInstance('name3');
-      matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app3);
+      matcher.addRoutes([{ path: 'path2', fill: 'foo', isFragment: true }], app3);
 
       expect((matcher as any)._trees).toMatchObject([
         {
@@ -322,14 +322,14 @@ describe('Matcher', () => {
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
       const app2 = getAppInstance('name2');
-      matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
+      matcher.addRoutes([{ path: 'path2', fill: 'foo', isFragment: true }], app2);
       const app3 = getAppInstance('name3');
       matcher.addRoutes([{ path: 'path2', fill: 'foo', children: [{ path: 'path3' }] }], app3);
 
       expect((matcher as any)._trees[0].children[0].children[0].parent).toBe((matcher as any)._trees[0].children[0]);
     });
 
-    test('同上，合并路由时，都具有 children 的 路由合并应该 throw error。', () => {
+    test('同上，合并路由时，都不是 Fragment 的路由合并应该 throw error。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -339,19 +339,6 @@ describe('Matcher', () => {
 
       expect(() => {
         matcher.addRoutes([{ path: 'path2', fill: 'foo', children: [{ path: 'path4' }] }], app3);
-      }).toThrowError('Can not Merge route(same path)');
-    });
-
-    test('同上，合并路由时，任何一个 child 具有 slot 都应该 throw error。', () => {
-      const matcher = getMatcher();
-      const app1 = getAppInstance('name1');
-      matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
-      const app2 = getAppInstance('name2');
-      matcher.addRoutes([{ path: 'path2', fill: 'foo', children: [{ path: 'path3' }] }], app2);
-      const app3 = getAppInstance('name3');
-
-      expect(() => {
-        matcher.addRoutes([{ path: 'path2', fill: 'foo', slot: 'other' }], app3);
       }).toThrowError('Can not Merge route(same path)');
     });
 
@@ -381,7 +368,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
 
-      expect(matcher.match('/path1', {})).toMatchObject([
+      expect(matcher.match('/path1', {}).routes).toMatchObject([
         {
           path: '/path1',
           apps: [
@@ -399,8 +386,8 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
 
-      const matchedRoutes = matcher.match('/path1', {});
-      expect(matchedRoutes[0].getRoute()).toMatchObject({
+      const matchedResult = matcher.match('/path1', {});
+      expect(matchedResult.routes[0].getRoute()).toMatchObject({
         path: '/path1',
         apps: [
           {
@@ -416,7 +403,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
 
-      expect(matcher.match('/path2', {})).toEqual([]);
+      expect(matcher.match('/path2', {}).routes).toEqual([]);
     });
 
     test('带有参数的路径且路径相同，应当匹配成功且返回正确的参数', () => {
@@ -424,7 +411,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/:id' }], app);
 
-      expect(matcher.match('/path1/1/path2', {})).toMatchObject([
+      expect(matcher.match('/path1/1/path2', {}).routes).toMatchObject([
         {
           path: '/path1/:id',
           apps: [
@@ -445,7 +432,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/:id/:type' }], app);
 
-      expect(matcher.match('/path1/1/type1', {})).toMatchObject([
+      expect(matcher.match('/path1/1/type1', {}).routes).toMatchObject([
         {
           path: '/path1/:id/:type',
           apps: [
@@ -467,7 +454,7 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/(.*)' }], app);
 
-      expect(matcher.match('/path1/1/2', {})).toMatchObject([
+      expect(matcher.match('/path1/1/2', {}).routes).toMatchObject([
         {
           path: '/path1/(.*)',
           apps: [
@@ -491,7 +478,7 @@ describe('Matcher', () => {
         app,
       );
 
-      expect(matcher.match('/path1/1/type/path4', {})).toMatchObject([
+      expect(matcher.match('/path1/1/type/path4', {}).routes).toMatchObject([
         {
           path: '/path1',
           fullPath: '/path1',
