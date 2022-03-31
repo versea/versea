@@ -13,12 +13,15 @@ export interface IRoute {
   /** 匹配的路径 */
   path: string;
 
-  /** 是否是一个主路由，仅仅在没有 children 和 slot 时生效 */
-  isMainRoute: boolean;
+  /**
+   * 声明一个路由是否是一个碎片路由
+   * @description 碎片路由和主路由不同，仅仅作用于某块区域的展示，不能嵌套路由，类似 Component。
+   */
+  isFragment: boolean;
 
   /**
    * 配置的路由对应的应用
-   * @description 数组第一个是主路由应用，其他是碎片应用（仅仅控制某一区域的展示内容，不能继续嵌套路由）
+   * @description 数组第一个是主路由应用，其他是碎片应用（仅仅控制某一区域的展示内容，不能继续嵌套路由）。
    */
   apps: IApp[];
 
@@ -62,8 +65,11 @@ export interface RouteOptions {
   /** route 额外参数 */
   meta?: Record<string, unknown>;
 
-  /** 是否是一个主路由，仅仅在没有 children 和 slot 时生效 */
-  isMainRoute?: boolean;
+  /** 声明一个路由是否是一个顶层碎片路由 */
+  isRootFragment?: boolean;
+
+  /** 声明一个路由是否是一个碎片路由 */
+  isFragment?: boolean;
 
   children?: RouteOptions[];
 
@@ -85,7 +91,7 @@ export interface ToMatchedRouteOptions {
 export type MatchedRoute = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
   object.ExcludeValues<IRoute, Function>,
-  'children' | 'fill' | 'isMainRoute' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
+  'children' | 'fill' | 'isFragment' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
     getRoute: () => IRoute;

@@ -4,8 +4,8 @@ import {
   VerseaCanceledError,
   createPromiseMonitor,
   memoizePromise,
-  minusMatrixWithBaseColumn,
-  ensureDiffMatrixWithBaseColumn,
+  minusMatrix,
+  ensureDiffMatrix,
 } from '@versea/shared';
 import { flatten } from 'ramda';
 
@@ -152,7 +152,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
    */
   protected _getAppsToUnmount(): IApp[][] {
-    return minusMatrixWithBaseColumn(this.currentMountedApps, this.appsToMount).reverse();
+    return minusMatrix(this.currentMountedApps, this.appsToMount).reverse();
   }
 
   protected _getAppsToMount(): IApp[][] {
@@ -167,7 +167,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
    */
   protected _ensureAppsToMount(appsList: IApp[][]): void {
     try {
-      ensureDiffMatrixWithBaseColumn(appsList);
+      ensureDiffMatrix(appsList);
     } catch {
       throw new VerseaError(`Matched Routes is invalid, please check routesTree.`);
     }

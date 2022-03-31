@@ -12,7 +12,7 @@ export * from './interface';
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 
-  public isMainRoute: boolean;
+  public isFragment: boolean;
 
   /** 配置的路由对应的应用 */
   public apps: IApp[];
@@ -34,11 +34,15 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
     super(options);
+
+    // 检查输入参数
+    this._validRouteOptions(options);
+
     this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
-    this.isMainRoute = options.isMainRoute ?? false;
     this.apps = [app];
-    this.meta = options.meta ?? {};
     this.parent = parent;
+    this.isFragment = options.isFragment ?? false;
+    this.meta = options.meta ?? {};
     this.slot = options.slot;
     this.fill = options.fill;
     this.pathToRegexpOptions = options.pathToRegexpOptions ?? {};
@@ -66,11 +70,18 @@ export class Route extends ExtensibleEntity implements IRoute {
   public merge(route: IRoute): void {
     if (this.path !== route.path) return;
 
+    if (!route.isFragment) {
+      if (!this.isFragment) {
+        throw new VerseaError('Can not Merge route(same path) without fragment.');
+      }
+
+      route.merge(this);
+      return;
+    }
+
     if (process.env.NODE_ENV !== 'production') {
       console.warn(`Merge route with same path  "${route.path}".`);
     }
-
-    this._ensureRouteWithSamePath(route);
 
     // 合并扩展属性
     Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
@@ -80,22 +91,16 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    // 主路由应用放在前面
-    if (route.slot || route.children.length > 0 || route.isMainRoute) {
-      this.apps = [...route.apps, ...this.apps];
-    } else {
-      this.apps = [...this.apps, ...route.apps];
-    }
-    this.isMainRoute = this.isMainRoute || route.isMainRoute;
-    this.meta = { ...this.meta, ...route.meta };
-    this.slot = this.slot ?? route.slot;
-    this.pathToRegexpOptions = { ...this.pathToRegexpOptions, ...route.pathToRegexpOptions };
+    console.log(this);
 
-    if (this.children.length === 0) {
-      this.children = route.children;
-      this.children.forEach((child) => {
-        child.parent = this;
-      });
+    // 主路由应用放在 Fragment 应用之前
+    this.apps = [...this.apps, ...route.apps];
+    this.isFragment = this.isFragment && route.isFragment;
+
+    if (!this.parent && route.parent) {
+      this.parent = route.parent;
+      const index = this.parent.children.findIndex((child) => child === route);
+      this.parent.children.splice(index, 1, this);
     }
   }
 
@@ -147,17 +152,21 @@ export class Route extends ExtensibleEntity implements IRoute {
     };
   }
 
-  protected _ensureRouteWithSamePath(route: IRoute): void {
-    if (this.children.length > 0 && route.children.length > 0) {
-      throw new VerseaError('Can not Merge route(same path) with children.');
+  protected _validRouteOptions(options: RouteOptions): void {
+    if (options.isFragment) {
+      ['meta', 'slot', 'pathToRegexpOptions', 'children'].forEach((key) => {
+        if (options[key as keyof RouteOptions]) {
+          throw new VerseaError(`FragmentRoute "${key}" option is not support.`);
+        }
+      });
     }
 
-    if (
-      (this.slot && route.slot) ||
-      (this.children.length > 0 && route.slot) ||
-      (this.slot && route.children.length > 0)
-    ) {
-      throw new VerseaError('Can not Merge route(same path) with slot.');
+    if (options.isFragment) {
+      ['slot', 'children'].forEach((key) => {
+        if (options[key as keyof RouteOptions]) {
+          throw new VerseaError(`RootFragmentRoute "${key}" option is not support.`);
+        }
+      });
     }
   }
 

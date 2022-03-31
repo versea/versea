@@ -1,6 +1,7 @@
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
-import { MatchedRoute, RouteOptions } from '../route/service';
+import { MatchedResult } from '../matcher/service';
+import { RouteOptions } from '../route/service';
 
 export const IRouterControllerKey = createServiceSymbol('IRouterController');
 
@@ -12,7 +13,7 @@ export interface IRouterController {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 使用当前路径匹配路由 */
-  match: (location?: Location) => MatchedRoute[];
+  match: (location?: Location) => MatchedResult;
 
   /** 增加路由拦截 */
   reroute: (navigationEvent?: Event) => Promise<void>;

@@ -1,5 +1,5 @@
 export * from './error';
 export * from './extensible-entity';
-export * from './matrix';
+export * from './linked-list';
 export * from './memo';
 export * from './promise-helper';
