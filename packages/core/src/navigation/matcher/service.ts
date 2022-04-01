@@ -7,7 +7,7 @@ import queryString from 'query-string';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, RouteOptions, MatchedRoute } from '../route/service';
-import { IMatcher, IMatcherKey, MatchedResult } from './interface';
+import { IMatcher, IMatcherKey, Matched } from './interface';
 
 export * from './interface';
 
@@ -47,7 +47,7 @@ export class Matcher implements IMatcher {
     this._mergeTrees();
   }
 
-  public match(path: string, query: queryString.ParsedQuery): MatchedResult {
+  public match(path: string, query: queryString.ParsedQuery): Matched {
     return {
       routes: this._matchTree(path, query),
       fragments: this._matchFragment(path, query),

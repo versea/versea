@@ -1,11 +1,11 @@
 import { IApp } from '../../application/app/service';
-import { MatchedResult } from '../../navigation/matcher/service';
+import { Matched } from '../../navigation/matcher/service';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 
 export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
 
-export interface SwitcherOptions extends MatchedResult {
+export interface SwitcherOptions extends Matched {
   navigationEvent?: Event;
 }
 

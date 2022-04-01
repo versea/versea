@@ -386,8 +386,8 @@ describe('Matcher', () => {
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
 
-      const matchedResult = matcher.match('/path1', {});
-      expect(matchedResult.routes[0].getRoute()).toMatchObject({
+      const matched = matcher.match('/path1', {});
+      expect(matched.routes[0].getRoute()).toMatchObject({
         path: '/path1',
         apps: [
           {

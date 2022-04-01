@@ -91,8 +91,6 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    console.log(this);
-
     // 主路由应用放在 Fragment 应用之前
     this.apps = [...this.apps, ...route.apps];
     this.isFragment = this.isFragment && route.isFragment;
@@ -135,6 +133,10 @@ export class Route extends ExtensibleEntity implements IRoute {
   }
 
   public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
+    if (this.isFragment) {
+      throw new VerseaError('Can not Match route with only fragment routes.');
+    }
+
     const extensibleObject: Record<string, unknown> = {};
     Object.keys(this._extensiblePropDescriptions).forEach((key) => {
       extensibleObject[key] = this[key];

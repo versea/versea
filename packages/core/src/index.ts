@@ -10,3 +10,4 @@ export * from './navigation/route/service';
 export * from './navigation/router/service';
 export * from './navigation/router-controller/service';
 export * from './provider';
+export { createServiceSymbol } from './utils';

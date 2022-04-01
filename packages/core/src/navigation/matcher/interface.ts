@@ -2,7 +2,7 @@ import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
-import { IRoute, MatchedRoute, RouteOptions } from '../route/service';
+import { MatchedRoute, RouteOptions } from '../route/service';
 
 export const IMatcherKey = createServiceSymbol('IMatcher');
 
@@ -11,10 +11,13 @@ export interface IMatcher {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 匹配路由 */
-  match: (path: string, query: queryString.ParsedQuery, trees?: IRoute[], result?: MatchedResult) => MatchedResult;
+  match: (path: string, query: queryString.ParsedQuery) => Matched;
 }
 
-export interface MatchedResult {
+export interface Matched {
+  /** 匹配的路由信息 */
   routes: MatchedRoute[];
+
+  /** 匹配的顶层碎片路由信息 */
   fragments: MatchedRoute[];
 }

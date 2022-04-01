@@ -48,7 +48,7 @@ export class AppSwitcher implements IAppSwitcher {
     // 上面的序列的正确执行顺序是 context0 run -> context0 cancel -> context1 cancel -> context0 cancel 完成 -> context1 run -> context1 cancel 完成 -> context2 run
     // 只有这样调用才类似一个 switch 链，不会跳过某个 context 不执行 cancel 或 run。
     const context = this.context;
-    const nextContext = this._createContext(options);
+    const nextContext = this._createSwitcherContext(options);
     this.context = nextContext;
 
     if (context) {
@@ -61,7 +61,7 @@ export class AppSwitcher implements IAppSwitcher {
     return nextContext?.run();
   }
 
-  protected _createContext(options: SwitcherOptions): IAppSwitcherContext {
+  protected _createSwitcherContext(options: SwitcherOptions): IAppSwitcherContext {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._AppSwitcherContext(options, {
       SwitcherStatusEnum: this._SwitcherStatusEnum,
