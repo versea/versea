@@ -32,10 +32,8 @@ export class Router implements IRouter {
   }
 
   public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
-    const matched = this.match();
-
     return appSwitcher.switch({
-      ...matched,
+      matched: this.match(),
       navigationEvent,
     });
   }

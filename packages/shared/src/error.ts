@@ -9,12 +9,7 @@ export class BaseError extends Error {
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, new.target);
     }
-    if (typeof Object.setPrototypeOf === 'function') {
-      Object.setPrototypeOf(this, new.target.prototype);
-    } else {
-      // @ts-expect-error 设置原型
-      this.__proto__ = new.target.prototype;
-    }
+    Object.setPrototypeOf(this, new.target.prototype);
   }
 }
 

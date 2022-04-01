@@ -3,6 +3,7 @@ export * from './app-switcher/app-switcher-context/service';
 export * from './application/app/service';
 export * from './application/app-controller/service';
 export * from './application/app-service/service';
+export * from './constants/action';
 export * from './constants/container-module';
 export * from './constants/status';
 export * from './navigation/matcher/service';

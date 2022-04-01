@@ -3,7 +3,7 @@ import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
-import { IStatusEnum, IStatusEnumKey } from '../../constants/status';
+import { IStatus, IStatusKey } from '../../constants/status';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppOptions } from '../app/service';
@@ -17,11 +17,11 @@ export class AppService implements IAppService {
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
-  protected readonly _StatusEnum: IStatusEnum;
+  protected readonly _Status: IStatus;
 
-  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IStatusEnumKey) StatusEnum: IStatusEnum) {
+  constructor(@inject(IAppKey) App: interfaces.Newable<IApp>, @inject(IStatusKey) Status: IStatus) {
     this._AppConstructor = App;
-    this._StatusEnum = StatusEnum;
+    this._Status = Status;
   }
 
   public registerApp(options: AppOptions, router: IRouter, appSwitcher?: IAppSwitcher): IApp {
@@ -30,7 +30,7 @@ export class AppService implements IAppService {
     }
 
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    const app = new this._AppConstructor(options, { StatusEnum: this._StatusEnum });
+    const app = new this._AppConstructor(options, { Status: this._Status });
     this.appMap.set(app.name, app);
 
     // 创建 routes

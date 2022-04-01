@@ -1,5 +1,5 @@
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { IStatusEnum } from '../../constants/status';
+import { IStatus } from '../../constants/status';
 import { RouteOptions } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 
@@ -26,7 +26,7 @@ export interface IApp {
   readonly name: string;
 
   /** 当前应用的状态 */
-  status: IStatusEnum[keyof IStatusEnum];
+  status: IStatus[keyof IStatus];
 
   /** 应用是否已经加载 */
   isLoaded: boolean;
@@ -77,5 +77,5 @@ export interface AppOptions {
 
 export interface AppDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  StatusEnum: IStatusEnum;
+  Status: IStatus;
 }
