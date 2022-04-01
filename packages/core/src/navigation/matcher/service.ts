@@ -23,7 +23,7 @@ export class Matcher implements IMatcher {
    * 顶层碎片路由数组
    * @description 数组的每一项都是一个没有 children 的 Route。
    */
-  protected readonly _rootFragmentArray: IRoute[] = [];
+  protected readonly _rootFragments: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
@@ -38,7 +38,7 @@ export class Matcher implements IMatcher {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
       const route = new this._RouteConstructor(routeOption, app);
       if (routeOption.isRootFragment) {
-        this._rootFragmentArray.push(route);
+        this._rootFragments.push(route);
       } else {
         this._trees.push(route);
       }
@@ -74,7 +74,7 @@ export class Matcher implements IMatcher {
 
   protected _matchFragment(path: string, query: queryString.ParsedQuery): MatchedRoute[] {
     const result: MatchedRoute[] = [];
-    this._rootFragmentArray.forEach((route) => {
+    this._rootFragments.forEach((route) => {
       const params: Record<string, string> = {};
       const isMatched = this._matchRoute(path, route, params);
       if (isMatched) {

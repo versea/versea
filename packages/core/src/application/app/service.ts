@@ -1,7 +1,7 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { IStatusEnum } from '../../constants/status';
+import { IStatus } from '../../constants/status';
 import { provide } from '../../provider';
 import {
   IApp,
@@ -20,7 +20,7 @@ export * from './interface';
 export class App extends ExtensibleEntity implements IApp {
   public readonly name: string;
 
-  public status: IStatusEnum[keyof IStatusEnum];
+  public status: IStatus[keyof IStatus];
 
   public isLoaded = false;
 
@@ -31,7 +31,7 @@ export class App extends ExtensibleEntity implements IApp {
   protected readonly _props: AppOptionsProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  protected readonly _StatusEnum: IStatusEnum;
+  protected readonly _Status: IStatus;
 
   protected _hooks: AppHooks = {};
 
@@ -46,84 +46,84 @@ export class App extends ExtensibleEntity implements IApp {
   constructor(options: AppOptions, dependencies: AppDependencies) {
     super(options);
     // 绑定依赖
-    this._StatusEnum = dependencies.StatusEnum;
+    this._Status = dependencies.Status;
 
     this.name = options.name;
     this._props = options.props ?? {};
     this._loadApp = options.loadApp;
-    this.status = this._StatusEnum.NotLoaded;
+    this.status = this._Status.NotLoaded;
   }
 
   @memoizePromise()
   public async load(context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._StatusEnum.NotLoaded && this.status !== this._StatusEnum.LoadError) {
+    if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
       throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
     }
 
     if (!this._loadApp) {
-      this.status = this._StatusEnum.Broken;
+      this.status = this._Status.Broken;
       throw new VerseaError(`Can not find loadApp prop on app "${this.name}".`);
     }
 
-    this.status = this._StatusEnum.LoadingSourceCode;
+    this.status = this._Status.LoadingSourceCode;
     try {
       const hooks = await this._loadApp(this.getProps(context));
-      this.status = this._StatusEnum.NotBootstrapped;
+      this.status = this._Status.NotBootstrapped;
       this.isLoaded = true;
       this._setHooks(hooks);
     } catch (error) {
-      this.status = this._StatusEnum.LoadError;
+      this.status = this._Status.LoadError;
       throw error;
     }
   }
 
   @memoizePromise()
   public async bootstrap(context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._StatusEnum.NotBootstrapped) {
+    if (this.status !== this._Status.NotBootstrapped) {
       throw new VerseaError(`Can not bootstrap app "${this.name}" with status "${this.status}".`);
     }
 
     if (!this._hooks.bootstrap) {
-      this.status = this._StatusEnum.NotMounted;
+      this.status = this._Status.NotMounted;
       return;
     }
 
-    this.status = this._StatusEnum.Bootstrapping;
+    this.status = this._Status.Bootstrapping;
     try {
       await this._hooks.bootstrap(this.getProps(context));
-      this.status = this._StatusEnum.NotMounted;
+      this.status = this._Status.NotMounted;
       this.isBootstrapped = true;
     } catch (error) {
-      this.status = this._StatusEnum.Broken;
+      this.status = this._Status.Broken;
       throw error;
     }
   }
 
   @memoizePromise()
   public async mount(context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._StatusEnum.NotMounted) {
+    if (this.status !== this._Status.NotMounted) {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
     }
 
     if (!this._hooks.mount) {
-      this.status = this._StatusEnum.Mounted;
+      this.status = this._Status.Mounted;
       return;
     }
 
-    this.status = this._StatusEnum.Mounting;
+    this.status = this._Status.Mounting;
     try {
       const result = await this._hooks.mount(this.getProps(context));
       this._waitForChildrenContainerHooks = result ?? {};
-      this.status = this._StatusEnum.Mounted;
+      this.status = this._Status.Mounted;
     } catch (error) {
-      this.status = this._StatusEnum.Broken;
+      this.status = this._Status.Broken;
       throw error;
     }
   }
 
   @memoizePromise()
   public async waitForChildContainer(name: string, context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._StatusEnum.Mounted) {
+    if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not wait for app "${this.name}" with status "${this.status}".`);
     }
 
@@ -141,21 +141,21 @@ export class App extends ExtensibleEntity implements IApp {
   // TODO: unmount parcel if needed.
   @memoizePromise()
   public async unmount(context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._StatusEnum.Mounted) {
+    if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
     }
 
     if (!this._hooks.unmount) {
-      this.status = this._StatusEnum.NotMounted;
+      this.status = this._Status.NotMounted;
       return;
     }
 
-    this.status = this._StatusEnum.Unmounting;
+    this.status = this._Status.Unmounting;
     try {
       await this._hooks.unmount(this.getProps(context));
-      this.status = this._StatusEnum.NotMounted;
+      this.status = this._Status.NotMounted;
     } catch (error) {
-      this.status = this._StatusEnum.Broken;
+      this.status = this._Status.Broken;
       throw error;
     }
   }

@@ -1,10 +1,12 @@
 import { inject, interfaces } from 'inversify';
 
-import { IApp } from '../../application/app/service';
-import { ISwitcherStatusEnum, ISwitcherStatusEnumKey } from '../../constants/status';
+import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
+import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
+import { Matched } from '../../navigation/matcher/interface';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
-import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/service';
+import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
+import { IRendererKey, IRenderer } from '../renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
@@ -15,26 +17,38 @@ export class AppSwitcher implements IAppSwitcher {
 
   public currentContext: IAppSwitcherContext | null = null;
 
+  public readonly renderer: IRenderer;
+
   protected readonly _AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>;
 
-  protected readonly _SwitcherStatusEnum: ISwitcherStatusEnum;
+  protected readonly _Renderer: interfaces.Newable<IRenderer>;
+
+  protected readonly _SwitcherStatus: ISwitcherStatus;
+
+  protected readonly _ActionType: IActionType;
+
+  protected readonly _ActionTargetType: IActionTargetType;
 
   protected readonly _router: IRouter;
 
   constructor(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    /* eslint-disable @typescript-eslint/naming-convention */
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(ISwitcherStatusEnumKey) SwitcherStatusEnum: ISwitcherStatusEnum,
+    @inject(IRendererKey) Renderer: interfaces.Newable<IRenderer>,
+    @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
+    @inject(IActionTypeKey) ActionType: IActionType,
+    @inject(IActionTargetTypeKey) ActionTargetType: IActionTargetType,
+    /* eslint-enable @typescript-eslint/naming-convention */
     @inject(IRouterKey) router: IRouter,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
-    this._SwitcherStatusEnum = SwitcherStatusEnum;
+    this._Renderer = Renderer;
+    this._SwitcherStatus = SwitcherStatus;
+    this._ActionType = ActionType;
+    this._ActionTargetType = ActionTargetType;
     this._router = router;
-  }
 
-  public get currentMountedApps(): IApp[][] {
-    return this.currentContext ? this.currentContext.currentMountedApps : [];
+    this.renderer = this._createRenderer();
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -54,18 +68,32 @@ export class AppSwitcher implements IAppSwitcher {
     if (context) {
       await context.cancel();
     }
-    // 无论当前是否有 context，都需要同步当前已经渲染的应用给将要运行的 nextContext
-    nextContext.syncMountedApps(context ? context.currentMountedApps : []);
 
     this.currentContext = nextContext;
-    return nextContext?.run();
+    return nextContext?.run({
+      renderer: this.renderer,
+    });
   }
 
   protected _createSwitcherContext(options: SwitcherOptions): IAppSwitcherContext {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._AppSwitcherContext(options, {
-      SwitcherStatusEnum: this._SwitcherStatusEnum,
+      SwitcherStatus: this._SwitcherStatus,
+      ActionType: this._ActionType,
+      ActionTargetType: this._ActionTargetType,
       router: this._router,
+    });
+  }
+
+  protected _createRenderer(): IRenderer {
+    const defaultMatched: Matched = {
+      routes: [],
+      fragments: [],
+    };
+    // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
+    return new this._Renderer(defaultMatched, {
+      ActionType: this._ActionType,
+      ActionTargetType: this._ActionTargetType,
     });
   }
 }

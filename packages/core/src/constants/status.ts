@@ -1,8 +1,8 @@
 import { provideValue } from '../provider';
 import { createServiceSymbol } from '../utils';
 
-export const IStatusEnumKey = createServiceSymbol('IStatusEnum');
-export const StatusEnum = {
+export const IStatusKey = createServiceSymbol('IStatus');
+export const Status = {
   NotLoaded: 'NotLoaded',
   LoadingSourceCode: 'LoadingSourceCode',
   NotBootstrapped: 'NotBootstrapped',
@@ -15,16 +15,16 @@ export const StatusEnum = {
   LoadError: 'LoadError',
   Broken: 'Broken',
 } as const;
-provideValue(StatusEnum, IStatusEnumKey);
+provideValue(Status, IStatusKey);
 
-type IStatusEnumTyped = typeof StatusEnum;
-// 将 IStatusEnum 转换成 interface 导出，方便外部合并类型
+type IStatusTyped = typeof Status;
+// 将 IStatus 转换成 interface 导出，方便外部合并类型
 /** App 应用状态 */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IStatusEnum extends IStatusEnumTyped {}
+export interface IStatus extends IStatusTyped {}
 
-export const ISwitcherStatusEnumKey = createServiceSymbol('ISwitcherStatusEnum');
-export const SwitcherStatusEnum = {
+export const ISwitcherStatusKey = createServiceSymbol('ISwitcherStatus');
+export const SwitcherStatus = {
   NotStart: 'NotStart',
   LoadingApps: 'LoadingApps',
   NotUnmounted: 'NotUnmounted',
@@ -36,10 +36,10 @@ export const SwitcherStatusEnum = {
   Canceled: 'Canceled',
   Broken: 'Broken',
 } as const;
-provideValue(SwitcherStatusEnum, ISwitcherStatusEnumKey);
+provideValue(SwitcherStatus, ISwitcherStatusKey);
 
-type ISwitcherStatusEnumTyped = typeof SwitcherStatusEnum;
-// 将 IStatusEnum 转换成 interface 导出，方便外部合并类型
+type ISwitcherStatusTyped = typeof SwitcherStatus;
+// 将 ISwitcherStatus 转换成 interface 导出，方便外部合并类型
 /** SwitcherContext 运行状态 */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ISwitcherStatusEnum extends ISwitcherStatusEnumTyped {}
+export interface ISwitcherStatus extends ISwitcherStatusTyped {}

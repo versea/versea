@@ -1,4 +1,4 @@
-import { IAppSwitcher } from '../../app-switcher/app-switcher/interface';
+import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
 import { Matched } from '../matcher/service';
