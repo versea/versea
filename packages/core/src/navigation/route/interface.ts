@@ -88,7 +88,7 @@ export interface ToMatchedRouteOptions {
   query: queryString.ParsedQuery;
 }
 
-export type MatchedRoute = Omit<
+type MatchedRouteTyped = Omit<
   // eslint-disable-next-line @typescript-eslint/ban-types
   object.ExcludeValues<IRoute, Function>,
   'children' | 'fill' | 'isFragment' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
@@ -96,3 +96,6 @@ export type MatchedRoute = Omit<
   ToMatchedRouteOptions & {
     getRoute: () => IRoute;
   };
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MatchedRoute extends MatchedRouteTyped {}
