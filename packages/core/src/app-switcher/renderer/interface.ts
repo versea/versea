@@ -7,14 +7,43 @@ export const IRendererKey = createServiceSymbol('IRenderer');
 
 export interface IRenderer {
   /** 当前正在运行的路由和应用 */
-  routes: MatchedRoute[];
+  currentRoutes: MatchedRoute[];
 
   /** 当前正在运行的顶层碎片路由和碎片应用 */
-  rootFragments: MatchedRoute[];
+  currentRootFragmentRoutes: MatchedRoute[];
 
   /**
    * 计算和执行渲染逻辑
    * @description 根据 matched 计算出 unmount 和 mount 的应用和顺序
+   * ------
+   * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
+   *
+   * 举例说明，当前路由如下（当前）：
+   * ```
+   * [
+   *   { path: 'path1', apps: [A, B] },
+   *   { path: 'path2', apps: [A, I, J, L] },
+   *   { path: 'path3', apps: [C] },
+   *   { path: 'path4', apps: [C, D] },
+   * ]
+   * ```
+   *
+   * 这次匹配的结果如下（目标）：
+   * ```
+   * [
+   *   { path: 'path1', apps: [A, B] },
+   *   { path: 'path2', apps: [A, J, K] },
+   *   { path: 'path5', apps: [A] },
+   *   { path: 'path6', apps: [A, F, G] },
+   *   { path: 'path7', apps: [A] },
+   *   { path: 'path8', apps: [H] },
+   *   { path: 'path9', apps: [H, M] },
+   * ]
+   * ```
+   *
+   * 第三行 path3 和 path5 不匹配，
+   * 1. unmount 阶段：销毁 path3 和之下所有 route。对应应用的销毁顺序是 D -> C ->[I, L]并行
+   * 2. mount 阶段：优先渲染主路由，对应应用的 mount 顺序是 H -> K -> [F, G]并行 -> L
    */
   render: (matchedRoutes: MatchedRoutes, onAction: RendererActionHandler) => Promise<void>;
 }

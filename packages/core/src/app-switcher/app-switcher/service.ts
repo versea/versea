@@ -5,6 +5,7 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
+import { ILoaderKey, ILoader } from '../loader/service';
 import { IRendererKey, IRenderer } from '../renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
@@ -18,8 +19,6 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>;
 
-  protected readonly _renderer: IRenderer;
-
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
   protected readonly _ActionType: IActionType;
@@ -27,6 +26,10 @@ export class AppSwitcher implements IAppSwitcher {
   protected readonly _ActionTargetType: IActionTargetType;
 
   protected readonly _router: IRouter;
+
+  protected readonly _loader: ILoader;
+
+  protected readonly _renderer: IRenderer;
 
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -37,14 +40,17 @@ export class AppSwitcher implements IAppSwitcher {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     @inject(IRouterKey) router: IRouter,
+    @inject(ILoaderKey) loader: ILoader,
     @inject(IRendererKey) renderer: IRenderer,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
-    this._renderer = renderer;
     this._SwitcherStatus = SwitcherStatus;
     this._ActionType = ActionType;
     this._ActionTargetType = ActionTargetType;
+
     this._router = router;
+    this._loader = loader;
+    this._renderer = renderer;
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -67,6 +73,7 @@ export class AppSwitcher implements IAppSwitcher {
 
     this.currentContext = nextContext;
     return nextContext?.run({
+      loader: this._loader,
       renderer: this._renderer,
     });
   }
