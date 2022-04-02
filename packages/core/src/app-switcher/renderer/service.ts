@@ -1,5 +1,5 @@
 import { inject } from 'inversify';
-import { difference } from 'ramda';
+import { differenceWith } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
@@ -9,35 +9,14 @@ import { provide } from '../../provider';
 import { RendererActionHandler } from './action';
 import { IRenderer, IRendererKey } from './interface';
 
+export * from './action';
 export * from './interface';
-
-// 当前：
-// [
-//   [A, B]
-//   [A, J]
-//   [A]
-//   [A]
-//   [A]
-//   [H]
-//   [H]
-// ]
-
-// 变成：
-// [
-//   [A, B]
-//   [A, J, L]
-//   [A]
-//   [A, F]
-//   [A, G]
-//   [H]
-//   [H, K]
-// ]
 
 @provide(IRendererKey)
 export class Renderer implements IRenderer {
-  public readonly routes: MatchedRoute[];
+  public readonly currentRoutes: MatchedRoute[];
 
-  public readonly rootFragments: MatchedRoute[];
+  public readonly currentRootFragmentRoutes: MatchedRoute[];
 
   protected readonly _ActionType: IActionType;
 
@@ -52,14 +31,10 @@ export class Renderer implements IRenderer {
     this._ActionType = ActionType;
     this._ActionTargetType = ActionTargetType;
 
-    this.routes = [];
-    this.rootFragments = [];
+    this.currentRoutes = [];
+    this.currentRootFragmentRoutes = [];
   }
 
-  /**
-   * 渲染应用
-   * @description 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
-   */
   public async render(matched: MatchedRoutes, onAction: RendererActionHandler): Promise<void> {
     await this._unmount(matched, onAction);
   }
@@ -80,7 +55,7 @@ export class Renderer implements IRenderer {
       targetType: this._ActionTargetType.Null,
     });
 
-    await this._unmountFragments(targetFragments, onAction);
+    await this._unmountRootFragmentApps(targetFragments, onAction);
 
     await onAction({
       type: this._ActionType.Mounted,
@@ -89,69 +64,83 @@ export class Renderer implements IRenderer {
   }
 
   protected async _unmountApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
-    const routes = this.routes;
+    const currentRoutes = this.currentRoutes;
     const mismatchIndex = this._getMismatchIndex(targetRoutes);
 
     // unmount 匹配的路由的应用
-    for (let i = routes.length - 1; i >= 0; i--) {
-      const route = routes[i];
+    for (let i = currentRoutes.length - 1; i >= 0; i--) {
+      const currentRoute = currentRoutes[i];
       const targetRoute = targetRoutes[i];
-      const [mainApp, ...fragmentApps] = route.apps;
+      const [mainApp, ...fragmentApps] = currentRoute.apps;
 
       if (i < mismatchIndex) {
         // 在 mismatchIndex 位置之前的 MatchedRoute 中的 apps，只删除碎片应用中多余的部分
-        const apps = difference(fragmentApps, targetRoute.apps.slice(1));
-        await onAction({
-          type: this._ActionType.Unmount,
-          targetType: this._ActionTargetType.Fragment,
-          apps,
-          route,
-          targetRoute,
-        });
-        route.apps = [mainApp, ...fragmentApps.filter((app) => !apps.includes(app))];
+        const differentApps = differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1));
+        if (differentApps.length > 0) {
+          await onAction({
+            type: this._ActionType.Unmount,
+            targetType: this._ActionTargetType.Fragment,
+            apps: differentApps,
+            currentRoute,
+            targetRoute,
+          });
+          currentRoute.apps = [mainApp, ...fragmentApps.filter((app) => !differentApps.includes(app))];
+        }
         continue;
       }
 
       // 删除在 mismatchIndex 位置之后的 MatchedRoute 中的删除 apps
-      await onAction({
-        type: this._ActionType.Unmount,
-        targetType: this._ActionTargetType.Fragment,
-        apps: fragmentApps,
-        route,
-        targetRoute,
-      });
+      if (fragmentApps.length > 0) {
+        await onAction({
+          type: this._ActionType.Unmount,
+          targetType: this._ActionTargetType.Fragment,
+          apps: fragmentApps,
+          currentRoute,
+          targetRoute,
+        });
+      }
 
       // 当主路由应用与上一个不同时，需要卸载主路由应用
-      const lastApp: IApp | null = i === 0 ? null : routes[i - 1].apps[0];
+      const lastApp: IApp | null = i === 0 ? null : currentRoutes[i - 1].apps[0];
       if (mainApp !== lastApp) {
         await onAction({
           type: this._ActionType.Unmount,
           targetType: this._ActionTargetType.MainApp,
           apps: [mainApp],
-          route,
+          currentRoute,
           targetRoute,
         });
       }
       // 删除整个 route 对象
-      routes.splice(i, 1);
+      currentRoutes.splice(i, 1);
     }
   }
 
-  protected async _unmountFragments(targetFragments: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
+  protected async _unmountRootFragmentApps(
+    targetRootFragmentRoutes: MatchedRoute[],
+    onAction: RendererActionHandler,
+  ): Promise<void> {
     // unmount 匹配的顶层碎片路由的应用
-    const fragments = difference(this.rootFragments, targetFragments);
+    const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
+    const differentRoutes = differenceWith(
+      (route1, route2) => {
+        return route1.path === route2.path && route1.apps[0] === route2.apps[0];
+      },
+      currentRootFragmentRoutes,
+      targetRootFragmentRoutes,
+    );
     await Promise.all(
-      fragments.map(async (route) => {
+      differentRoutes.map(async (currentRoute) => {
         await onAction({
           type: this._ActionType.Unmount,
           targetType: this._ActionTargetType.RootFragment,
-          apps: route.apps,
-          route,
+          apps: currentRoute.apps,
+          currentRoute,
         });
 
-        const index = this.rootFragments.indexOf(route);
+        const index = currentRootFragmentRoutes.indexOf(currentRoute);
         if (index >= 0) {
-          this.rootFragments.splice(index, 1);
+          currentRootFragmentRoutes.splice(index, 1);
         }
       }),
     );
@@ -159,12 +148,12 @@ export class Renderer implements IRenderer {
 
   /** 获取当前匹配的路由数组和目标匹配的路由数组之间的不匹配的位置 */
   protected _getMismatchIndex(targetRoutes: MatchedRoute[]): number {
-    const routes = this.routes;
-    for (let i = 0; i < routes.length; i++) {
-      const route = routes[i];
+    const currentRoutes = this.currentRoutes;
+    for (let i = 0; i < currentRoutes.length; i++) {
+      const currentRoute = currentRoutes[i];
       const targetRoute = targetRoutes[i];
 
-      if (route.path !== targetRoute.path || route.apps[0] !== targetRoute.apps[0]) {
+      if (currentRoute.path !== targetRoute.path || currentRoute.apps[0] !== targetRoute.apps[0]) {
         return i;
       }
     }

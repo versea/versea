@@ -3,6 +3,7 @@ import { ISwitcherStatus } from '../../constants/status';
 import { MatchedRoutes } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
+import { ILoader } from '../loader/service';
 import { IRenderer } from '../renderer/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
@@ -29,6 +30,7 @@ export interface IAppSwitcherContext {
 }
 
 export interface RunOptions {
+  loader: ILoader;
   renderer: IRenderer;
 }
 
