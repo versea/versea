@@ -12,6 +12,7 @@ export * from './interface';
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 
+  /** 声明一个路由是否是一个碎片路由 */
   public isFragment: boolean;
 
   /** 配置的路由对应的应用 */
@@ -134,7 +135,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
     if (this.isFragment) {
-      throw new VerseaError('Can not Match route with only fragment routes.');
+      throw new VerseaError(`Can not match route path "${this.fullPath}" with only fragment routes.`);
     }
 
     const extensibleObject: Record<string, unknown> = {};

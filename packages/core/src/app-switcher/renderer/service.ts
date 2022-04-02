@@ -3,7 +3,7 @@ import { difference } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { IActionTargetType, IActionType } from '../../constants/action';
-import { Matched } from '../../navigation/matcher/service';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { RendererActionHandler } from './action';
@@ -44,26 +44,26 @@ export class Renderer extends ExtensibleEntity implements IRenderer {
   protected readonly _ActionTargetType: IActionTargetType;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(options: Matched, { ActionType, ActionTargetType }: RendererDependencies) {
+  constructor(options: MatchedRoutes, { ActionType, ActionTargetType }: RendererDependencies) {
     super(options);
     // 绑定依赖
     this._ActionType = ActionType;
     this._ActionTargetType = ActionTargetType;
 
     this.routes = options.routes;
-    this.rootFragments = options.fragments;
+    this.rootFragments = options.fragmentRoutes;
   }
 
   /**
    * 渲染应用
    * @description 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
    */
-  public async render(matched: Matched, onAction: RendererActionHandler): Promise<void> {
+  public async render(matched: MatchedRoutes, onAction: RendererActionHandler): Promise<void> {
     await this._unmount(matched, onAction);
   }
 
   protected async _unmount(
-    { routes: targetRoutes, fragments: targetFragments }: Matched,
+    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedRoutes,
     onAction: RendererActionHandler,
   ): Promise<void> {
     await onAction({

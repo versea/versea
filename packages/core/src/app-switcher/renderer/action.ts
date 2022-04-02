@@ -1,6 +1,6 @@
 import { IApp } from '../../application/app/service';
 import { IActionType, IActionTargetType } from '../../constants/action';
-import { MatchedRoute } from '../../navigation/route/interface';
+import { MatchedRoute } from '../../navigation/route/service';
 
 export interface RendererAction {
   type: IActionType[keyof IActionType];

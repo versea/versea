@@ -4,7 +4,7 @@ import { parse } from 'query-string';
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { IMatcher, IMatcherKey, Matched } from '../matcher/service';
+import { IMatcher, IMatcherKey, MatchedRoutes } from '../matcher/service';
 import { callCapturedEventListeners } from '../navigation-events';
 import { RouteOptions } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
@@ -25,7 +25,7 @@ export class Router implements IRouter {
     this._matcher.addRoutes(routes, app);
   }
 
-  public match(): Matched {
+  public match(): MatchedRoutes {
     const path = window.location.pathname;
     const query = parse(window.location.search);
     return this._matcher.match(path, query);
@@ -33,8 +33,8 @@ export class Router implements IRouter {
 
   public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
     return appSwitcher.switch({
-      matched: this.match(),
       navigationEvent,
+      matchedRoutes: this.match(),
     });
   }
 

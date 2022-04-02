@@ -18,7 +18,7 @@ export const ActionType = {
 provideValue(ActionType, IActionTypeKey);
 
 type IActionTyped = typeof ActionType;
-// 将 IStatus 转换成 interface 导出，方便外部合并类型
+// 将 IActionType 转换成 interface 导出，方便外部合并类型
 /** Action 的类型 */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IActionType extends IActionTyped {}
@@ -33,7 +33,7 @@ export const ActionTargetType = {
 provideValue(ActionTargetType, IActionTargetTypeKey);
 
 type IActionTargetTyped = typeof ActionTargetType;
-// 将 IStatus 转换成 interface 导出，方便外部合并类型
+// 将 IActionTargetType 转换成 interface 导出，方便外部合并类型
 /** Action 的目标类型 */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IActionTargetType extends IActionTargetTyped {}

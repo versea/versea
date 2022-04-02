@@ -1,5 +1,5 @@
 import { IActionTargetType, IActionType } from '../../constants/action';
-import { Matched } from '../../navigation/matcher/service';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 import { RendererActionHandler } from './action';
@@ -17,7 +17,7 @@ export interface IRenderer {
    * 计算和执行渲染逻辑
    * @description 根据 matched 计算出 unmount 和 mount 的应用和顺序
    */
-  render: (matched: Matched, onAction: RendererActionHandler) => Promise<void>;
+  render: (matchedRoutes: MatchedRoutes, onAction: RendererActionHandler) => Promise<void>;
 }
 
 export interface RendererDependencies {
