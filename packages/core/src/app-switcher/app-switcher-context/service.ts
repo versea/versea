@@ -118,6 +118,10 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
       this._callEvent();
     }
 
+    if (type === this._ActionType.BeforeMount) {
+      this.status = this._SwitcherStatus.Mounting;
+    }
+
     if (type === this._ActionType.Mount) {
       if (targetType === this._ActionTargetType.RootFragment) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
