@@ -2,7 +2,6 @@ import { inject, interfaces } from 'inversify';
 
 import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
-import { MatchedRoutes } from '../../navigation/matcher/service';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
@@ -17,11 +16,9 @@ export class AppSwitcher implements IAppSwitcher {
 
   public currentContext: IAppSwitcherContext | null = null;
 
-  public readonly renderer: IRenderer;
-
   protected readonly _AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>;
 
-  protected readonly _Renderer: interfaces.Newable<IRenderer>;
+  protected readonly _renderer: IRenderer;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
@@ -34,21 +31,20 @@ export class AppSwitcher implements IAppSwitcher {
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
-    @inject(IRendererKey) Renderer: interfaces.Newable<IRenderer>,
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     @inject(IActionTypeKey) ActionType: IActionType,
     @inject(IActionTargetTypeKey) ActionTargetType: IActionTargetType,
     /* eslint-enable @typescript-eslint/naming-convention */
+
     @inject(IRouterKey) router: IRouter,
+    @inject(IRendererKey) renderer: IRenderer,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
-    this._Renderer = Renderer;
+    this._renderer = renderer;
     this._SwitcherStatus = SwitcherStatus;
     this._ActionType = ActionType;
     this._ActionTargetType = ActionTargetType;
     this._router = router;
-
-    this.renderer = this._createRenderer();
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -71,7 +67,7 @@ export class AppSwitcher implements IAppSwitcher {
 
     this.currentContext = nextContext;
     return nextContext?.run({
-      renderer: this.renderer,
+      renderer: this._renderer,
     });
   }
 
@@ -82,18 +78,6 @@ export class AppSwitcher implements IAppSwitcher {
       ActionType: this._ActionType,
       ActionTargetType: this._ActionTargetType,
       router: this._router,
-    });
-  }
-
-  protected _createRenderer(): IRenderer {
-    const defaultMatched: MatchedRoutes = {
-      routes: [],
-      fragmentRoutes: [],
-    };
-    // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    return new this._Renderer(defaultMatched, {
-      ActionType: this._ActionType,
-      ActionTargetType: this._ActionTargetType,
     });
   }
 }

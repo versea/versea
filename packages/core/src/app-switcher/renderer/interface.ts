@@ -1,4 +1,3 @@
-import { IActionTargetType, IActionType } from '../../constants/action';
 import { MatchedRoutes } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
@@ -18,11 +17,4 @@ export interface IRenderer {
    * @description 根据 matched 计算出 unmount 和 mount 的应用和顺序
    */
   render: (matchedRoutes: MatchedRoutes, onAction: RendererActionHandler) => Promise<void>;
-}
-
-export interface RendererDependencies {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  ActionType: IActionType;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  ActionTargetType: IActionTargetType;
 }
