@@ -161,11 +161,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   public hasChildContainerHook(name: string): boolean {
-    if (this.status !== this._Status.Mounted) {
-      throw new VerseaError(`Can not get app "${this.name}" having container hooks with status "${this.status}".`);
-    }
-
-    return Boolean(this._waitForChildrenContainerHooks[name]);
+    return this.status === this._Status.Mounted && !!this._waitForChildrenContainerHooks[name];
   }
 
   public getProps(context: IAppSwitcherContext): AppProps {

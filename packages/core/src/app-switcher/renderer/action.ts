@@ -8,6 +8,7 @@ export interface RendererAction {
   apps?: IApp[];
   currentRoute?: MatchedRoute;
   targetRoute?: MatchedRoute;
+  parents?: IApp[];
 }
 
 /** 事件处理函数 */

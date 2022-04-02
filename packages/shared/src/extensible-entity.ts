@@ -6,6 +6,7 @@ export interface ExtensiblePropDescription {
   default?: unknown;
   validator?: (value: unknown) => boolean;
   onMerge?: (value: unknown, otherValue: unknown) => unknown;
+  onClone?: (value: unknown) => unknown;
 }
 
 /**

@@ -140,14 +140,19 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     const extensibleObject: Record<string, unknown> = {};
     Object.keys(this._extensiblePropDescriptions).forEach((key) => {
-      extensibleObject[key] = this[key];
+      if (this._extensiblePropDescriptions[key].onClone) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
+        extensibleObject[key] = this._extensiblePropDescriptions[key].onClone!(this[key]);
+      } else {
+        extensibleObject[key] = this[key];
+      }
     });
 
     return {
       ...extensibleObject,
       path: this.path,
       apps: this.apps,
-      meta: this.meta,
+      meta: { ...this.meta },
       fullPath: this.fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
