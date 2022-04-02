@@ -2,7 +2,7 @@ import { inject, interfaces } from 'inversify';
 
 import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
-import { Matched } from '../../navigation/matcher/interface';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
@@ -86,9 +86,9 @@ export class AppSwitcher implements IAppSwitcher {
   }
 
   protected _createRenderer(): IRenderer {
-    const defaultMatched: Matched = {
+    const defaultMatched: MatchedRoutes = {
       routes: [],
-      fragments: [],
+      fragmentRoutes: [],
     };
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._Renderer(defaultMatched, {

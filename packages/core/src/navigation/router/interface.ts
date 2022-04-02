@@ -1,7 +1,7 @@
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
-import { Matched } from '../matcher/service';
+import { MatchedRoutes } from '../matcher/service';
 import { RouteOptions } from '../route/service';
 
 export const IRouterKey = createServiceSymbol('IRouter');
@@ -14,7 +14,7 @@ export interface IRouter {
   addRoutes: (routes: RouteOptions[], app: IApp) => void;
 
   /** 使用当前路径匹配路由 */
-  match: (location?: Location) => Matched;
+  match: (location?: Location) => MatchedRoutes;
 
   /** 增加路由拦截 */
   reroute: (appSwitcher: IAppSwitcher, navigationEvent?: Event) => Promise<void>;

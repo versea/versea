@@ -121,23 +121,6 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @memoizePromise()
-  public async waitForChildContainer(name: string, context: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._Status.Mounted) {
-      throw new VerseaError(`Can not wait for app "${this.name}" with status "${this.status}".`);
-    }
-
-    if (!this._waitForChildrenContainerHooks[name]) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
-      }
-      return;
-    }
-
-    await this._waitForChildrenContainerHooks[name](this.getProps(context));
-    return;
-  }
-
   // TODO: unmount parcel if needed.
   @memoizePromise()
   public async unmount(context: IAppSwitcherContext): Promise<void> {
@@ -158,6 +141,31 @@ export class App extends ExtensibleEntity implements IApp {
       this.status = this._Status.Broken;
       throw error;
     }
+  }
+
+  @memoizePromise()
+  public async waitForChildContainer(name: string, context: IAppSwitcherContext): Promise<void> {
+    if (this.status !== this._Status.Mounted) {
+      throw new VerseaError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
+    }
+
+    if (!this._waitForChildrenContainerHooks[name]) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
+      }
+      return;
+    }
+
+    await this._waitForChildrenContainerHooks[name](this.getProps(context));
+    return;
+  }
+
+  public hasChildContainerHook(name: string): boolean {
+    if (this.status !== this._Status.Mounted) {
+      throw new VerseaError(`Can not get app "${this.name}" having container hooks with status "${this.status}".`);
+    }
+
+    return Boolean(this._waitForChildrenContainerHooks[name]);
   }
 
   public getProps(context: IAppSwitcherContext): AppProps {

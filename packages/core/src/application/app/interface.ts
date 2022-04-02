@@ -43,18 +43,21 @@ export interface IApp {
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext) => Promise<void>;
 
+  /** 卸载应用 */
+  unmount: (context: IAppSwitcherContext) => Promise<void>;
+
+  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
+  getProps: (context: IAppSwitcherContext) => AppProps;
+
+  /** 判断应用是否有 waitForChildContainer 的 Hooks */
+  hasChildContainerHook: (name: string) => boolean;
+
   /**
    * 等待容器渲染完成
    * @description 参考 issue https://github.com/versea/versea/issues/8
    * @param name - 嵌套的应用的名称
    */
   waitForChildContainer: (name: string, context: IAppSwitcherContext) => Promise<void>;
-
-  /** 卸载应用 */
-  unmount: (context: IAppSwitcherContext) => Promise<void>;
-
-  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
-  getProps: (context: IAppSwitcherContext) => AppProps;
 }
 
 /** App 实例化的参数 */

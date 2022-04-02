@@ -3,7 +3,7 @@ import { ExtensibleEntity, VerseaCanceledError, createPromiseMonitor, memoizePro
 import { IApp } from '../../application/app/service';
 import { IActionType, IActionTargetType } from '../../constants/action';
 import { ISwitcherStatus } from '../../constants/status';
-import { Matched } from '../../navigation/matcher/service';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
@@ -16,7 +16,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   public status: ISwitcherStatus[keyof ISwitcherStatus];
 
   /** 匹配的路由 */
-  public readonly matched: Matched;
+  public readonly matchedRoutes: MatchedRoutes;
 
   /** cancel 任务的 promise */
   protected readonly _canceledMonitor = createPromiseMonitor<boolean>();
@@ -45,7 +45,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     this._ActionTargetType = ActionTargetType;
     this._router = router;
 
-    this.matched = options.matched;
+    this.matchedRoutes = options.matchedRoutes;
     this._navigationEvent = options.navigationEvent;
 
     this.status = this._SwitcherStatus.NotStart;
@@ -54,7 +54,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   @memoizePromise(0, false)
   public async run({ renderer }: RunOptions): Promise<void> {
     // await this._loadApps();
-    await renderer.render(this.matched, async ({ type, apps }) => {
+    await renderer.render(this.matchedRoutes, async ({ type, apps }) => {
       this._ensureWithoutCancel();
       if (apps?.length) {
         try {

@@ -1,4 +1,4 @@
-import { Matched } from '../../navigation/matcher/service';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 import { IRenderer } from '../renderer/service';
@@ -6,8 +6,8 @@ import { IRenderer } from '../renderer/service';
 export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
 
 export interface SwitcherOptions {
-  matched: Matched;
   navigationEvent?: Event;
+  matchedRoutes: MatchedRoutes;
 }
 
 export interface IAppSwitcher {

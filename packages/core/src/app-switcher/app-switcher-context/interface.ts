@@ -1,6 +1,6 @@
 import { IActionType, IActionTargetType } from '../../constants/action';
 import { ISwitcherStatus } from '../../constants/status';
-import { Matched } from '../../navigation/matcher/service';
+import { MatchedRoutes } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
 import { IRenderer } from '../renderer/service';
@@ -13,7 +13,7 @@ export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext')
  */
 export interface IAppSwitcherContext {
   /** 匹配的路由 */
-  readonly matched: Matched;
+  readonly matchedRoutes: MatchedRoutes;
 
   /**
    * 开始执行切换应用
