@@ -37,6 +37,7 @@ export class Renderer implements IRenderer {
 
   public async render(matched: MatchedRoutes, onAction: RendererActionHandler): Promise<void> {
     await this._unmount(matched, onAction);
+    await this._mount(matched, onAction);
   }
 
   protected async _unmount(
@@ -56,6 +57,32 @@ export class Renderer implements IRenderer {
     });
 
     await this._unmountRootFragmentApps(targetFragments, onAction);
+
+    await onAction({
+      type: this._ActionType.Mounted,
+      targetType: this._ActionTargetType.Null,
+    });
+  }
+
+  protected async _mount(
+    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedRoutes,
+    onAction: RendererActionHandler,
+  ): Promise<void> {
+    await onAction({
+      type: this._ActionType.BeforeMount,
+      targetType: this._ActionTargetType.Null,
+    });
+
+    await this._mountMainApps(targetRoutes, onAction);
+
+    await onAction({
+      type: this._ActionType.BeforeMountFragment,
+      targetType: this._ActionTargetType.Null,
+    });
+
+    await this._mountRootFragmentApps(targetFragments, onAction);
+
+    await this._mountFragmentApps(targetFragments, onAction);
 
     await onAction({
       type: this._ActionType.Mounted,
@@ -144,6 +171,105 @@ export class Renderer implements IRenderer {
         }
       }),
     );
+  }
+
+  protected async _mountMainApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
+    const currentRoutes = this.currentRoutes;
+    for (let i = 0; i < targetRoutes.length; i++) {
+      const targetRoute = targetRoutes[i];
+      const mainApp = targetRoute.apps[0];
+      if (!currentRoutes[i]) {
+        // 当主路由应用与上一个不同时，需要添加主路由应用
+        const lastApp: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
+        if (mainApp !== lastApp) {
+          await onAction({
+            type: this._ActionType.Mount,
+            targetType: this._ActionTargetType.MainApp,
+            apps: [mainApp],
+            targetRoute,
+            parents: lastApp ? [lastApp] : [],
+          });
+        }
+        currentRoutes.push(this._cloneMatchedRouteWithApps(targetRoute, [mainApp]));
+      }
+    }
+  }
+
+  protected async _mountRootFragmentApps(
+    targetRootFragmentRoutes: MatchedRoute[],
+    onAction: RendererActionHandler,
+  ): Promise<void> {
+    // unmount 匹配的顶层碎片路由的应用
+    const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
+    const differentRoutes = differenceWith(
+      (route1, route2) => {
+        return route1.path === route2.path && route1.apps[0] === route2.apps[0];
+      },
+      targetRootFragmentRoutes,
+      currentRootFragmentRoutes,
+    );
+    await Promise.all(
+      differentRoutes.map(async (targetRoute) => {
+        await onAction({
+          type: this._ActionType.Mount,
+          targetType: this._ActionTargetType.RootFragment,
+          apps: targetRoute.apps,
+          targetRoute,
+        });
+
+        currentRootFragmentRoutes.push(this._cloneMatchedRouteWithApps(targetRoute, targetRoute.apps));
+      }),
+    );
+  }
+
+  protected async _mountFragmentApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
+    const currentRoutes = this.currentRoutes;
+    for (let i = 0; i < targetRoutes.length; i++) {
+      const targetRoute = targetRoutes[i];
+      const currentRoute = currentRoutes[i];
+      const differentApps = differenceWith(
+        (app1, app2) => app1 === app2,
+        targetRoute.apps.slice(1),
+        currentRoute.apps.slice(1),
+      );
+
+      if (differentApps.length > 0) {
+        const parents = this._findParentApps(differentApps, targetRoute.apps[0]);
+        await onAction({
+          type: this._ActionType.Mount,
+          targetType: this._ActionTargetType.Fragment,
+          apps: differentApps,
+          currentRoute,
+          targetRoute,
+          parents,
+        });
+      }
+      currentRoute.apps = [...targetRoute.apps];
+    }
+  }
+
+  protected _findParentApps(toMountApps: IApp[], defaultApp: IApp): IApp[] {
+    const result = toMountApps.map(() => defaultApp);
+    for (const currentRoute of this.currentRoutes) {
+      for (const app of currentRoute.apps) {
+        toMountApps.forEach((toMountApp, index) => {
+          if (app.hasChildContainerHook(toMountApp.name)) {
+            result[index] = app;
+          }
+        });
+      }
+    }
+    return result;
+  }
+
+  protected _cloneMatchedRouteWithApps(route: MatchedRoute, apps: IApp[]): MatchedRoute {
+    const { query, params } = route;
+    const clonedRoute = route.getRoute().toMatchedRoute({
+      query,
+      params,
+    });
+    clonedRoute.apps = apps;
+    return clonedRoute;
   }
 
   /** 获取当前匹配的路由数组和目标匹配的路由数组之间的不匹配的位置 */
