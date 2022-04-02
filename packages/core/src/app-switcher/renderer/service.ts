@@ -1,13 +1,13 @@
-import { ExtensibleEntity } from '@versea/shared';
+import { inject } from 'inversify';
 import { difference } from 'ramda';
 
 import { IApp } from '../../application/app/service';
-import { IActionTargetType, IActionType } from '../../constants/action';
+import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
 import { MatchedRoutes } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { RendererActionHandler } from './action';
-import { IRenderer, IRendererKey, RendererDependencies } from './interface';
+import { IRenderer, IRendererKey } from './interface';
 
 export * from './interface';
 
@@ -33,8 +33,8 @@ export * from './interface';
 //   [H, K]
 // ]
 
-@provide(IRendererKey, 'Constructor')
-export class Renderer extends ExtensibleEntity implements IRenderer {
+@provide(IRendererKey)
+export class Renderer implements IRenderer {
   public readonly routes: MatchedRoute[];
 
   public readonly rootFragments: MatchedRoute[];
@@ -43,15 +43,17 @@ export class Renderer extends ExtensibleEntity implements IRenderer {
 
   protected readonly _ActionTargetType: IActionTargetType;
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(options: MatchedRoutes, { ActionType, ActionTargetType }: RendererDependencies) {
-    super(options);
-    // 绑定依赖
+  constructor(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    @inject(IActionTypeKey) ActionType: IActionType,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    @inject(IActionTargetTypeKey) ActionTargetType: IActionTargetType,
+  ) {
     this._ActionType = ActionType;
     this._ActionTargetType = ActionTargetType;
 
-    this.routes = options.routes;
-    this.rootFragments = options.fragmentRoutes;
+    this.routes = [];
+    this.rootFragments = [];
   }
 
   /**

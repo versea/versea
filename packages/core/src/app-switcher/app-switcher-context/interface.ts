@@ -8,21 +8,21 @@ import { IRenderer } from '../renderer/service';
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
 /**
- * 应用加载信息
- * @description 决定 load、mount 和 unmount 哪些应用
+ * 应用切换上下文
+ * @description 执行 load app 和 mount app 和 unmount app
  */
 export interface IAppSwitcherContext {
   /** 匹配的路由 */
   readonly matchedRoutes: MatchedRoutes;
 
   /**
-   * 开始执行切换应用
+   * 开始切换应用
    * @description 仅仅执行一次，如果多次调用，返回第一次调用的结果
    */
   run: (options: RunOptions) => Promise<void>;
 
   /**
-   * 取消执行切换应用
+   * 取消切换应用
    * @description 仅仅执行一次，如果多次调用，返回第一次调用的结果
    */
   cancel: () => Promise<void>;
