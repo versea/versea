@@ -125,12 +125,20 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     if (type === this._ActionType.Mount) {
       if (targetType === this._ActionTargetType.RootFragment) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this._runSingleTask(apps!, async (app) => app.mount(this));
+        await this._runSingleTask(apps!, async (app) => {
+          if (!app.isBootstrapped) {
+            await app.bootstrap(this);
+          }
+          return app.mount(this);
+        });
       } else {
         this._ensureWithoutCancel();
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await this._runSingleTask(apps!, async (app, index) => {
           const parent = parents?.[index];
+          if (!app.isBootstrapped) {
+            await app.bootstrap(this);
+          }
           if (parent) {
             await parent.waitForChildContainer(app.name, this);
           }
