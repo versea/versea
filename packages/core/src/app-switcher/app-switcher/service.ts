@@ -58,9 +58,9 @@ export class AppSwitcher implements IAppSwitcher {
     // ------
     // 考虑这么一种的场景：
     // 多次连续调用 switch，会产生一个 context 序列，假设是 [context0, context1, context2]
-    // 第一次调用 switch，初始状态 context0 run，当前 context 是 context0
-    // 第二次调用 switch，等待 context0 cancel, 当前 context 是 context1
-    // 第三次调用 switch，context0 还未 cancel 等待 context1 cancel，这里特别注意的，是 context1 而不是 context0，当前 context 是 context2
+    // 第一次调用 switch，初始状态 context0 run，最新 context 是 context0
+    // 第二次调用 switch，等待 context0 cancel, 最新 context 是 context1
+    // 第三次调用 switch，context0 还未 cancel 等待 context1 cancel，这里特别注意的，是 context1 而不是 context0，最新 context 是 context2
     // 上面的序列的正确执行顺序是 context0 run -> context0 cancel -> context1 cancel -> context0 cancel 完成 -> context1 run -> context1 cancel 完成 -> context2 run
     // 只有这样调用才类似一个 switch 链，不会跳过某个 context 不执行 cancel 或 run。
     const context = this.context;

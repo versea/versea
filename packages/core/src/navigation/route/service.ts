@@ -169,7 +169,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       });
     }
 
-    if (options.isFragment) {
+    if (options.isRootFragment) {
       ['slot', 'children'].forEach((key) => {
         if (options[key as keyof RouteOptions]) {
           throw new VerseaError(`RootFragmentRoute "${key}" option is not support.`);
