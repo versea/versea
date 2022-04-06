@@ -9,7 +9,7 @@ export interface IRenderer {
   /** 当前正在运行的路由和应用 */
   currentRoutes: MatchedRoute[];
 
-  /** 当前正在运行的顶层碎片路由和碎片应用 */
+  /** 当前正在运行的根部碎片路由和碎片应用 */
   currentRootFragmentRoutes: MatchedRoute[];
 
   /**

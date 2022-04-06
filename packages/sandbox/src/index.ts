@@ -1,10 +1,9 @@
-// export default 'hello world';
 import {
   buildProviderModule,
   IAppController,
   IAppControllerKey,
   App,
-  AppOptions,
+  AppConfig,
   IAppKey,
   provide,
   provideValue,
@@ -20,7 +19,7 @@ const parent = new Container({ defaultScope: 'Singleton' });
 export class NewApp extends App {
   public path: string;
 
-  constructor(options: AppOptions & { path: string }, dependencies: AppDependencies) {
+  constructor(options: AppConfig & { path: string }, dependencies: AppDependencies) {
     super(options, dependencies);
     this.path = options.path;
   }
@@ -45,7 +44,7 @@ parent.rebind('TestData').toConstantValue('test2');
 const app1 = parent.get<IAppController>(IAppControllerKey).registerApp({
   name: 'app1',
   path: 'app1_path',
-} as AppOptions);
+} as AppConfig);
 const app2 = parent.get<IAppController>(IAppControllerKey).registerApp({
   name: 'app2',
   path: 'app2_path',
@@ -54,7 +53,7 @@ const app2 = parent.get<IAppController>(IAppControllerKey).registerApp({
       path: 'a',
     },
   ],
-} as AppOptions);
+} as AppConfig);
 const matcher = parent.get<IRouter>(IRouterKey);
 const test = parent.get<Test>('Test');
 console.log(app1, app2, matcher);

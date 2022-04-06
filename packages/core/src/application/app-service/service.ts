@@ -6,14 +6,15 @@ import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IStatus, IStatusKey } from '../../constants/status';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
-import { IApp, IAppKey, AppOptions } from '../app/service';
+import { IApp, IAppKey, AppConfig } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
 
 export * from './interface';
 
 @provide(IAppServiceKey)
 export class AppService implements IAppService {
-  protected readonly appMap: Map<string, IApp> = new Map();
+  /** App 实例的 Map */
+  protected readonly _appMap: Map<string, IApp> = new Map();
 
   protected readonly _AppConstructor: interfaces.Newable<IApp>;
 
@@ -24,18 +25,18 @@ export class AppService implements IAppService {
     this._Status = Status;
   }
 
-  public registerApp(options: AppOptions, router: IRouter, appSwitcher?: IAppSwitcher): IApp {
-    if (this.appMap.has(options.name)) {
-      throw new VerseaError(`Duplicate app name: "${options.name}".`);
+  public registerApp(config: AppConfig, router: IRouter, appSwitcher?: IAppSwitcher): IApp {
+    if (this._appMap.has(config.name)) {
+      throw new VerseaError(`Duplicate app name: "${config.name}".`);
     }
 
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    const app = new this._AppConstructor(options, { Status: this._Status });
-    this.appMap.set(app.name, app);
+    const app = new this._AppConstructor(config, { Status: this._Status });
+    this._appMap.set(app.name, app);
 
     // 创建 routes
-    if (options.routes?.length) {
-      router.addRoutes(options.routes, app);
+    if (config.routes?.length) {
+      router.addRoutes(config.routes, app);
     }
 
     if (appSwitcher) {
@@ -45,14 +46,14 @@ export class AppService implements IAppService {
     return app;
   }
 
-  public registerApps(optionsList: AppOptions[], router: IRouter, appSwitcher: IAppSwitcher): IApp[] {
-    const apps = optionsList.map((options) => this.registerApp(options, router));
+  public registerApps(configList: AppConfig[], router: IRouter, appSwitcher: IAppSwitcher): IApp[] {
+    const apps = configList.map((config) => this.registerApp(config, router));
     void router.reroute(appSwitcher);
     return apps;
   }
 
   public getApp(name: string): IApp {
-    const app = this.appMap.get(name);
+    const app = this._appMap.get(name);
     if (!app) {
       throw new VerseaError(`Can not find app by name "${name}".`);
     }

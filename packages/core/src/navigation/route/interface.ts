@@ -15,13 +15,13 @@ export interface IRoute {
 
   /**
    * 声明一个路由是否是一个碎片路由
-   * @description 碎片路由和主路由不同，仅仅作用于某块区域的展示，不能嵌套路由，类似 Component。
+   * @description 碎片路由和主路由不同，碎片路由仅仅作用于展示某块区域，不能嵌套其他路由。
    */
   isFragment: boolean;
 
   /**
    * 配置的路由对应的应用
-   * @description 数组第一个是主路由应用，其他是碎片应用（仅仅控制某一区域的展示内容，不能嵌套路由）。
+   * @description 数组第一项是主路由应用，其他是碎片应用（仅仅控制展示某一区域的内容）。
    */
   apps: IApp[];
 
@@ -32,54 +32,60 @@ export interface IRoute {
 
   children: IRoute[];
 
-  /** 该 route 的 children 允许其他的应用的路由插入 */
+  /** route 的 children 允许其他的应用的路由插入的名称 */
   slot?: string;
 
-  /** 该 route 的整个内容需要插入其他的应用的路由的 children */
+  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称 */
   fill?: string;
 
+  /** pathToRegexp 的参数 */
   pathToRegexpOptions: PathToRegexpOptions;
 
   /** 具有 slot 的路由节点的数组 */
   readonly slotRoutes: IRoute[];
 
-  /** 用来匹配的完整路径 */
+  /** 拼接了父节点路径的完整路径 */
   readonly fullPath: string;
 
+  /** 深度优先遍历展开树结构 */
   flatten: () => IRoute[];
 
+  /** 合并 route */
   merge: (route: IRoute) => void;
 
+  /** 添加 route 子节点 */
   appendChild: (route: IRoute) => void;
 
+  /** 将 route 转化成 matchedRoute 对象 */
   toMatchedRoute: (options: ToMatchedRouteOptions) => MatchedRoute;
 
+  /** 获取该 route 匹配路径的正则表达式 */
   compile: (keys: Key[]) => RegExp;
 }
 
 /** Route 实例化的参数 */
-export interface RouteOptions {
+export interface RouteConfig {
   /** 匹配的路径 */
   path: string;
 
   /** route 额外参数 */
   meta?: Record<string, unknown>;
 
-  /** 声明一个路由是否是一个顶层碎片路由 */
-  isRootFragment?: boolean;
-
   /** 声明一个路由是否是一个碎片路由 */
   isFragment?: boolean;
 
-  children?: RouteOptions[];
+  /** 声明一个路由是否是一个根部碎片路由 */
+  isRootFragment?: boolean;
 
-  /** 该 route 的 children 允许其他的应用的路由插入 */
+  children?: RouteConfig[];
+
+  /** route 的 children 允许其他的应用的路由插入的名称 */
   slot?: string;
 
-  /** 该 route 的整个内容需要插入其他的应用的路由的 children */
+  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称 */
   fill?: string;
 
-  /** 编译 pathToRegexp 的参数 */
+  /** pathToRegexp 的参数 */
   pathToRegexpOptions?: PathToRegexpOptions;
 }
 
@@ -94,6 +100,7 @@ type MatchedRouteTyped = Omit<
   'children' | 'fill' | 'isFragment' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
+    /** 获取 matchedRoute 原本的 route 对象 */
     getRoute: () => IRoute;
   };
 

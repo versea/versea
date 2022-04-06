@@ -4,7 +4,7 @@ import { pathToRegexp, Key } from 'path-to-regexp';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { traverse } from '../../utils';
-import { IRoute, IRouteKey, MatchedRoute, RouteOptions, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
+import { IRoute, IRouteKey, MatchedRoute, RouteConfig, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
 
 export * from './interface';
 
@@ -12,43 +12,38 @@ export * from './interface';
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 
-  /** 声明一个路由是否是一个碎片路由 */
   public isFragment: boolean;
 
-  /** 配置的路由对应的应用 */
   public apps: IApp[];
 
   public parent: IRoute | null;
 
-  /** route 额外参数 */
   public meta: Record<string, unknown>;
 
   public children: IRoute[];
 
-  /** 该 route 的 children 允许其他的应用的路由插入 */
   public slot?: string;
 
-  /** 该 route 的整个内容需要插入其他的应用的路由的 children */
   public fill?: string;
 
   public pathToRegexpOptions: PathToRegexpOptions;
 
-  constructor(options: RouteOptions, app: IApp, parent: IRoute | null = null) {
-    super(options);
+  constructor(config: RouteConfig, app: IApp, parent: IRoute | null = null) {
+    super(config);
 
     // 检查输入参数
-    this._validRouteOptions(options);
+    this._validRouteConfig(config);
 
-    this.path = `/${options.path.replace(/(^\/*)|(\/*$)/g, '')}`;
+    this.path = `/${config.path.replace(/(^\/*)|(\/*$)/g, '')}`;
     this.apps = [app];
     this.parent = parent;
-    this.isFragment = options.isFragment ?? false;
-    this.meta = options.meta ?? {};
-    this.slot = options.slot;
-    this.fill = options.fill;
-    this.pathToRegexpOptions = options.pathToRegexpOptions ?? {};
-    this.children = options.children
-      ? options.children.map((child) => new (this.constructor as typeof Route)(child, app, this) as IRoute)
+    this.isFragment = config.isFragment ?? false;
+    this.meta = config.meta ?? {};
+    this.slot = config.slot;
+    this.fill = config.fill;
+    this.pathToRegexpOptions = config.pathToRegexpOptions ?? {};
+    this.children = config.children
+      ? config.children.map((child) => new (this.constructor as typeof Route)(child, app, this) as IRoute)
       : [];
   }
 
@@ -76,6 +71,7 @@ export class Route extends ExtensibleEntity implements IRoute {
         throw new VerseaError('Can not Merge route(same path) without fragment.');
       }
 
+      // 使用主路由合并碎片路由
       route.merge(this);
       return;
     }
@@ -92,10 +88,11 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    // 主路由应用放在 Fragment 应用之前
+    // 主路由应用放在碎片应用之前
     this.apps = [...this.apps, ...route.apps];
     this.isFragment = this.isFragment && route.isFragment;
 
+    // 合并之后可能导致 parent 和 children 都不正确，需要修改他们
     if (!this.parent && route.parent) {
       this.parent = route.parent;
       const index = this.parent.children.findIndex((child) => child === route);
@@ -112,17 +109,12 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     route.parent = this;
 
-    if (this.children.length === 0) {
-      this.children.push(route);
-      return;
-    }
-
+    // 保证添加的子路由节点在 (.*) 的路由匹配节点之前
     const wildChildIndex = this.children.findIndex((child) => ['/(.*)'].includes(child.path));
     if (wildChildIndex < 0) {
       this.children.push(route);
       return;
     }
-
     this.children.splice(wildChildIndex, 0, route);
   }
 
@@ -160,18 +152,18 @@ export class Route extends ExtensibleEntity implements IRoute {
     };
   }
 
-  protected _validRouteOptions(options: RouteOptions): void {
-    if (options.isFragment) {
+  protected _validRouteConfig(config: RouteConfig): void {
+    if (config.isFragment) {
       ['meta', 'slot', 'pathToRegexpOptions', 'children'].forEach((key) => {
-        if (options[key as keyof RouteOptions]) {
+        if (config[key as keyof RouteConfig]) {
           throw new VerseaError(`FragmentRoute "${key}" option is not support.`);
         }
       });
     }
 
-    if (options.isRootFragment) {
+    if (config.isRootFragment) {
       ['slot', 'children'].forEach((key) => {
-        if (options[key as keyof RouteOptions]) {
+        if (config[key as keyof RouteConfig]) {
           throw new VerseaError(`RootFragmentRoute "${key}" option is not support.`);
         }
       });
@@ -184,7 +176,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     return props
       .filter((key) => !['parent'].includes(key))
       .reduce<Record<string, unknown>>((prev, key: keyof this) => {
-        // 序列化时，apps 只需要返回 app 的名称
+        // 序列化只返回 app 的名称
         if (key === 'apps') {
           prev.apps = this.apps.map((app) => app.name);
         }

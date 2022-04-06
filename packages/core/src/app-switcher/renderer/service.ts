@@ -147,7 +147,7 @@ export class Renderer implements IRenderer {
     targetRootFragmentRoutes: MatchedRoute[],
     onAction: RendererActionHandler,
   ): Promise<void> {
-    // unmount 匹配的顶层碎片路由的应用
+    // unmount 匹配的根部碎片路由的应用
     const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
     const differentRoutes = differenceWith(
       (route1, route2) => {
@@ -199,7 +199,7 @@ export class Renderer implements IRenderer {
     targetRootFragmentRoutes: MatchedRoute[],
     onAction: RendererActionHandler,
   ): Promise<void> {
-    // unmount 匹配的顶层碎片路由的应用
+    // unmount 匹配的根部碎片路由的应用
     const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
     const differentRoutes = differenceWith(
       (route1, route2) => {

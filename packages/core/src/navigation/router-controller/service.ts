@@ -5,7 +5,7 @@ import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { MatchedRoutes } from '../matcher/service';
 import { bindRouter } from '../navigation-events';
-import { IRouteKey, RouteOptions } from '../route/service';
+import { IRouteKey, RouteConfig } from '../route/service';
 import { IRouter } from '../router/service';
 import { IRouterController, IRouterControllerKey } from './interface';
 
@@ -29,7 +29,7 @@ export class RouterController implements IRouterController {
     return this._router.isStarted;
   }
 
-  public addRoutes(routes: RouteOptions[], app: IApp): void {
+  public addRoutes(routes: RouteConfig[], app: IApp): void {
     // 将 router 传给 navigationEvent
     if (!this._hasBindRouter) {
       this._hasBindRouter = true;

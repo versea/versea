@@ -1,24 +1,34 @@
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
 import { IStatus } from '../../constants/status';
-import { RouteOptions } from '../../navigation/route/service';
+import { RouteConfig } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
 
-export type AppOptionsProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
+export type AppConfigProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
 
+/** 最终传给加载和挂载的各个阶段函数的属性 */
 export interface AppProps extends Record<string, unknown> {
+  /** 应用名称 */
   name: string;
+
+  /** 应用实例 */
   app: IApp;
+
+  /** 当前正在运行的应用切换上下文 */
   context: IAppSwitcherContext;
 }
 
-export type HookFunction<T = unknown> = (props: AppProps) => Promise<T>;
+export type AppHookFunction<T = unknown> = (props: AppProps) => Promise<T>;
 
+/**
+ * 应用加载函数的返回的 Hooks
+ * @description 应用加载和挂载的各个阶段会分别调用这些 Hooks
+ */
 export interface AppHooks {
-  bootstrap?: HookFunction;
-  mount?: HookFunction<Record<string, HookFunction>> | HookFunction<void>;
-  unmount?: HookFunction;
+  bootstrap?: AppHookFunction;
+  mount?: AppHookFunction<Record<string, AppHookFunction>> | AppHookFunction<void>;
+  unmount?: AppHookFunction;
 }
 
 export interface IApp {
@@ -31,13 +41,16 @@ export interface IApp {
   /** 应用是否已经加载 */
   isLoaded: boolean;
 
-  /** 应用是否已经 Bootstrap */
+  /** 应用是否已经成功运行过 bootstrap 函数 */
   isBootstrapped: boolean;
 
   /** 加载应用 */
   load: (context: IAppSwitcherContext) => Promise<void>;
 
-  /** 引导，应用内容首次挂载到页面前调用 */
+  /**
+   * 引导
+   * @description 应用内容首次挂载到页面前调用。
+   */
   bootstrap: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 挂载应用 */
@@ -46,35 +59,35 @@ export interface IApp {
   /** 卸载应用 */
   unmount: (context: IAppSwitcherContext) => Promise<void>;
 
-  /** 获取最终传给应用 loadApp 和 mount 方法的属性 */
+  /** 获取最终传给加载和挂载的各个阶段函数的属性 */
   getProps: (context: IAppSwitcherContext) => AppProps;
 
-  /** 判断应用是否有 waitForChildContainer 的 Hooks */
+  /** 判断应用是否有等待容器渲染完成的 Hooks */
   hasChildContainerHook: (name: string) => boolean;
 
   /**
-   * 等待容器渲染完成
-   * @description 参考 issue https://github.com/versea/versea/issues/8
+   * 等待应用内部容器渲染完成
    * @param name - 嵌套的应用的名称
+   * @description 参考 issue https://github.com/versea/versea/issues/8。
    */
   waitForChildContainer: (name: string, context: IAppSwitcherContext) => Promise<void>;
 }
 
 /** App 实例化的参数 */
-export interface AppOptions {
+export interface AppConfig {
   /** 应用名称 */
   name: string;
 
-  /** 应用的路由 */
-  routes?: RouteOptions[];
-
-  /** 传给应用的属性 */
-  props?: AppOptionsProps;
+  /** 应用的路由配置 */
+  routes?: RouteConfig[];
 
   /**
-   * 加载应用的方法
-   * @description 必须传入，这里设计成可选参数，因为某些插件会生成这个函数。
+   * 应用的属性
+   * @description 透传给应用加载和挂载的各个阶段的函数。
    */
+  props?: AppConfigProps;
+
+  /** 加载应用的方法 */
   loadApp?: (props: AppProps) => Promise<AppHooks>;
 }
 

@@ -6,7 +6,7 @@ import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { IRoute, IRouteKey, RouteOptions, MatchedRoute } from '../route/service';
+import { IRoute, IRouteKey, RouteConfig, MatchedRoute } from '../route/service';
 import { IMatcher, IMatcherKey, MatchedRoutes } from './interface';
 
 export * from './interface';
@@ -20,7 +20,7 @@ export class Matcher implements IMatcher {
   protected readonly _trees: IRoute[] = [];
 
   /**
-   * 顶层碎片路由数组
+   * 根部碎片路由数组
    * @description 数组的每一项都是一个没有 children 的 Route。
    */
   protected readonly _rootFragments: IRoute[] = [];
@@ -33,14 +33,14 @@ export class Matcher implements IMatcher {
     this._RouteConstructor = Route;
   }
 
-  public addRoutes(routes: RouteOptions[], app: IApp): void {
-    routes.forEach((routeOption) => {
+  public addRoutes(routes: RouteConfig[], app: IApp): void {
+    routes.forEach((routeConfig) => {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-      const route = new this._RouteConstructor(routeOption, app);
-      if (routeOption.isRootFragment) {
-        this._rootFragments.push(route);
-      } else {
+      const route = new this._RouteConstructor(routeConfig, app);
+      if (!routeConfig.isRootFragment) {
         this._trees.push(route);
+      } else {
+        this._rootFragments.push(route);
       }
     });
 
@@ -130,7 +130,7 @@ export class Matcher implements IMatcher {
       });
     });
 
-    // 根据 slot 和 fill 合并树
+    // 根据 slot 和 fill 合并路由树
     for (let i = this._trees.length - 1; i >= 0; i--) {
       const tree = this._trees[i];
       if (tree.fill && slotMap[tree.fill]) {
@@ -139,7 +139,7 @@ export class Matcher implements IMatcher {
       }
     }
 
-    // 合并拫节点
+    // 合并多个 Tree 的拫节点
     for (let i = 0; i < this._trees.length; i++) {
       const tree = this._trees[i];
       for (let j = this._trees.length - 1; j > i; j--) {

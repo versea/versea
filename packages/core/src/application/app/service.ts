@@ -6,12 +6,12 @@ import { provide } from '../../provider';
 import {
   IApp,
   IAppKey,
-  AppOptions,
+  AppConfig,
   AppDependencies,
   AppProps,
   AppHooks,
-  AppOptionsProps,
-  HookFunction,
+  AppConfigProps,
+  AppHookFunction,
 } from './interface';
 
 export * from './interface';
@@ -28,29 +28,30 @@ export class App extends ExtensibleEntity implements IApp {
 
   protected readonly _loadApp?: (props: AppProps) => Promise<AppHooks>;
 
-  protected readonly _props: AppOptionsProps;
+  protected readonly _props: AppConfigProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _Status: IStatus;
 
+  /** 应用加载函数的返回的 Hooks */
   protected _hooks: AppHooks = {};
 
-  /** mount 嵌套的子应用的等待函数 */
-  protected _waitForChildrenContainerHooks: Record<string, HookFunction> = {};
+  /** “等待应用内部容器渲染完成”的 Hooks */
+  protected _waitForChildrenContainerHooks: Record<string, AppHookFunction> = {};
 
   /**
    * 生成一个 App 实例
-   * @param options App 实例化的参数
-   * @param dependencies 由于 App 必须继承 ExtensibleEntity，这里无法使用依赖注入，依赖问题必须自己管理。
+   * @param config App 实例化的参数
+   * @param dependencies 由于 App 继承 ExtensibleEntity，导致无法使用依赖注入，依赖必须自己管理。
    */
-  constructor(options: AppOptions, dependencies: AppDependencies) {
-    super(options);
+  constructor(config: AppConfig, dependencies: AppDependencies) {
+    super(config);
     // 绑定依赖
     this._Status = dependencies.Status;
 
-    this.name = options.name;
-    this._props = options.props ?? {};
-    this._loadApp = options.loadApp;
+    this.name = config.name;
+    this._props = config.props ?? {};
+    this._loadApp = config.loadApp;
     this.status = this._Status.NotLoaded;
   }
 
@@ -121,7 +122,6 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  // TODO: unmount parcel if needed.
   @memoizePromise()
   public async unmount(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
@@ -135,6 +135,7 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.Unmounting;
     try {
+      // TODO: unmount parcel
       await this._hooks.unmount(this.getProps(context));
       this.status = this._Status.NotMounted;
     } catch (error) {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { IRouterController } from '../router-controller/service';
-import { HistoryFunctionName, EventName, HistoryEventListenersType } from './types';
+import { HistoryFunctionName, LocationEventName, HistoryEventListenersType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 let _routerController: IRouterController | null = null;
@@ -8,15 +8,15 @@ export function bindRouter(routerController: IRouterController): void {
   _routerController = routerController;
 }
 
-const capturedEventListeners: Record<EventName, EventListener[]> = {
+const capturedEventListeners: Record<LocationEventName, EventListener[]> = {
   hashchange: [],
   popstate: [],
 };
-const routingEventsListeningTo = Object.keys(capturedEventListeners) as EventName[];
+const routingEventsListeningTo = Object.keys(capturedEventListeners) as LocationEventName[];
 
 export function callCapturedEventListeners(navigationEvent?: Event): void {
   if (navigationEvent) {
-    const eventType = navigationEvent.type as EventName;
+    const eventType = navigationEvent.type as LocationEventName;
     capturedEventListeners[eventType]?.forEach((listener: EventListener) => {
       try {
         listener.apply(navigationEvent.target, [navigationEvent]);
@@ -41,7 +41,8 @@ const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): voi
 window.addEventListener('popstate', handleUrlChange);
 window.addEventListener('hashchange', handleUrlChange);
 
-// 重写 addEventListener 和 removeEventListener，当增加 popstate 或 hashchange 事件监听函数，把他们存储起来，在 versea 切换应用的合适的时机调用
+// 重写 addEventListener 和 removeEventListener
+// 当增加 popstate 或 hashchange 事件监听函数，把他们存储到 capturedEventListeners，在 versea 切换应用的合适时机调用
 const originalAddEventListener = window.addEventListener;
 const originalRemoveEventListener = window.removeEventListener;
 
@@ -52,10 +53,10 @@ window.addEventListener = function (
 ): void {
   if (typeof listenerFn === 'function') {
     if (
-      routingEventsListeningTo.includes(eventName as EventName) &&
-      !capturedEventListeners[eventName as EventName].find((listener: EventListener) => listener === listenerFn)
+      routingEventsListeningTo.includes(eventName as LocationEventName) &&
+      !capturedEventListeners[eventName as LocationEventName].find((listener: EventListener) => listener === listenerFn)
     ) {
-      capturedEventListeners[eventName as EventName].push(listenerFn);
+      capturedEventListeners[eventName as LocationEventName].push(listenerFn);
       return;
     }
   }
@@ -68,10 +69,10 @@ window.removeEventListener = function (
   options?: AddEventListenerOptions | boolean,
 ): void {
   if (typeof listenerFn === 'function') {
-    if (routingEventsListeningTo.includes(eventName as EventName)) {
-      capturedEventListeners[eventName as EventName] = capturedEventListeners[eventName as EventName].filter(
-        (fn: EventListener) => fn !== listenerFn,
-      );
+    if (routingEventsListeningTo.includes(eventName as LocationEventName)) {
+      capturedEventListeners[eventName as LocationEventName] = capturedEventListeners[
+        eventName as LocationEventName
+      ].filter((fn: EventListener) => fn !== listenerFn);
       return;
     }
   }
@@ -89,7 +90,6 @@ function createPopStateEvent(state: PopStateEventInit, originalMethodName: Histo
   return evt;
 }
 
-// 重写 pushState 和 replaceState 方法
 function patchedUpdateState(updateState: HistoryEventListenersType, methodName: HistoryFunctionName) {
   return function (this: History, ...args: Parameters<HistoryEventListenersType>): void {
     const urlBefore = window.location.href;
@@ -98,8 +98,8 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
 
     if (urlBefore !== urlAfter) {
       if (_routerController?.isStarted) {
-        // 如果已经启动应用，需要触发一个 popstate 事件，这个那些已经注册的应用可以知晓路由变更，他们的路由状态和页面状态才会发生变更。
-        // 如果不触发 popstate 事件，可能会导致路由切换了，但是注册应用的页面未发生变更
+        // 如果已经启动应用，需要触发一个 popstate 事件，这样才能通知那些已经注册的应用知晓路由变更，他们的路由状态和页面状态才会发生变更。
+        // 如果不触发 popstate 事件，可能会导致路由切换了，但那些已经注册的应用的页面未发生变更
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
         void _routerController?.reroute();
@@ -108,5 +108,6 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
   };
 }
 
+// 重写 pushState 和 replaceState 方法
 window.history.pushState = patchedUpdateState(window.history.pushState, 'pushState');
 window.history.replaceState = patchedUpdateState(window.history.replaceState, 'replaceState');

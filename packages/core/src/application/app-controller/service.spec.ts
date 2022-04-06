@@ -3,7 +3,7 @@ import { Container } from 'inversify';
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
 import { Status } from '../../constants/status';
 import { buildProviderModule } from '../../provider';
-import { AppHooks, AppOptions, IApp, HookFunction } from '../app/service';
+import { AppHooks, AppConfig, IApp, AppHookFunction } from '../app/service';
 import { IAppController, IAppControllerKey } from './service';
 
 async function delay(time: number): Promise<void> {
@@ -12,17 +12,17 @@ async function delay(time: number): Promise<void> {
   });
 }
 
-function getAppInstance(options: AppOptions): IApp {
+function getAppInstance(config: AppConfig): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
   const appController = container.get<IAppController>(IAppControllerKey);
-  return appController.registerApp(options);
+  return appController.registerApp(config);
 }
 
-function getAppWithLoadOptions(
-  options: AppOptions,
+function getAppWithLoadHook(
+  config: AppConfig,
   hooks: AppHooks = {},
-  mountHooks?: Record<string, HookFunction>,
+  mountHooks?: Record<string, AppHookFunction>,
 ): IApp {
   return getAppInstance({
     loadApp: async () => {
@@ -42,7 +42,7 @@ function getAppWithLoadOptions(
         ...hooks,
       });
     },
-    ...options,
+    ...config,
   });
 }
 
@@ -97,7 +97,7 @@ describe('App', () => {
 
   describe('App.bootstrap', () => {
     test('bootstrap 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' });
+      const app = getAppWithLoadHook({ name: 'app' });
       await app.load({} as IAppSwitcherContext);
 
       expect(app.status).toBe(Status.NotBootstrapped);
@@ -108,7 +108,7 @@ describe('App', () => {
     });
 
     test('没有 bootstrap 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' }, { bootstrap: undefined });
+      const app = getAppWithLoadHook({ name: 'app' }, { bootstrap: undefined });
       await app.load({} as IAppSwitcherContext);
 
       expect(app.status).toBe(Status.NotBootstrapped);
@@ -117,7 +117,7 @@ describe('App', () => {
     });
 
     test('bootstrap 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadOptions(
+      const app = getAppWithLoadHook(
         { name: 'app' },
         {
           bootstrap: async () => {
@@ -138,7 +138,7 @@ describe('App', () => {
 
   describe('App.mount', () => {
     test('mount 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' });
+      const app = getAppWithLoadHook({ name: 'app' });
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
 
@@ -150,7 +150,7 @@ describe('App', () => {
     });
 
     test('没有 mount 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' }, { mount: undefined });
+      const app = getAppWithLoadHook({ name: 'app' }, { mount: undefined });
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
 
@@ -160,7 +160,7 @@ describe('App', () => {
     });
 
     test('mount 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadOptions(
+      const app = getAppWithLoadHook(
         { name: 'app' },
         {
           mount: async () => {
@@ -183,7 +183,7 @@ describe('App', () => {
   describe('App.waitForChildContainer', () => {
     test('mount 应之后，可以等待该应用的子容器渲染完成。', async () => {
       const test = jest.fn(() => 1);
-      const app = getAppWithLoadOptions(
+      const app = getAppWithLoadHook(
         { name: 'app' },
         {},
         {
@@ -205,7 +205,7 @@ describe('App', () => {
 
   describe('App.unmount', () => {
     test('unmount 应用之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' }, {});
+      const app = getAppWithLoadHook({ name: 'app' }, {});
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext);
@@ -218,7 +218,7 @@ describe('App', () => {
     });
 
     test('没有 unmount 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadOptions({ name: 'app' }, { unmount: undefined });
+      const app = getAppWithLoadHook({ name: 'app' }, { unmount: undefined });
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext);
@@ -229,7 +229,7 @@ describe('App', () => {
     });
 
     test('unmount 应用失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadOptions(
+      const app = getAppWithLoadHook(
         { name: 'app' },
         {
           unmount: async () => {

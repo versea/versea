@@ -1,26 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+export class Deferred<T> {
+  public promise: Promise<T>;
 
-export interface PromiseMonitor<T> {
-  promise: Promise<T>;
-  resolve: (value?: PromiseLike<T> | T) => void;
-  reject: (reason?: any) => void;
-}
+  public resolve!: (value: PromiseLike<T> | T) => void;
 
-export function createPromiseMonitor<T>(): PromiseMonitor<T> {
-  let resolveHandler: ((value: PromiseLike<T> | T) => void) | null = null;
-  let rejectHandler: ((reason?: any) => void) | null = null;
+  public reject!: (reason?: any) => void;
 
-  const promise = new Promise<T>((resolve, reject) => {
-    resolveHandler = resolve;
-    rejectHandler = reject;
-  });
-
-  return {
-    promise,
-    resolve: resolveHandler as unknown as (value?: PromiseLike<T> | T) => void,
-    reject: rejectHandler as unknown as (reason?: any) => void,
-  };
+  constructor() {
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
+    });
+  }
 }
 
 export function memoizePromise(index = 0, deleteMemo = true) {

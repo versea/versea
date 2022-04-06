@@ -7,7 +7,7 @@ import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { IMatcher, IMatcherKey, MatchedRoutes } from '../matcher/service';
 import { callCapturedEventListeners } from '../navigation-events';
-import { RouteOptions } from '../route/service';
+import { RouteConfig } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
 
 export * from './interface';
@@ -22,7 +22,7 @@ export class Router implements IRouter {
     this._matcher = matcher;
   }
 
-  public addRoutes(routes: RouteOptions[], app: IApp): void {
+  public addRoutes(routes: RouteConfig[], app: IApp): void {
     this._matcher.addRoutes(routes, app);
   }
 

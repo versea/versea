@@ -1,10 +1,4 @@
-import {
-  ExtensibleEntity,
-  VerseaError,
-  VerseaCanceledError,
-  createPromiseMonitor,
-  memoizePromise,
-} from '@versea/shared';
+import { ExtensibleEntity, VerseaError, VerseaCanceledError, Deferred, memoizePromise } from '@versea/shared';
 
 import { IApp } from '../../application/app/service';
 import { IActionType, IActionTargetType } from '../../constants/action';
@@ -27,7 +21,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   public readonly matchedRoutes: MatchedRoutes;
 
   /** cancel 任务的 promise */
-  protected readonly _canceledMonitor = createPromiseMonitor<boolean>();
+  protected readonly _canceledDeferred = new Deferred<boolean>();
 
   /** 是否已经 */
   protected _navigationEvent?: Event;
@@ -73,7 +67,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     if (this.status !== this._SwitcherStatus.Canceled && this.status !== this._SwitcherStatus.Done) {
       this.status = this._SwitcherStatus.WaitForCancel;
     }
-    return this._canceledMonitor.promise;
+    return this._canceledDeferred.promise;
   }
 
   // TODO: Action 相关应该全部换成 hooks
@@ -176,7 +170,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   protected _resolveCanceledMonitor(cancel: boolean): void {
     this._callEvent();
-    this._canceledMonitor.resolve(cancel);
+    this._canceledDeferred.resolve(cancel);
     if (cancel) {
       this.status = this._SwitcherStatus.Canceled;
     }

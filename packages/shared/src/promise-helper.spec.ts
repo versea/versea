@@ -1,4 +1,4 @@
-import { createPromiseMonitor, memoizePromise } from './promise-helper';
+import { Deferred, memoizePromise } from './promise-helper';
 
 async function delay(time: number): Promise<void> {
   return new Promise((resolve) => {
@@ -10,25 +10,25 @@ async function delay(time: number): Promise<void> {
  * unit
  * @author huchao
  */
-describe('createPromiseMonitor', () => {
-  test('新建一个 PromiseMonitor, 调用 monitor.resolve，monitor.promise 应该能被正常 resolve 并 返回正确的值', async () => {
+describe('Deferred', () => {
+  test('新建一个 Deferred, 调用 deferred.resolve，deferred.promise 应该能被正常 resolve 并 返回正确的值', async () => {
     const test = 'test';
-    const monitor = createPromiseMonitor<string>();
+    const deferred = new Deferred<string>();
 
     await delay(1);
-    monitor.resolve(test);
+    deferred.resolve(test);
 
-    await expect(monitor.promise).resolves.toBe(test);
+    await expect(deferred.promise).resolves.toBe(test);
   });
 
-  test('新建一个 PromiseMonitor, 调用 monitor.reject，monitor.promise 应该能被 reject', async () => {
+  test('新建一个 Deferred, 调用 deferred.reject，deferred.promise 应该能被 reject', async () => {
     const testError = new Error('test');
-    const monitor = createPromiseMonitor<string>();
+    const deferred = new Deferred<string>();
 
     await delay(1);
-    monitor.reject(testError);
+    deferred.reject(testError);
 
-    await expect(monitor.promise).rejects.toBe(testError);
+    await expect(deferred.promise).rejects.toBe(testError);
   });
 });
 
