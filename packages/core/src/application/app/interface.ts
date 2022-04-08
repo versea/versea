@@ -62,15 +62,12 @@ export interface IApp {
   /** 获取最终传给加载和挂载的各个阶段函数的属性 */
   getProps: (context: IAppSwitcherContext) => AppProps;
 
-  /** 判断应用是否有等待容器渲染完成的 Hooks */
-  hasChildContainerHook: (name: string) => boolean;
-
   /**
    * 等待应用内部容器渲染完成
-   * @param name - 嵌套的应用的名称
+   * @param containerName - 能嵌套应用的容器的名称
    * @description 参考 issue https://github.com/versea/versea/issues/8。
    */
-  waitForChildContainer: (name: string, context: IAppSwitcherContext) => Promise<void>;
+  waitForChildContainer: (containerName: string, context: IAppSwitcherContext) => Promise<void>;
 }
 
 /** App 实例化的参数 */

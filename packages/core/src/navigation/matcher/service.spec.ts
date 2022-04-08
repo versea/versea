@@ -48,9 +48,12 @@ describe('Matcher', () => {
     test('先创建一个路径为 path1 的 route 节点，后创建一个路径为 path1 的 route 节点，Matcher.trees 应该能合并节点。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
-      matcher.addRoutes([{ path: 'path1' }], app1);
+      matcher.addRoutes([{ path: 'path1', meta: { test: 'test' } }], app1);
       const app2 = getAppInstance('name2');
-      matcher.addRoutes([{ path: 'path1', isFragment: true }], app2);
+      matcher.addRoutes(
+        [{ path: 'path1', isFragment: true, meta: { parentAppName: 'name1', parentContainerName: 'container1' } }],
+        app2,
+      );
 
       expect((matcher as any)._trees).toMatchObject([
         {
@@ -63,6 +66,13 @@ describe('Matcher', () => {
               name: 'name2',
             },
           ],
+          meta: {
+            test: 'test',
+            name2: {
+              parentAppName: 'name1',
+              parentContainerName: 'container1',
+            },
+          },
         },
       ]);
     });
@@ -74,9 +84,15 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2' }], app2);
       const app3 = getAppInstance('name3');
-      matcher.addRoutes([{ path: 'path2', isFragment: true }], app3);
+      matcher.addRoutes(
+        [{ path: 'path2', isFragment: true, meta: { parentAppName: 'name2', parentContainerName: 'container2' } }],
+        app3,
+      );
       const app4 = getAppInstance('name4');
-      matcher.addRoutes([{ path: 'path1', isFragment: true }], app4);
+      matcher.addRoutes(
+        [{ path: 'path1', isFragment: true, meta: { parentAppName: 'name1', parentContainerName: 'container1' } }],
+        app4,
+      );
       const app5 = getAppInstance('name5');
       matcher.addRoutes([{ path: 'path3' }], app5);
 
@@ -290,7 +306,17 @@ describe('Matcher', () => {
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
       const app3 = getAppInstance('name3');
-      matcher.addRoutes([{ path: 'path2', fill: 'foo', isFragment: true }], app3);
+      matcher.addRoutes(
+        [
+          {
+            path: 'path2',
+            fill: 'foo',
+            isFragment: true,
+            meta: { parentAppName: 'name2', parentContainerName: 'container2' },
+          },
+        ],
+        app3,
+      );
 
       expect((matcher as any)._trees).toMatchObject([
         {
@@ -322,7 +348,17 @@ describe('Matcher', () => {
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
       const app2 = getAppInstance('name2');
-      matcher.addRoutes([{ path: 'path2', fill: 'foo', isFragment: true }], app2);
+      matcher.addRoutes(
+        [
+          {
+            path: 'path2',
+            fill: 'foo',
+            isFragment: true,
+            meta: { parentAppName: 'name1', parentContainerName: 'container1' },
+          },
+        ],
+        app2,
+      );
       const app3 = getAppInstance('name3');
       matcher.addRoutes([{ path: 'path2', fill: 'foo', children: [{ path: 'path3' }] }], app3);
 

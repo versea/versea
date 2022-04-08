@@ -1,5 +1,6 @@
 import { ExtensibleEntity, VerseaError } from '@versea/shared';
 import { pathToRegexp, Key } from 'path-to-regexp';
+import { mergeRight, clone } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
@@ -90,6 +91,13 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     // 主路由应用放在碎片应用之前
     this.apps = [...this.apps, ...route.apps];
+
+    // 碎片应用的 meta 需要 scoped
+    const routeMeta: Record<string, unknown> =
+      route.apps.length === 1 ? { [route.apps[0].name]: route.meta } : route.meta;
+    const originMeta = this.apps.length === 1 && this.isFragment ? { [this.apps[0].name]: this.meta } : this.meta;
+    this.meta = mergeRight(originMeta, routeMeta);
+
     this.isFragment = this.isFragment && route.isFragment;
 
     // 合并之后可能导致 parent 和 children 都不正确，需要修改他们
@@ -144,7 +152,8 @@ export class Route extends ExtensibleEntity implements IRoute {
       ...extensibleObject,
       path: this.path,
       apps: this.apps,
-      meta: { ...this.meta },
+      meta: clone(this.meta),
+      parentContainerName: this.fill,
       fullPath: this.fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
@@ -154,11 +163,22 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   protected _validRouteConfig(config: RouteConfig): void {
     if (config.isFragment) {
-      ['meta', 'slot', 'pathToRegexpOptions', 'children'].forEach((key) => {
+      ['slot', 'pathToRegexpOptions', 'children'].forEach((key) => {
         if (config[key as keyof RouteConfig]) {
           throw new VerseaError(`FragmentRoute "${key}" option is not support.`);
         }
       });
+
+      // 碎片应用 meta 必须声明 parentAppName 和 parentContainerName
+      if (!config.meta) {
+        throw new VerseaError(`FragmentRoute "meta" option should be scoped.`);
+      }
+      if (!config.meta.parentAppName) {
+        throw new VerseaError(`FragmentRoute "meta.parentAppName" should be defined.`);
+      }
+      if (!config.meta.parentContainerName) {
+        throw new VerseaError(`FragmentRoute "meta.parentContainerName" should be defined.`);
+      }
     }
 
     if (config.isRootFragment) {

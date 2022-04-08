@@ -248,17 +248,18 @@ export class Renderer implements IRenderer {
     }
   }
 
+  // Container 的渲染需要读取 meta 的 container 函数，这块后面重构
   protected _findParentApps(toMountApps: IApp[], defaultApp: IApp): IApp[] {
     const result = toMountApps.map(() => defaultApp);
-    for (const currentRoute of this.currentRoutes) {
-      for (const app of currentRoute.apps) {
-        toMountApps.forEach((toMountApp, index) => {
-          if (app.hasChildContainerHook(toMountApp.name)) {
-            result[index] = app;
-          }
-        });
-      }
-    }
+    // for (const currentRoute of this.currentRoutes) {
+    //   for (const app of currentRoute.apps) {
+    //     toMountApps.forEach((toMountApp, index) => {
+    //       if (app.hasChildContainerHook(toMountApp.name)) {
+    //         result[index] = app;
+    //       }
+    //     });
+    //   }
+    // }
     return result;
   }
 
