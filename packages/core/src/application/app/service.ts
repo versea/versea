@@ -145,24 +145,20 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async waitForChildContainer(name: string, context: IAppSwitcherContext): Promise<void> {
+  public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
     }
 
-    if (!this._waitForChildrenContainerHooks[name]) {
+    if (!this._waitForChildrenContainerHooks[containerName]) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
       }
       return;
     }
 
-    await this._waitForChildrenContainerHooks[name](this.getProps(context));
+    await this._waitForChildrenContainerHooks[containerName](this.getProps(context));
     return;
-  }
-
-  public hasChildContainerHook(name: string): boolean {
-    return this.status === this._Status.Mounted && !!this._waitForChildrenContainerHooks[name];
   }
 
   public getProps(context: IAppSwitcherContext): AppProps {

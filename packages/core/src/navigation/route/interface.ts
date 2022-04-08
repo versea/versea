@@ -32,10 +32,10 @@ export interface IRoute {
 
   children: IRoute[];
 
-  /** route 的 children 允许其他的应用的路由插入的名称 */
+  /** route 的 children 允许其他的应用的路由插入的名称, 同时也是容器名称 */
   slot?: string;
 
-  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称 */
+  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称，同时也是容器名称 */
   fill?: string;
 
   /** pathToRegexp 的参数 */
@@ -69,7 +69,7 @@ export interface RouteConfig {
   path: string;
 
   /** route 额外参数 */
-  meta?: Record<string, unknown>;
+  meta?: RouteMeta;
 
   /** 声明一个路由是否是一个碎片路由 */
   isFragment?: boolean;
@@ -79,14 +79,24 @@ export interface RouteConfig {
 
   children?: RouteConfig[];
 
-  /** route 的 children 允许其他的应用的路由插入的名称 */
+  /** route 的 children 允许其他的应用的路由插入的名称, 同时也是容器名称 */
   slot?: string;
 
-  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称 */
+  /** route 的整个内容需要插入其他的应用的路由作为 children 的名称，同时也是容器名称 */
   fill?: string;
 
   /** pathToRegexp 的参数 */
   pathToRegexpOptions?: PathToRegexpOptions;
+}
+
+export interface RouteMeta {
+  [key: string]: unknown;
+
+  /** 嵌套的父应用名称 */
+  parentAppName?: string;
+
+  /** 嵌套的父应用容器名称 */
+  parentContainerName?: string;
 }
 
 export interface ToMatchedRouteOptions {
@@ -100,6 +110,9 @@ type MatchedRouteTyped = Omit<
   'children' | 'fill' | 'isFragment' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
+    /** 嵌套的父应用容器名称 */
+    parentContainerName?: string;
+
     /** 获取 matchedRoute 原本的 route 对象 */
     getRoute: () => IRoute;
   };
