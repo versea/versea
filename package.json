@@ -17,6 +17,7 @@
     "release:force": "lerna publish from-package --yes",
     "test": "jest --coverage --maxWorkers=8",
     "test:core": "jest packages/core/ --maxWorkers=8",
+    "test:plugin-driver": "jest packages/plugin-driver/ --maxWorkers=8",
     "test:sandbox": "jest packages/sandbox/ --maxWorkers=8",
     "test:shared": "jest packages/shared/ --maxWorkers=8",
     "test:prod": "jest --coverage --maxWorkers=8 --silent",
