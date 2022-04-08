@@ -110,11 +110,9 @@ type MatchedRouteTyped = Omit<
   'children' | 'fill' | 'isFragment' | 'parent' | 'pathToRegexpOptions' | 'slot' | 'slotRoutes'
 > &
   ToMatchedRouteOptions & {
-    /** 嵌套的父应用容器名称 */
-    parentContainerName?: string;
-
     /** 获取 matchedRoute 原本的 route 对象 */
     getRoute: () => IRoute;
+    clone: () => MatchedRoute;
   };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
