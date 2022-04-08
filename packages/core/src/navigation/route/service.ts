@@ -152,11 +152,11 @@ export class Route extends ExtensibleEntity implements IRoute {
       ...extensibleObject,
       path: this.path,
       apps: this.apps,
-      meta: clone(this.meta),
-      parentContainerName: this.fill,
+      meta: { parentContainerName: this.fill, ...clone(this.meta) },
       fullPath: this.fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
+      clone: (): MatchedRoute => this.toMatchedRoute(options),
       getRoute: (): IRoute => this,
     };
   }
