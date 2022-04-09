@@ -22,7 +22,7 @@ function getAppInstance(config: AppConfig): IApp {
 function getAppWithLoadHook(
   config: AppConfig,
   hooks: AppHooks = {},
-  mountHooks?: Record<string, AppHookFunction>,
+  mountHooks: Record<string, AppHookFunction> = {},
 ): IApp {
   return getAppInstance({
     loadApp: async () => {

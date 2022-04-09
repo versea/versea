@@ -1,0 +1,33 @@
+{
+  "name": "@versea/tapable",
+  "version": "0.0.5",
+  "license": "MIT",
+  "main": "lib",
+  "module": "esm",
+  "umd:main": "dist/versea.tapable.umd.production.js",
+  "unpkg": "dist/versea.tapable.umd.production.js",
+  "types": "esm/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/versea/versea.git"
+  },
+  "bugs": {
+    "url": "https://github.com/versea/versea/issues"
+  },
+  "homepage": "https://github.com/versea/versea#readme",
+  "scripts": {
+    "build": "rimraf -rf lib esm dist && npm run build:cjs && npm run build:esm && npm run build:umd",
+    "build:cjs": "tsc --project tsconfig.build.json",
+    "build:esm": "tsc --project tsconfig.build.json --module es2015 --outDir esm",
+    "build:umd": "rollup --config",
+    "type:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@versea/shared": "0.0.5",
+    "tslib": "^2.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "gitHead": "1ef4c047fab816017e0a2b716abc326b95f53287"
+}

@@ -11,6 +11,7 @@ const presets = () => {
     '@versea/core': 'Versea.Core',
     '@versea/shared': 'Versea.Shared',
     '@versea/sandbox': 'Versea.Sandbox',
+    '@versea/tapable': 'Versea.Tapable',
   };
 
   return [
