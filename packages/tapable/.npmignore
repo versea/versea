@@ -1,0 +1,8 @@
+node_modules
+*.log
+src
+build
+__tests__
+rollup.config.js
+tsconfig.json
+tsconfig.build.json

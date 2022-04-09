@@ -7,6 +7,7 @@
     "Versea",
     "inversify",
     "unmount",
-    "middlewares"
+    "middlewares",
+    "tapable"
   ]
 }
