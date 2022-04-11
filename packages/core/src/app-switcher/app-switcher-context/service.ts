@@ -7,7 +7,7 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
-import { RendererAction } from '../renderer/action';
+import { RendererAction } from '../logic-renderer/action';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';
@@ -23,7 +23,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   /** cancel 任务的 promise */
   protected readonly _canceledDeferred = new Deferred<boolean>();
 
-  /** 是否已经 */
+  /** 路由事件 */
   protected _navigationEvent?: Event;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
@@ -84,7 +84,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     onCancel?: () => void,
   ): Promise<T> {
     try {
-      this._ensureWithoutCancel(onCancel);
+      this._ensureNotCanceled(onCancel);
       const result = await fn();
       return result;
     } catch (error) {
@@ -98,20 +98,20 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   // TODO: Action 相关应该全部换成 hooks
   protected async _handleRendererAction({ type, targetType, apps, parents }: RendererAction): Promise<void> {
     if (type === this._ActionType.BeforeUnmount) {
-      this._ensureWithoutCancel();
+      this._ensureNotCanceled();
       this.status = this._SwitcherStatus.Unmounting;
     }
 
     if (type === this._ActionType.Unmount) {
       if (targetType !== this._ActionTargetType.RootFragment) {
-        this._ensureWithoutCancel();
+        this._ensureNotCanceled();
       }
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       await this._runSingleTask(apps!, async (app) => app.unmount(this));
     }
 
     if (type === this._ActionType.BeforeUnmountFragment) {
-      this._ensureWithoutCancel();
+      this._ensureNotCanceled();
     }
 
     if (type === this._ActionType.Unmounted) {
@@ -133,7 +133,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
           return app.mount(this);
         });
       } else {
-        this._ensureWithoutCancel();
+        this._ensureNotCanceled();
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         await this._runSingleTask(apps!, async (app, index) => {
           const parent = parents?.[index];
@@ -149,7 +149,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     }
 
     if (type === this._ActionType.BeforeMountFragment) {
-      this._ensureWithoutCancel();
+      this._ensureNotCanceled();
     }
 
     if (type === this._ActionType.Mounted) {
@@ -168,7 +168,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     }
   }
 
-  protected _ensureWithoutCancel(onCancel?: () => void): void {
+  protected _ensureNotCanceled(onCancel?: () => void): void {
     if (this.status === this._SwitcherStatus.WaitForCancel) {
       onCancel?.();
       this._resolveCanceledDeferred(true);

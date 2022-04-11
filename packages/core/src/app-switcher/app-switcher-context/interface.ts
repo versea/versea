@@ -4,7 +4,7 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
 import { ILogicLoader } from '../logic-loader/service';
-import { IRenderer } from '../renderer/service';
+import { IRenderer } from '../logic-renderer/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
@@ -31,7 +31,10 @@ export interface IAppSwitcherContext {
    */
   cancel: () => Promise<boolean>;
 
-  /** 运行异步事务 */
+  /**
+   * 运行事务
+   * @description 将异步的函数包装成一个异步事务并运行，确保在取消和运行报错情况下都能保持 SwitcherContext 的状态正确
+   */
   runTransaction: <T>(fn: () => Promise<T>, onError?: (error: unknown) => void, onCancel?: () => void) => Promise<T>;
 }
 

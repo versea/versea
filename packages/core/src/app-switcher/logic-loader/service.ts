@@ -38,26 +38,26 @@ export class LogicLoader implements ILogicLoader {
     const hookContext = this._createLogicLoaderHookContext(switcherContext);
     this.currentHookContext = hookContext;
 
-    await this._runTransaction(async () => this._hooks.beforeLoadApps.call(hookContext));
+    await this._runTransaction(async () => this._hooks.beforeLogicLoad.call(hookContext));
 
     // 开始加载应用
     hookContext.switcherContext.status = this._SwitcherStatus.Loading;
     for (const apps of hookContext.targetApps) {
       hookContext.currentApps = apps;
-      await this._runTransaction(async () => this._hooks.loadApps.call(hookContext));
+      await this._runTransaction(async () => this._hooks.logicLoad.call(hookContext));
     }
     // 加载应用完成，修改状态并清空需要加载的应用
     hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
     hookContext.currentApps = [];
 
-    await this._runTransaction(async () => this._hooks.afterLoadApps.call(hookContext));
+    await this._runTransaction(async () => this._hooks.afterLogicLoad.call(hookContext));
 
     // 无论什么情况加载完成都需要清空 currentHookContext
     this._restoreLogicLoaderHookContext();
   }
 
   protected _initHooks(): void {
-    this._hooks.loadApps.tap('internal-load-apps', async (hookContext) => {
+    this._hooks.logicLoad.tap('internal-load-apps', async (hookContext) => {
       const apps = hookContext.currentApps;
       await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
     });
