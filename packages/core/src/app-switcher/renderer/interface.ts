@@ -1,4 +1,4 @@
-import { MatchedRoutes } from '../../navigation/matcher/service';
+import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 import { RendererActionHandler } from './action';
@@ -45,5 +45,5 @@ export interface IRenderer {
    * 1. unmount 阶段：销毁 path3 和之下所有 route。对应应用的销毁顺序是 D -> C ->[I, L]并行
    * 2. mount 阶段：优先渲染主路由，对应应用的 mount 顺序是 H -> K -> [F, G]并行 -> M
    */
-  render: (matchedRoutes: MatchedRoutes, onAction: RendererActionHandler) => Promise<void>;
+  render: (matchedResult: MatchedResult, onAction: RendererActionHandler) => Promise<void>;
 }

@@ -18,7 +18,7 @@ export interface TapOptions {
 
   /**
    * 同名时是否替换回调函数
-   * @description 一般不需要传入，紧急需要替换时传 true
+   * @description 一般不需要传入，仅仅需要替换时传 true。
    */
   replace?: boolean;
 
@@ -27,5 +27,9 @@ export interface TapOptions {
 }
 
 export interface HookContext {
-  cancel?: boolean;
+  /**
+   * 熔断
+   * @description 设置为 true 则会取消后续 Tap 执行。
+   */
+  bail?: boolean;
 }

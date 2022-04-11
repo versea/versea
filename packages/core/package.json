@@ -25,6 +25,7 @@
   "dependencies": {
     "@types/ramda": "^0.28.3",
     "@versea/shared": "0.0.5",
+    "@versea/tapable": "0.0.5",
     "inversify": "^6.0.1",
     "path-to-regexp": "^6.2.0",
     "query-string": "^7.1.1",

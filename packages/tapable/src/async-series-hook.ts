@@ -13,7 +13,7 @@ export class AsyncSeriesHook<T extends HookContext> extends BaseHook<T, Promise<
         throw error;
       }
 
-      if (context.cancel) {
+      if (context.bail) {
         breakIndex = i;
         break;
       }

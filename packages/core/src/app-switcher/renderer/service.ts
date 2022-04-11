@@ -3,7 +3,7 @@ import { differenceWith } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
-import { MatchedRoutes } from '../../navigation/matcher/service';
+import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { RendererActionHandler } from './action';
@@ -35,13 +35,13 @@ export class Renderer implements IRenderer {
     this.currentRootFragmentRoutes = [];
   }
 
-  public async render(matched: MatchedRoutes, onAction: RendererActionHandler): Promise<void> {
+  public async render(matched: MatchedResult, onAction: RendererActionHandler): Promise<void> {
     await this._unmount(matched, onAction);
     await this._mount(matched, onAction);
   }
 
   protected async _unmount(
-    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedRoutes,
+    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedResult,
     onAction: RendererActionHandler,
   ): Promise<void> {
     await onAction({
@@ -65,7 +65,7 @@ export class Renderer implements IRenderer {
   }
 
   protected async _mount(
-    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedRoutes,
+    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedResult,
     onAction: RendererActionHandler,
   ): Promise<void> {
     await onAction({

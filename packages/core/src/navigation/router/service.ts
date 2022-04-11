@@ -5,7 +5,7 @@ import { parse } from 'query-string';
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { IMatcher, IMatcherKey, MatchedRoutes } from '../matcher/service';
+import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/service';
 import { callCapturedEventListeners } from '../navigation-events';
 import { RouteConfig } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
@@ -26,7 +26,7 @@ export class Router implements IRouter {
     this._matcher.addRoutes(routes, app);
   }
 
-  public match(): MatchedRoutes {
+  public match(): MatchedResult {
     const path = window.location.pathname;
     const query = parse(window.location.search);
     return this._matcher.match(path, query);
@@ -36,7 +36,7 @@ export class Router implements IRouter {
     try {
       await appSwitcher.switch({
         navigationEvent,
-        matchedRoutes: this.match(),
+        matchedResult: this.match(),
       });
     } catch (error) {
       if (!(error instanceof VerseaCanceledError)) {
