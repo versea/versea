@@ -6,7 +6,7 @@ import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILogicLoaderKey, ILogicLoader } from '../logic-loader/service';
-import { IRendererKey, IRenderer } from '../renderer/service';
+import { IRendererKey, IRenderer } from '../logic-renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
