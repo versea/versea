@@ -13,7 +13,7 @@ export class SyncHook<T extends HookContext> extends BaseHook<T, void> {
         throw error;
       }
 
-      if (context.cancel) {
+      if (context.bail) {
         breakIndex = i;
         break;
       }

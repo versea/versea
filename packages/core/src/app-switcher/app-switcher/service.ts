@@ -5,7 +5,7 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
-import { ILoaderKey, ILoader } from '../loader/service';
+import { ILogicLoaderKey, ILogicLoader } from '../logic-loader/service';
 import { IRendererKey, IRenderer } from '../renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
@@ -27,7 +27,7 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _router: IRouter;
 
-  protected readonly _loader: ILoader;
+  protected readonly _logicLoader: ILogicLoader;
 
   protected readonly _renderer: IRenderer;
 
@@ -40,7 +40,7 @@ export class AppSwitcher implements IAppSwitcher {
     /* eslint-enable @typescript-eslint/naming-convention */
 
     @inject(IRouterKey) router: IRouter,
-    @inject(ILoaderKey) loader: ILoader,
+    @inject(ILogicLoaderKey) logicLoader: ILogicLoader,
     @inject(IRendererKey) renderer: IRenderer,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
@@ -49,7 +49,7 @@ export class AppSwitcher implements IAppSwitcher {
     this._ActionTargetType = ActionTargetType;
 
     this._router = router;
-    this._loader = loader;
+    this._logicLoader = logicLoader;
     this._renderer = renderer;
   }
 
@@ -73,7 +73,7 @@ export class AppSwitcher implements IAppSwitcher {
 
     this.currentContext = nextContext;
     return nextContext?.run({
-      loader: this._loader,
+      logicLoader: this._logicLoader,
       renderer: this._renderer,
     });
   }

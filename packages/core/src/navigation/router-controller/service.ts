@@ -3,7 +3,7 @@ import { inject } from 'inversify';
 import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/service';
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { MatchedRoutes } from '../matcher/service';
+import { MatchedResult } from '../matcher/service';
 import { bindRouter } from '../navigation-events';
 import { IRouteKey, RouteConfig } from '../route/service';
 import { IRouter } from '../router/service';
@@ -38,7 +38,7 @@ export class RouterController implements IRouterController {
     this._router.addRoutes(routes, app);
   }
 
-  public match(): MatchedRoutes {
+  public match(): MatchedResult {
     return this._router.match();
   }
 

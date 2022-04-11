@@ -3,11 +3,10 @@ import { ExtensibleEntity, VerseaError, VerseaCanceledError, Deferred, memoizePr
 import { IApp } from '../../application/app/service';
 import { IActionType, IActionTargetType } from '../../constants/action';
 import { ISwitcherStatus } from '../../constants/status';
-import { MatchedRoutes } from '../../navigation/matcher/service';
+import { MatchedResult } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
-import { LoaderAction } from '../loader/action';
 import { RendererAction } from '../renderer/action';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
@@ -15,10 +14,11 @@ export * from './interface';
 
 @provide(IAppSwitcherContextKey, 'Constructor')
 export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcherContext {
+  /** SwitcherContext 运行状态 */
   public status: ISwitcherStatus[keyof ISwitcherStatus];
 
   /** 匹配的路由 */
-  public readonly matchedRoutes: MatchedRoutes;
+  public readonly matchedResult: MatchedResult;
 
   /** cancel 任务的 promise */
   protected readonly _canceledDeferred = new Deferred<boolean>();
@@ -26,7 +26,6 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   /** 是否已经 */
   protected _navigationEvent?: Event;
 
-  /** SwitcherContext 运行状态 */
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
   protected readonly _ActionType: IActionType;
@@ -47,20 +46,29 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     this._ActionTargetType = ActionTargetType;
     this._router = router;
 
-    this.matchedRoutes = options.matchedRoutes;
+    this.matchedResult = options.matchedResult;
     this._navigationEvent = options.navigationEvent;
 
     this.status = this._SwitcherStatus.NotStart;
   }
 
   @memoizePromise(0, false)
-  public async run({ renderer, loader }: RunOptions): Promise<void> {
+  public async run({ renderer, logicLoader }: RunOptions): Promise<void> {
     if (this.status !== this._SwitcherStatus.NotStart) {
       throw new VerseaError(`Can not load apps with status "${this.status}".`);
     }
 
-    await loader.load(this.matchedRoutes, async (action) => this._handleLoaderAction(action));
-    await renderer.render(this.matchedRoutes, async (action) => this._handleRendererAction(action));
+    await logicLoader.load(this);
+
+    if (!this._router.isStarted) {
+      // 没有执行过 start，不需要执行 mount 逻辑
+      this._resolveCanceledDeferred(false);
+      this.status = this._SwitcherStatus.Done;
+      return;
+    }
+
+    this.status = this._SwitcherStatus.NotUnmounted;
+    await renderer.render(this.matchedResult, async (action) => this._handleRendererAction(action));
   }
 
   public async cancel(): Promise<boolean> {
@@ -70,21 +78,20 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     return this._canceledDeferred.promise;
   }
 
-  // TODO: Action 相关应该全部换成 hooks
-  protected async _handleLoaderAction({ type, apps }: LoaderAction): Promise<void> {
-    if (type === this._ActionType.BeforeLoad) {
-      this._ensureWithoutCancel();
-      this.status = this._SwitcherStatus.LoadingApps;
-    }
-
-    if (type === this._ActionType.Load) {
-      this._ensureWithoutCancel();
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await this._runSingleTask(apps!, async (app) => app.load(this));
-    }
-
-    if (type === this._ActionType.Loaded) {
-      this.status = this._SwitcherStatus.NotUnmounted;
+  public async runTransaction<T>(
+    fn: () => Promise<T>,
+    onError?: (error: unknown) => void,
+    onCancel?: () => void,
+  ): Promise<T> {
+    try {
+      this._ensureWithoutCancel(onCancel);
+      const result = await fn();
+      return result;
+    } catch (error) {
+      this._resolveCanceledDeferred(false);
+      this.status = this._SwitcherStatus.Broken;
+      onError?.(error);
+      throw error;
     }
   }
 
@@ -146,7 +153,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     }
 
     if (type === this._ActionType.Mounted) {
-      this._resolveCanceledMonitor(false);
+      this._resolveCanceledDeferred(false);
       this.status = this._SwitcherStatus.Done;
     }
   }
@@ -155,20 +162,21 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     try {
       await Promise.all(apps.map(fn));
     } catch (error) {
-      this._resolveCanceledMonitor(false);
+      this._resolveCanceledDeferred(false);
       this.status = this._SwitcherStatus.Broken;
       throw error;
     }
   }
 
-  protected _ensureWithoutCancel(): void {
+  protected _ensureWithoutCancel(onCancel?: () => void): void {
     if (this.status === this._SwitcherStatus.WaitForCancel) {
-      this._resolveCanceledMonitor(true);
+      onCancel?.();
+      this._resolveCanceledDeferred(true);
       throw new VerseaCanceledError('Cancel switcher task.');
     }
   }
 
-  protected _resolveCanceledMonitor(cancel: boolean): void {
+  protected _resolveCanceledDeferred(cancel: boolean): void {
     this._callEvent();
     this._canceledDeferred.resolve(cancel);
     if (cancel) {
