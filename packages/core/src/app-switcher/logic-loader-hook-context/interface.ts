@@ -20,8 +20,8 @@ export interface ILogicLoaderHookContext extends HookContext {
    */
   targetApps: IApp[][];
 
-  /** 当前正在加载的应用 */
-  currentApps: IApp[];
+  /** 当前需要加载的应用 */
+  currentLoadApps: IApp[];
 }
 
 export interface LogicLoaderHookContextOptions {

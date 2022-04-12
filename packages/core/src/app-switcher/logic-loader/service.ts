@@ -43,12 +43,12 @@ export class LogicLoader implements ILogicLoader {
     // 开始加载应用
     hookContext.switcherContext.status = this._SwitcherStatus.Loading;
     for (const apps of hookContext.targetApps) {
-      hookContext.currentApps = apps;
+      hookContext.currentLoadApps = apps;
       await this._runTransaction(async () => this._hooks.logicLoad.call(hookContext));
+      hookContext.currentLoadApps = [];
     }
-    // 加载应用完成，修改状态并清空需要加载的应用
+    // 加载应用完成，修改状态
     hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
-    hookContext.currentApps = [];
 
     await this._runTransaction(async () => this._hooks.afterLogicLoad.call(hookContext));
 
@@ -58,7 +58,7 @@ export class LogicLoader implements ILogicLoader {
 
   protected _initHooks(): void {
     this._hooks.logicLoad.tap('internal-load-apps', async (hookContext) => {
-      const apps = hookContext.currentApps;
+      const apps = hookContext.currentLoadApps;
       await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
     });
   }
