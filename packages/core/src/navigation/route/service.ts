@@ -148,16 +148,20 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
+    const apps = this.apps;
+    const fullPath = this.fullPath;
+
     return {
       ...extensibleObject,
       path: this.path,
-      apps: this.apps,
+      apps,
       meta: { parentContainerName: this.fill, ...clone(this.meta) },
-      fullPath: this.fullPath,
+      fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
       clone: (): MatchedRoute => this.toMatchedRoute(options),
       getRoute: (): IRoute => this,
+      equal: (route: MatchedRoute): boolean => fullPath === route.fullPath && apps[0] === route.apps[0],
     };
   }
 

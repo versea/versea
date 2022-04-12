@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { inject, interfaces } from 'inversify';
 
+import { VERSEA_INTERNAL_TAP } from '../../constants/constants';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
@@ -12,8 +12,6 @@ export * from './interface';
 
 @provide(ILogicLoaderKey)
 export class LogicLoader implements ILogicLoader {
-  public currentHookContext: ILogicLoaderHookContext | null = null;
-
   protected _hooks: IHooks;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
@@ -35,53 +33,45 @@ export class LogicLoader implements ILogicLoader {
   }
 
   public async load(switcherContext: IAppSwitcherContext): Promise<void> {
+    const { logicLoad } = this._hooks;
     const hookContext = this._createLogicLoaderHookContext(switcherContext);
-    this.currentHookContext = hookContext;
+    await switcherContext.runTask(async () => logicLoad.call(hookContext));
+  }
 
-    await this._runTransaction(async () => this._hooks.beforeLogicLoad.call(hookContext));
-
-    // 开始加载应用
-    hookContext.switcherContext.status = this._SwitcherStatus.Loading;
-    for (const apps of hookContext.targetApps) {
-      hookContext.currentLoadApps = apps;
-      await this._runTransaction(async () => this._hooks.logicLoad.call(hookContext));
-      hookContext.currentLoadApps = [];
-    }
-    // 加载应用完成，修改状态
-    hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
-
-    await this._runTransaction(async () => this._hooks.afterLogicLoad.call(hookContext));
-
-    // 无论什么情况加载完成都需要清空 currentHookContext
-    this._restoreLogicLoaderHookContext();
+  public restore(): void {
+    // 销毁本次加载的副作用
   }
 
   protected _initHooks(): void {
-    this._hooks.logicLoad.tap('internal-load-apps', async (hookContext) => {
+    const { logicLoad, logicLoadApps } = this._hooks;
+
+    // 执行逻辑加载应用的勾子
+    logicLoad.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onLoad(hookContext));
+
+    // 执行逻辑加载单条应用数据的勾子
+    logicLoadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const apps = hookContext.currentLoadApps;
       await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
     });
   }
 
+  protected async _onLoad(hookContext: ILogicLoaderHookContext): Promise<void> {
+    const { logicLoadApps } = this._hooks;
+    const { switcherContext } = hookContext;
+
+    // 开始加载应用
+    switcherContext.status = this._SwitcherStatus.Loading;
+    for (const apps of hookContext.targetApps) {
+      hookContext.currentLoadApps = apps;
+      await switcherContext.runTask(async () => logicLoadApps.call(hookContext));
+      hookContext.currentLoadApps = [];
+    }
+    // 加载应用完成，修改状态
+    hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
+  }
+
   protected _createLogicLoaderHookContext(switcherContext: IAppSwitcherContext): ILogicLoaderHookContext {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult });
-  }
-
-  protected _restoreLogicLoaderHookContext(): void {
-    this.currentHookContext = null;
-  }
-
-  protected async _runTransaction<T>(fn: () => Promise<T>): Promise<T> {
-    const result = await this.currentHookContext!.switcherContext.runTransaction(
-      fn,
-      () => {
-        this._restoreLogicLoaderHookContext();
-      },
-      () => {
-        this._restoreLogicLoaderHookContext();
-      },
-    );
-    return result;
   }
 }

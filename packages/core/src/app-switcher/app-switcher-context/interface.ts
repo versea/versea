@@ -1,16 +1,15 @@
-import { IActionType, IActionTargetType } from '../../constants/action';
 import { ISwitcherStatus } from '../../constants/status';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
 import { ILogicLoader } from '../logic-loader/service';
-import { IRenderer } from '../logic-renderer/service';
+import { ILogicRenderer } from '../logic-renderer/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
 /**
  * 应用切换上下文
- * @description 执行 load app 和 mount app 和 unmount app
+ * @description 执行 load app 和 mount app 和 unmount app。
  */
 export interface IAppSwitcherContext {
   /** SwitcherContext 运行状态 */
@@ -32,22 +31,28 @@ export interface IAppSwitcherContext {
   cancel: () => Promise<boolean>;
 
   /**
-   * 运行事务
-   * @description 将异步的函数包装成一个异步事务并运行，确保在取消和运行报错情况下都能保持 SwitcherContext 的状态正确
+   * 运行异步任务
+   * @description 将异步的函数包装成一个异步任务，会优先判断任务是否被取消。
    */
-  runTransaction: <T>(fn: () => Promise<T>, onError?: (error: unknown) => void, onCancel?: () => void) => Promise<T>;
+  runTask: <T>(fn: () => Promise<T>) => Promise<T>;
+
+  /**
+   * 确保当前任务没有被取消
+   * @description 检查当前状态是不是 WaitForCancel，如果是抛出 VerseaCanceledError。
+   */
+  ensureNotCanceled: () => void;
+
+  /** 调用存储的路由事件 */
+  callEvent: () => void;
 }
 
 export interface RunOptions {
   logicLoader: ILogicLoader;
-  renderer: IRenderer;
+  logicRenderer: ILogicRenderer;
 }
 
 export interface AppSwitcherContextDependencies {
-  /* eslint-disable @typescript-eslint/naming-convention */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   SwitcherStatus: ISwitcherStatus;
-  ActionType: IActionType;
-  ActionTargetType: IActionTargetType;
-  /* eslint-enable @typescript-eslint/naming-convention */
   router: IRouter;
 }

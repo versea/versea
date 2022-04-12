@@ -15,7 +15,7 @@ export interface IMatcher {
 }
 
 export interface MatchedResult {
-  /** 匹配的路由信息 */
+  /** 匹配的普通路由信息 */
   routes: MatchedRoute[];
 
   /** 匹配的根部碎片路由信息 */

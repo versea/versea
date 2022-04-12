@@ -1,12 +1,11 @@
 import { inject, interfaces } from 'inversify';
 
-import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILogicLoaderKey, ILogicLoader } from '../logic-loader/service';
-import { IRendererKey, IRenderer } from '../logic-renderer/service';
+import { ILogicRendererKey, ILogicRenderer } from '../logic-renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
@@ -21,36 +20,27 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
-  protected readonly _ActionType: IActionType;
-
-  protected readonly _ActionTargetType: IActionTargetType;
-
   protected readonly _router: IRouter;
 
   protected readonly _logicLoader: ILogicLoader;
 
-  protected readonly _renderer: IRenderer;
+  protected readonly _logicRenderer: ILogicRenderer;
 
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
-    @inject(IActionTypeKey) ActionType: IActionType,
-    @inject(IActionTargetTypeKey) ActionTargetType: IActionTargetType,
     /* eslint-enable @typescript-eslint/naming-convention */
-
     @inject(IRouterKey) router: IRouter,
     @inject(ILogicLoaderKey) logicLoader: ILogicLoader,
-    @inject(IRendererKey) renderer: IRenderer,
+    @inject(ILogicRendererKey) logicRenderer: ILogicRenderer,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
-    this._ActionType = ActionType;
-    this._ActionTargetType = ActionTargetType;
 
     this._router = router;
     this._logicLoader = logicLoader;
-    this._renderer = renderer;
+    this._logicRenderer = logicRenderer;
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -74,7 +64,7 @@ export class AppSwitcher implements IAppSwitcher {
     this.currentContext = nextContext;
     return nextContext?.run({
       logicLoader: this._logicLoader,
-      renderer: this._renderer,
+      logicRenderer: this._logicRenderer,
     });
   }
 
@@ -82,8 +72,6 @@ export class AppSwitcher implements IAppSwitcher {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._AppSwitcherContext(options, {
       SwitcherStatus: this._SwitcherStatus,
-      ActionType: this._ActionType,
-      ActionTargetType: this._ActionTargetType,
       router: this._router,
     });
   }

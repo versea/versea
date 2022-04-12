@@ -1,22 +1,14 @@
-import { MatchedResult } from '../../navigation/matcher/service';
-import { MatchedRoute } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
-import { RendererActionHandler } from './action';
+import { AppSwitcherContext } from '../app-switcher-context/service';
 
-export const IRendererKey = createServiceSymbol('IRenderer');
+export const ILogicRendererKey = createServiceSymbol('ILogicRenderer');
 
-export interface IRenderer {
-  /** 当前正在运行的路由和应用 */
-  currentRoutes: MatchedRoute[];
-
-  /** 当前正在运行的根部碎片路由和碎片应用 */
-  currentRootFragmentRoutes: MatchedRoute[];
-
+export interface ILogicRenderer {
   /**
    * 计算和执行渲染逻辑
-   * @description 根据 matched 计算出 unmount 和 mount 的应用和顺序
+   * @description 根据 matchedRoutes 计算出 unmount 和 mount 的应用和顺序
    * ------
-   * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，cost 会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
+   * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，代价会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
    *
    * 举例说明，当前路由如下（当前）：
    * ```
@@ -45,5 +37,8 @@ export interface IRenderer {
    * 1. unmount 阶段：销毁 path3 和之下所有 route。对应应用的销毁顺序是 D -> C ->[I, L]并行
    * 2. mount 阶段：优先渲染主路由，对应应用的 mount 顺序是 H -> K -> [F, G]并行 -> M
    */
-  render: (matchedResult: MatchedResult, onAction: RendererActionHandler) => Promise<void>;
+  render: (switcherContext: AppSwitcherContext) => Promise<void>;
+
+  /** 重置为初始状态 */
+  restore: () => void;
 }

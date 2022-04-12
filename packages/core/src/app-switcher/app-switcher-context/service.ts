@@ -1,13 +1,10 @@
 import { ExtensibleEntity, VerseaError, VerseaCanceledError, Deferred, memoizePromise } from '@versea/shared';
 
-import { IApp } from '../../application/app/service';
-import { IActionType, IActionTargetType } from '../../constants/action';
 import { ISwitcherStatus } from '../../constants/status';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
-import { RendererAction } from '../logic-renderer/action';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';
@@ -20,30 +17,24 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   /** 匹配的路由 */
   public readonly matchedResult: MatchedResult;
 
-  /** cancel 任务的 promise */
-  protected readonly _canceledDeferred = new Deferred<boolean>();
-
   /** 路由事件 */
   protected _navigationEvent?: Event;
 
+  /** cancel 任务的 promise */
+  protected readonly _canceledDeferred = new Deferred<boolean>();
+
   protected readonly _SwitcherStatus: ISwitcherStatus;
-
-  protected readonly _ActionType: IActionType;
-
-  protected readonly _ActionTargetType: IActionTargetType;
 
   protected readonly _router: IRouter;
 
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { SwitcherStatus, ActionType, ActionTargetType, router }: AppSwitcherContextDependencies,
+    { SwitcherStatus, router }: AppSwitcherContextDependencies,
   ) {
     super(options);
     // 绑定依赖
     this._SwitcherStatus = SwitcherStatus;
-    this._ActionType = ActionType;
-    this._ActionTargetType = ActionTargetType;
     this._router = router;
 
     this.matchedResult = options.matchedResult;
@@ -53,22 +44,36 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   @memoizePromise(0, false)
-  public async run({ renderer, logicLoader }: RunOptions): Promise<void> {
+  public async run({ logicRenderer, logicLoader }: RunOptions): Promise<void> {
     if (this.status !== this._SwitcherStatus.NotStart) {
       throw new VerseaError(`Can not load apps with status "${this.status}".`);
     }
 
-    await logicLoader.load(this);
+    const restoreAndResolveCanceled = (cancel: boolean): void => {
+      logicLoader.restore();
+      logicRenderer.restore();
+      this._resolveCanceledDeferred(cancel);
+    };
 
-    if (!this._router.isStarted) {
-      // 没有执行过 start，不需要执行 mount 逻辑
-      this._resolveCanceledDeferred(false);
-      this.status = this._SwitcherStatus.Done;
-      return;
+    try {
+      await logicLoader.load(this);
+      if (this._router.isStarted) {
+        this.status = this._SwitcherStatus.NotUnmounted;
+        await logicRenderer.render(this);
+      }
+    } catch (error) {
+      if (error instanceof VerseaCanceledError) {
+        restoreAndResolveCanceled(true);
+        return;
+      }
+
+      restoreAndResolveCanceled(false);
+      this.status = this._SwitcherStatus.Broken;
+      throw error;
     }
 
-    this.status = this._SwitcherStatus.NotUnmounted;
-    await renderer.render(this.matchedResult, async (action) => this._handleRendererAction(action));
+    restoreAndResolveCanceled(false);
+    this.status = this._SwitcherStatus.Done;
   }
 
   public async cancel(): Promise<boolean> {
@@ -78,116 +83,102 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     return this._canceledDeferred.promise;
   }
 
-  public async runTransaction<T>(
-    fn: () => Promise<T>,
-    onError?: (error: unknown) => void,
-    onCancel?: () => void,
-  ): Promise<T> {
-    try {
-      this._ensureNotCanceled(onCancel);
-      const result = await fn();
-      return result;
-    } catch (error) {
-      this._resolveCanceledDeferred(false);
-      this.status = this._SwitcherStatus.Broken;
-      onError?.(error);
-      throw error;
-    }
+  public async runTask<T>(fn: () => Promise<T>): Promise<T> {
+    this.ensureNotCanceled();
+    return fn();
   }
 
-  // TODO: Action 相关应该全部换成 hooks
-  protected async _handleRendererAction({ type, targetType, apps, parents }: RendererAction): Promise<void> {
-    if (type === this._ActionType.BeforeUnmount) {
-      this._ensureNotCanceled();
-      this.status = this._SwitcherStatus.Unmounting;
-    }
-
-    if (type === this._ActionType.Unmount) {
-      if (targetType !== this._ActionTargetType.RootFragment) {
-        this._ensureNotCanceled();
-      }
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await this._runSingleTask(apps!, async (app) => app.unmount(this));
-    }
-
-    if (type === this._ActionType.BeforeUnmountFragment) {
-      this._ensureNotCanceled();
-    }
-
-    if (type === this._ActionType.Unmounted) {
-      this.status = this._SwitcherStatus.NotMounted;
-      this._callEvent();
-    }
-
-    if (type === this._ActionType.BeforeMount) {
-      this.status = this._SwitcherStatus.Mounting;
-    }
-
-    if (type === this._ActionType.Mount) {
-      if (targetType === this._ActionTargetType.RootFragment) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this._runSingleTask(apps!, async (app) => {
-          if (!app.isBootstrapped) {
-            await app.bootstrap(this);
-          }
-          return app.mount(this);
-        });
-      } else {
-        this._ensureNotCanceled();
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        await this._runSingleTask(apps!, async (app, index) => {
-          const parent = parents?.[index];
-          if (!app.isBootstrapped) {
-            await app.bootstrap(this);
-          }
-          if (parent) {
-            await parent.waitForChildContainer(app.name, this);
-          }
-          return app.mount(this);
-        });
-      }
-    }
-
-    if (type === this._ActionType.BeforeMountFragment) {
-      this._ensureNotCanceled();
-    }
-
-    if (type === this._ActionType.Mounted) {
-      this._resolveCanceledDeferred(false);
-      this.status = this._SwitcherStatus.Done;
-    }
-  }
-
-  protected async _runSingleTask(apps: IApp[], fn: (app: IApp, index: number) => Promise<void>): Promise<void> {
-    try {
-      await Promise.all(apps.map(fn));
-    } catch (error) {
-      this._resolveCanceledDeferred(false);
-      this.status = this._SwitcherStatus.Broken;
-      throw error;
-    }
-  }
-
-  protected _ensureNotCanceled(onCancel?: () => void): void {
+  public ensureNotCanceled(): void {
     if (this.status === this._SwitcherStatus.WaitForCancel) {
-      onCancel?.();
-      this._resolveCanceledDeferred(true);
       throw new VerseaCanceledError('Cancel switcher task.');
     }
   }
 
+  public callEvent(): void {
+    if (this._navigationEvent) {
+      this._router.callCapturedEventListeners(this._navigationEvent);
+      this._navigationEvent = undefined;
+    }
+  }
+
   protected _resolveCanceledDeferred(cancel: boolean): void {
-    this._callEvent();
+    this.callEvent();
     this._canceledDeferred.resolve(cancel);
     if (cancel) {
       this.status = this._SwitcherStatus.Canceled;
     }
   }
 
-  protected _callEvent(): void {
-    if (this._navigationEvent) {
-      this._router.callCapturedEventListeners(this._navigationEvent);
-      this._navigationEvent = undefined;
-    }
-  }
+  // TODO: Action 相关应该全部换成 hooks
+  // protected async _handleRendererAction({ type, targetType, apps, parents }: RendererAction): Promise<void> {
+  //   if (type === this._ActionType.BeforeUnmount) {
+  //     this._ensureNotCanceled();
+  //     this.status = this._SwitcherStatus.Unmounting;
+  //   }
+
+  //   if (type === this._ActionType.Unmount) {
+  //     if (targetType !== this._ActionTargetType.RootFragment) {
+  //       this._ensureNotCanceled();
+  //     }
+  //     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //     await this._runSingleTask(apps!, async (app) => app.unmount(this));
+  //   }
+
+  //   if (type === this._ActionType.BeforeUnmountFragment) {
+  //     this._ensureNotCanceled();
+  //   }
+
+  //   if (type === this._ActionType.Unmounted) {
+  //     this.status = this._SwitcherStatus.NotMounted;
+  //     this._callEvent();
+  //   }
+
+  //   if (type === this._ActionType.BeforeMount) {
+  //     this.status = this._SwitcherStatus.Mounting;
+  //   }
+
+  //   if (type === this._ActionType.Mount) {
+  //     if (targetType === this._ActionTargetType.RootFragment) {
+  //       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //       await this._runSingleTask(apps!, async (app) => {
+  //         if (!app.isBootstrapped) {
+  //           await app.bootstrap(this);
+  //         }
+  //         return app.mount(this);
+  //       });
+  //     } else {
+  //       this._ensureNotCanceled();
+  //       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  //       await this._runSingleTask(apps!, async (app, index) => {
+  //         const parent = parents?.[index];
+  //         if (!app.isBootstrapped) {
+  //           await app.bootstrap(this);
+  //         }
+  //         if (parent) {
+  //           await parent.waitForChildContainer(app.name, this);
+  //         }
+  //         return app.mount(this);
+  //       });
+  //     }
+  //   }
+
+  //   if (type === this._ActionType.BeforeMountFragment) {
+  //     this._ensureNotCanceled();
+  //   }
+
+  //   if (type === this._ActionType.Mounted) {
+  //     this._resolveCanceledDeferred(false);
+  //     this.status = this._SwitcherStatus.Done;
+  //   }
+  // }
+
+  // protected async _runSingleTask(apps: IApp[], fn: (app: IApp, index: number) => Promise<void>): Promise<void> {
+  //   try {
+  //     await Promise.all(apps.map(fn));
+  //   } catch (error) {
+  //     this._resolveCanceledDeferred(false);
+  //     this.status = this._SwitcherStatus.Broken;
+  //     throw error;
+  //   }
+  // }
 }

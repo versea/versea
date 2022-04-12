@@ -14,7 +14,7 @@ export * from './interface';
 @provide(IMatcherKey)
 export class Matcher implements IMatcher {
   /**
-   * 路由树
+   * 普通路由树
    * @description 数组的每一项都是树结构。
    */
   protected readonly _trees: IRoute[] = [];

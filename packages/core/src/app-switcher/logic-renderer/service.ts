@@ -1,290 +1,168 @@
-import { inject } from 'inversify';
+import { inject, interfaces } from 'inversify';
 import { differenceWith } from 'ramda';
 
 import { IApp } from '../../application/app/service';
-import { IActionTargetType, IActionTargetTypeKey, IActionType, IActionTypeKey } from '../../constants/action';
-import { MatchedResult } from '../../navigation/matcher/service';
-import { MatchedRoute } from '../../navigation/route/service';
+import { VERSEA_INTERNAL_TAP } from '../../constants/constants';
+import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
+import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
-import { RendererActionHandler } from './action';
-import { IRenderer, IRendererKey } from './interface';
+import { IAppSwitcherContext } from '../app-switcher-context/service';
+import { ILogicRendererHookContext, ILogicRendererHookContextKey } from '../logic-renderer-hook-context/service';
+import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
+import { ILogicRenderer, ILogicRendererKey } from './interface';
 
-export * from './action';
 export * from './interface';
 
-@provide(IRendererKey)
-export class Renderer implements IRenderer {
-  public readonly currentRoutes: MatchedRoute[];
+@provide(ILogicRendererKey)
+export class LogicRenderer implements ILogicRenderer {
+  protected _hooks: IHooks;
 
-  public readonly currentRootFragmentRoutes: MatchedRoute[];
+  protected readonly _SwitcherStatus: ISwitcherStatus;
 
-  protected readonly _ActionType: IActionType;
+  protected _HookContext: interfaces.Newable<ILogicRendererHookContext>;
 
-  protected readonly _ActionTargetType: IActionTargetType;
+  protected _rendererStore: IRendererStore;
 
   constructor(
+    @inject(IHooksKey) hooks: IHooks,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(IActionTypeKey) ActionType: IActionType,
+    @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(IActionTargetTypeKey) ActionTargetType: IActionTargetType,
+    @inject(ILogicRendererHookContextKey) HookContext: interfaces.Newable<ILogicRendererHookContext>,
+    @inject(IRendererStoreKey) rendererStore: IRendererStore,
   ) {
-    this._ActionType = ActionType;
-    this._ActionTargetType = ActionTargetType;
+    this._hooks = hooks;
+    this._SwitcherStatus = SwitcherStatus;
+    this._HookContext = HookContext;
+    this._rendererStore = rendererStore;
 
-    this.currentRoutes = [];
-    this.currentRootFragmentRoutes = [];
+    this._initHooks();
   }
 
-  public async render(matched: MatchedResult, onAction: RendererActionHandler): Promise<void> {
-    await this._unmount(matched, onAction);
-    await this._mount(matched, onAction);
+  public async render(switcherContext: IAppSwitcherContext): Promise<void> {
+    const { logicUnmount, logicMount } = this._hooks;
+    const hookContext = this._createLogicRendererHookContext(switcherContext);
+
+    await switcherContext.runTask(async () => logicUnmount.call(hookContext));
+    switcherContext.callEvent();
+    await switcherContext.runTask(async () => logicMount.call(hookContext));
   }
 
-  protected async _unmount(
-    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedResult,
-    onAction: RendererActionHandler,
-  ): Promise<void> {
-    await onAction({
-      type: this._ActionType.BeforeUnmount,
-      targetType: this._ActionTargetType.Null,
-    });
-
-    await this._unmountApps(targetRoutes, onAction);
-
-    await onAction({
-      type: this._ActionType.BeforeUnmountFragment,
-      targetType: this._ActionTargetType.Null,
-    });
-
-    await this._unmountRootFragmentApps(targetFragments, onAction);
-
-    await onAction({
-      type: this._ActionType.Mounted,
-      targetType: this._ActionTargetType.Null,
-    });
+  public restore(): void {
+    // 销毁本次加载的副作用，暂无
   }
 
-  protected async _mount(
-    { routes: targetRoutes, fragmentRoutes: targetFragments }: MatchedResult,
-    onAction: RendererActionHandler,
-  ): Promise<void> {
-    await onAction({
-      type: this._ActionType.BeforeMount,
-      targetType: this._ActionTargetType.Null,
-    });
+  protected _initHooks(): void {
+    const {
+      logicUnmount,
+      logicUnmountNormal,
+      logicUnmountFragmentApps,
+      logicUnmountMainApp,
+      logicUnmountRoot,
+      logicMount,
+    } = this._hooks;
 
-    await this._mountMainApps(targetRoutes, onAction);
+    // 执行逻辑销毁应用
+    logicUnmount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmount(hookContext));
 
-    await onAction({
-      type: this._ActionType.BeforeMountFragment,
-      targetType: this._ActionTargetType.Null,
-    });
+    // 执行逻辑销毁普通路由
+    logicUnmountNormal.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountNormal(hookContext));
 
-    await this._mountRootFragmentApps(targetFragments, onAction);
+    // 执行销毁普通路由碎片应用
+    logicUnmountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountFragmentApps(hookContext));
 
-    await this._mountFragmentApps(targetFragments, onAction);
+    // 执行销毁普通路由主应用
+    logicUnmountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountMainApp(hookContext));
 
-    await onAction({
-      type: this._ActionType.Mounted,
-      targetType: this._ActionTargetType.Null,
-    });
+    // 执行销毁根部路由碎片应用
+    logicUnmountRoot.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountRoot(hookContext));
+
+    // 执行逻辑渲染应用
+    logicMount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onMount(hookContext));
   }
 
-  protected async _unmountApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
-    const currentRoutes = this.currentRoutes;
-    const mismatchIndex = this._getMismatchIndex(targetRoutes);
+  protected async _onUnmount(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { logicUnmountNormal, logicUnmountRoot } = this._hooks;
+    const { switcherContext } = hookContext;
 
-    // unmount 匹配的路由的应用
+    switcherContext.status = this._SwitcherStatus.Unmounting;
+    await switcherContext.runTask(async () => logicUnmountNormal.call(hookContext));
+    await switcherContext.runTask(async () => logicUnmountRoot.call(hookContext));
+    switcherContext.status = this._SwitcherStatus.Unmounted;
+  }
+
+  protected async _onMount(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { switcherContext } = hookContext;
+
+    switcherContext.status = this._SwitcherStatus.Mounting;
+    await Promise.resolve();
+    switcherContext.status = this._SwitcherStatus.Mounted;
+  }
+
+  protected async _onUnmountNormal(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { logicUnmountFragmentApps, logicUnmountMainApp } = this._hooks;
+    const { switcherContext, currentRoutes, mismatchIndex } = hookContext;
+
+    // 倒序销毁当前渲染的应用
     for (let i = currentRoutes.length - 1; i >= 0; i--) {
-      const currentRoute = currentRoutes[i];
-      const targetRoute = targetRoutes[i];
-      const [mainApp, ...fragmentApps] = currentRoute.apps;
+      const apps = currentRoutes[i].apps;
 
-      if (i < mismatchIndex) {
-        // 在 mismatchIndex 位置之前的 MatchedRoute 中的 apps，只删除碎片应用中多余的部分
-        const differentApps = differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1));
-        if (differentApps.length > 0) {
-          await onAction({
-            type: this._ActionType.Unmount,
-            targetType: this._ActionTargetType.Fragment,
-            apps: differentApps,
-            currentRoute,
-            targetRoute,
-          });
-          currentRoute.apps = [mainApp, ...fragmentApps.filter((app) => !differentApps.includes(app))];
-        }
-        continue;
+      hookContext.setTarget(i);
+      if (apps.length > 1) {
+        await switcherContext.runTask(async () => logicUnmountFragmentApps.call(hookContext));
       }
-
-      // 删除在 mismatchIndex 位置之后的 MatchedRoute 中的删除 apps
-      if (fragmentApps.length > 0) {
-        await onAction({
-          type: this._ActionType.Unmount,
-          targetType: this._ActionTargetType.Fragment,
-          apps: fragmentApps,
-          currentRoute,
-          targetRoute,
-        });
+      if (i >= mismatchIndex) {
+        await switcherContext.runTask(async () => logicUnmountMainApp.call(hookContext));
       }
-
-      // 当主路由应用与上一个不同时，需要卸载主路由应用
-      const lastApp: IApp | null = i === 0 ? null : currentRoutes[i - 1].apps[0];
-      if (mainApp !== lastApp) {
-        await onAction({
-          type: this._ActionType.Unmount,
-          targetType: this._ActionTargetType.MainApp,
-          apps: [mainApp],
-          currentRoute,
-          targetRoute,
-        });
-      }
-      // 删除整个 route 对象
-      currentRoutes.splice(i, 1);
+      hookContext.resetTarget();
     }
   }
 
-  protected async _unmountRootFragmentApps(
-    targetRootFragmentRoutes: MatchedRoute[],
-    onAction: RendererActionHandler,
-  ): Promise<void> {
-    // unmount 匹配的根部碎片路由的应用
-    const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
+  protected async _onUnmountFragmentApps(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { target, switcherContext, mismatchIndex, rendererStore } = hookContext;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { currentRoute, targetRoute, index } = target!;
+    const fragmentApps = currentRoute.apps.slice(1);
+    const apps =
+      index < mismatchIndex
+        ? differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1))
+        : fragmentApps;
+    await Promise.all(apps.map(async (app) => app.unmount(switcherContext)));
+    rendererStore.removeApps(index, apps);
+  }
+
+  protected async _onUnmountMainApp(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { target, switcherContext, currentRoutes, rendererStore } = hookContext;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const { currentRoute, index } = target!;
+    // 主路由应用与上一个不同，需要卸载主路由应用
+    const lastApp: IApp | null = index === 0 ? null : currentRoutes[index - 1].apps[0];
+    if (currentRoute.apps[0] !== lastApp) {
+      await currentRoute.apps[0].unmount(switcherContext);
+    }
+    rendererStore.removeRoute(index);
+  }
+
+  protected async _onUnmountRoot(hookContext: ILogicRendererHookContext): Promise<void> {
+    const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
+
+    // 销毁当前多余的根部路由的对应的应用
     const differentRoutes = differenceWith(
-      (route1, route2) => {
-        return route1.path === route2.path && route1.apps[0] === route2.apps[0];
-      },
+      (route1, route2) => route1.equal(route2),
       currentRootFragmentRoutes,
       targetRootFragmentRoutes,
     );
     await Promise.all(
-      differentRoutes.map(async (currentRoute) => {
-        await onAction({
-          type: this._ActionType.Unmount,
-          targetType: this._ActionTargetType.RootFragment,
-          apps: currentRoute.apps,
-          currentRoute,
-        });
-
-        const index = currentRootFragmentRoutes.indexOf(currentRoute);
-        if (index >= 0) {
-          currentRootFragmentRoutes.splice(index, 1);
-        }
+      differentRoutes.map(async (route) => {
+        await route.apps[0].unmount(switcherContext);
+        rendererStore.removeRootFragmentRoute(route);
       }),
     );
   }
 
-  protected async _mountMainApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
-    const currentRoutes = this.currentRoutes;
-    for (let i = 0; i < targetRoutes.length; i++) {
-      const targetRoute = targetRoutes[i];
-      const mainApp = targetRoute.apps[0];
-      if (!currentRoutes[i]) {
-        // 当主路由应用与上一个不同时，需要添加主路由应用
-        const lastApp: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
-        if (mainApp !== lastApp) {
-          await onAction({
-            type: this._ActionType.Mount,
-            targetType: this._ActionTargetType.MainApp,
-            apps: [mainApp],
-            targetRoute,
-            parents: lastApp ? [lastApp] : [],
-          });
-        }
-        currentRoutes.push(this._cloneMatchedRouteWithApps(targetRoute, [mainApp]));
-      }
-    }
-  }
-
-  protected async _mountRootFragmentApps(
-    targetRootFragmentRoutes: MatchedRoute[],
-    onAction: RendererActionHandler,
-  ): Promise<void> {
-    // unmount 匹配的根部碎片路由的应用
-    const currentRootFragmentRoutes = this.currentRootFragmentRoutes;
-    const differentRoutes = differenceWith(
-      (route1, route2) => {
-        return route1.path === route2.path && route1.apps[0] === route2.apps[0];
-      },
-      targetRootFragmentRoutes,
-      currentRootFragmentRoutes,
-    );
-    await Promise.all(
-      differentRoutes.map(async (targetRoute) => {
-        await onAction({
-          type: this._ActionType.Mount,
-          targetType: this._ActionTargetType.RootFragment,
-          apps: targetRoute.apps,
-          targetRoute,
-        });
-
-        currentRootFragmentRoutes.push(this._cloneMatchedRouteWithApps(targetRoute, targetRoute.apps));
-      }),
-    );
-  }
-
-  protected async _mountFragmentApps(targetRoutes: MatchedRoute[], onAction: RendererActionHandler): Promise<void> {
-    const currentRoutes = this.currentRoutes;
-    for (let i = 0; i < targetRoutes.length; i++) {
-      const targetRoute = targetRoutes[i];
-      const currentRoute = currentRoutes[i];
-      const differentApps = differenceWith(
-        (app1, app2) => app1 === app2,
-        targetRoute.apps.slice(1),
-        currentRoute.apps.slice(1),
-      );
-
-      if (differentApps.length > 0) {
-        const parents = this._findParentApps(differentApps, targetRoute.apps[0]);
-        await onAction({
-          type: this._ActionType.Mount,
-          targetType: this._ActionTargetType.Fragment,
-          apps: differentApps,
-          currentRoute,
-          targetRoute,
-          parents,
-        });
-      }
-      currentRoute.apps = [...targetRoute.apps];
-    }
-  }
-
-  // Container 的渲染需要读取 meta 的 container 函数，这块后面重构
-  protected _findParentApps(toMountApps: IApp[], defaultApp: IApp): IApp[] {
-    const result = toMountApps.map(() => defaultApp);
-    // for (const currentRoute of this.currentRoutes) {
-    //   for (const app of currentRoute.apps) {
-    //     toMountApps.forEach((toMountApp, index) => {
-    //       if (app.hasChildContainerHook(toMountApp.name)) {
-    //         result[index] = app;
-    //       }
-    //     });
-    //   }
-    // }
-    return result;
-  }
-
-  protected _cloneMatchedRouteWithApps(route: MatchedRoute, apps: IApp[]): MatchedRoute {
-    const { query, params } = route;
-    const clonedRoute = route.getRoute().toMatchedRoute({
-      query,
-      params,
-    });
-    clonedRoute.apps = apps;
-    return clonedRoute;
-  }
-
-  /** 获取当前匹配的路由数组和目标匹配的路由数组之间的不匹配的位置 */
-  protected _getMismatchIndex(targetRoutes: MatchedRoute[]): number {
-    const currentRoutes = this.currentRoutes;
-    for (let i = 0; i < currentRoutes.length; i++) {
-      const currentRoute = currentRoutes[i];
-      const targetRoute = targetRoutes[i];
-
-      if (currentRoute.path !== targetRoute.path || currentRoute.apps[0] !== targetRoute.apps[0]) {
-        return i;
-      }
-    }
-
-    return -1;
+  protected _createLogicRendererHookContext(switcherContext: IAppSwitcherContext): ILogicRendererHookContext {
+    // @ts-expect-error 需要传入参数
+    // eslint-disable-next-line prettier/prettier
+    return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult, rendererStore: this._rendererStore });
   }
 }
