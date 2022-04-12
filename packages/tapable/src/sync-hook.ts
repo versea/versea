@@ -9,6 +9,7 @@ export class SyncHook<T extends HookContext> extends BaseHook<T, void> {
       try {
         this._taps[i].fn(context);
       } catch (error) {
+        context.bail = false;
         this._removeOnce(i);
         throw error;
       }
@@ -19,6 +20,7 @@ export class SyncHook<T extends HookContext> extends BaseHook<T, void> {
       }
     }
 
+    context.bail = false;
     this._removeOnce(breakIndex);
   }
 }

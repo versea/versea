@@ -11,7 +11,7 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
     const sameTap = this._taps.find((item) => item.name === name);
     if (sameTap) {
       if (!options.replace) {
-        throw new VerseaError(`Duplicate app name: "${name}".`);
+        throw new VerseaError(`Duplicate tap name: "${name}".`);
       }
 
       sameTap.fn = fn;

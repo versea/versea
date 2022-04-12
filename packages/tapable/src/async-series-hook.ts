@@ -9,6 +9,7 @@ export class AsyncSeriesHook<T extends HookContext> extends BaseHook<T, Promise<
       try {
         await this._taps[i].fn(context);
       } catch (error) {
+        context.bail = false;
         this._removeOnce(i);
         throw error;
       }
@@ -19,6 +20,7 @@ export class AsyncSeriesHook<T extends HookContext> extends BaseHook<T, Promise<
       }
     }
 
+    context.bail = false;
     this._removeOnce(breakIndex);
   }
 }

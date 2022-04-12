@@ -17,7 +17,7 @@ export class LogicLoaderHookContext extends ExtensibleEntity implements ILogicLo
 
   public targetApps: IApp[][];
 
-  public currentApps: IApp[] = [];
+  public currentLoadApps: IApp[] = [];
 
   public bail = false;
 
