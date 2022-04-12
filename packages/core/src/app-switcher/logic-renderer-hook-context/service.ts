@@ -15,7 +15,7 @@ export * from './interface';
 
 @provide(ILogicRendererHookContextKey, 'Constructor')
 export class LogicRendererHookContext extends ExtensibleEntity implements ILogicRendererHookContext {
-  public switcherContext: IAppSwitcherContext;
+  public readonly switcherContext: IAppSwitcherContext;
 
   public targetRoutes: MatchedRoute[];
 

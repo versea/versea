@@ -1,9 +1,11 @@
 import { ISwitcherStatus } from '../../constants/status';
 import { MatchedResult } from '../../navigation/matcher/service';
+import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
 import { ILogicLoader } from '../logic-loader/service';
 import { ILogicRenderer } from '../logic-renderer/service';
+import { IRendererStore } from '../renderer-store/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
@@ -17,6 +19,18 @@ export interface IAppSwitcherContext {
 
   /** 匹配的路由 */
   readonly matchedResult: MatchedResult;
+
+  /** 当前正在运行的路由以及渲染的应用 */
+  readonly rendererStore: IRendererStore;
+
+  /**
+   * 当前正在运行的路由
+   * @description 包含整个路由信息，主路由应用和碎片路由应用。
+   */
+  readonly currentRoutes: MatchedRoute[];
+
+  /** 当前正在运行的根部碎片路由 */
+  readonly currentRootFragmentRoutes: MatchedRoute[];
 
   /**
    * 开始切换应用
@@ -55,4 +69,5 @@ export interface AppSwitcherContextDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   SwitcherStatus: ISwitcherStatus;
   router: IRouter;
+  rendererStore: IRendererStore;
 }
