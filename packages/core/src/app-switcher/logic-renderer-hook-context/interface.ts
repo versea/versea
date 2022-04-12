@@ -9,7 +9,7 @@ import { IRendererStore } from '../renderer-store/service';
 export const ILogicRendererHookContextKey = createServiceSymbol('ILogicRendererHookContext');
 
 export interface ILogicRendererHookContext extends HookContext {
-  switcherContext: IAppSwitcherContext;
+  readonly switcherContext: IAppSwitcherContext;
 
   /**
    * 需要切换的目标路由

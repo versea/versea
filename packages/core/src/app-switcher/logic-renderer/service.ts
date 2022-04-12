@@ -15,13 +15,13 @@ export * from './interface';
 
 @provide(ILogicRendererKey)
 export class LogicRenderer implements ILogicRenderer {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
-  protected _HookContext: interfaces.Newable<ILogicRendererHookContext>;
+  protected readonly _HookContext: interfaces.Newable<ILogicRendererHookContext>;
 
-  protected _rendererStore: IRendererStore;
+  protected readonly _rendererStore: IRendererStore;
 
   constructor(
     @inject(IHooksKey) hooks: IHooks,

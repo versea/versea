@@ -11,9 +11,9 @@ export * from './interface';
 
 @provide(ILogicLoaderHookContextKey, 'Constructor')
 export class LogicLoaderHookContext extends ExtensibleEntity implements ILogicLoaderHookContext {
-  public matchedResult: MatchedResult;
+  public readonly matchedResult: MatchedResult;
 
-  public switcherContext: IAppSwitcherContext;
+  public readonly switcherContext: IAppSwitcherContext;
 
   public targetApps: IApp[][];
 

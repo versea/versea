@@ -2,9 +2,11 @@ import { ExtensibleEntity, VerseaError, VerseaCanceledError, Deferred, memoizePr
 
 import { ISwitcherStatus } from '../../constants/status';
 import { MatchedResult } from '../../navigation/matcher/service';
+import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
+import { IRendererStore } from '../renderer-store/service';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';
@@ -16,6 +18,8 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   /** 匹配的路由 */
   public readonly matchedResult: MatchedResult;
+
+  public readonly rendererStore: IRendererStore;
 
   /** 路由事件 */
   protected _navigationEvent?: Event;
@@ -30,17 +34,26 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { SwitcherStatus, router }: AppSwitcherContextDependencies,
+    { SwitcherStatus, router, rendererStore }: AppSwitcherContextDependencies,
   ) {
     super(options);
     // 绑定依赖
     this._SwitcherStatus = SwitcherStatus;
     this._router = router;
+    this.rendererStore = rendererStore;
 
     this.matchedResult = options.matchedResult;
     this._navigationEvent = options.navigationEvent;
 
     this.status = this._SwitcherStatus.NotStart;
+  }
+
+  public get currentRoutes(): MatchedRoute[] {
+    return this.rendererStore.currentRoutes;
+  }
+
+  public get currentRootFragmentRoutes(): MatchedRoute[] {
+    return this.rendererStore.currentRootFragmentRoutes;
   }
 
   @memoizePromise(0, false)

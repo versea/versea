@@ -6,6 +6,7 @@ import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILogicLoaderKey, ILogicLoader } from '../logic-loader/service';
 import { ILogicRendererKey, ILogicRenderer } from '../logic-renderer/service';
+import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
@@ -26,6 +27,8 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _logicRenderer: ILogicRenderer;
 
+  protected readonly _rendererStore: IRendererStore;
+
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
@@ -34,6 +37,7 @@ export class AppSwitcher implements IAppSwitcher {
     @inject(IRouterKey) router: IRouter,
     @inject(ILogicLoaderKey) logicLoader: ILogicLoader,
     @inject(ILogicRendererKey) logicRenderer: ILogicRenderer,
+    @inject(IRendererStoreKey) rendererStore: IRendererStore,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
@@ -41,6 +45,7 @@ export class AppSwitcher implements IAppSwitcher {
     this._router = router;
     this._logicLoader = logicLoader;
     this._logicRenderer = logicRenderer;
+    this._rendererStore = rendererStore;
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -73,6 +78,7 @@ export class AppSwitcher implements IAppSwitcher {
     return new this._AppSwitcherContext(options, {
       SwitcherStatus: this._SwitcherStatus,
       router: this._router,
+      rendererStore: this._rendererStore,
     });
   }
 }
