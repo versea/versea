@@ -1,4 +1,3 @@
-import { VerseaCanceledError } from '@versea/shared';
 import { inject } from 'inversify';
 import { parse } from 'query-string';
 
@@ -33,16 +32,10 @@ export class Router implements IRouter {
   }
 
   public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
-    try {
-      await appSwitcher.switch({
-        navigationEvent,
-        matchedResult: this.match(),
-      });
-    } catch (error) {
-      if (!(error instanceof VerseaCanceledError)) {
-        throw error;
-      }
-    }
+    await appSwitcher.switch({
+      navigationEvent,
+      matchedResult: this.match(),
+    });
   }
 
   public callCapturedEventListeners(navigationEvent?: Event): void {

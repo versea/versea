@@ -112,7 +112,12 @@ type MatchedRouteTyped = Omit<
   ToMatchedRouteOptions & {
     /** 获取 matchedRoute 原本的 route 对象 */
     getRoute: () => IRoute;
+
+    /** 拷贝一个新的 matchedRoute */
     clone: () => MatchedRoute;
+
+    /** 判断两个 matchedRoute 是否相等 */
+    equal: (route: MatchedRoute) => boolean;
   };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
