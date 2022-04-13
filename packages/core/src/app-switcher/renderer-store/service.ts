@@ -46,4 +46,8 @@ export class RendererStore implements IRendererStore {
       this.currentRoutes[index].apps = apps;
     }
   }
+
+  public appendRootFragmentRoute(route: MatchedRoute): void {
+    this.currentRootFragmentRoutes.push(route.clone());
+  }
 }
