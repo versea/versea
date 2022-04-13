@@ -50,6 +50,7 @@ export class Renderer implements IRenderer {
 
     await switcherContext.runTask(async () => unmount.call(hookContext));
     switcherContext.callEvent();
+    switcherContext.status = this._SwitcherStatus.NotMounted;
     await switcherContext.runTask(async () => mount.call(hookContext));
   }
 

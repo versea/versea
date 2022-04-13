@@ -31,6 +31,7 @@ export const SwitcherStatus = {
   NotUnmounted: 'NotUnmounted',
   Unmounting: 'Unmounting',
   Unmounted: 'Unmounted',
+  NotMounted: 'NotMounted',
   Mounting: 'Mounting',
   Mounted: 'Mounted',
   Done: 'Done',
