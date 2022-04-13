@@ -34,7 +34,7 @@ export interface IHooks {
   /** 执行销毁单条主应用数据的勾子 */
   unmountMainApp: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 执行销毁单条根部碎片应用数据的勾子 */
+  /** 执行销毁根部碎片应用数据的勾子 */
   unmountRootFragmentApps: AsyncSeriesHook<IRendererHookContext>;
 
   /**
@@ -43,6 +43,12 @@ export interface IHooks {
    */
   mount: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 执行渲染单条主应用数据勾子 */
+  /** 执行渲染主应用数据勾子 */
   mountMainApp: AsyncSeriesHook<IRendererHookContext>;
+
+  /** 执行渲染根部碎片应用数据的勾子 */
+  mountRootFragmentApps: AsyncSeriesHook<IRendererHookContext>;
+
+  /** 执行渲染碎片应用数据的勾子 */
+  mountFragmentApps: AsyncSeriesHook<IRendererHookContext>;
 }

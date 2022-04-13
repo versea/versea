@@ -62,9 +62,11 @@ export class Renderer implements IRenderer {
     this._tapUnmountNormal();
     this._tapUnmountFragmentApps();
     this._tapUnmountMainApp();
-    this._tapUnmountRootRootFragmentApps();
+    this._tapUnmountRootFragmentApps();
     this._tapMount();
     this._tapMountMainApp();
+    this._tapMountRootFragmentApps();
+    this._tapMountFragmentApps();
   }
 
   /** 销毁应用 */
@@ -88,7 +90,7 @@ export class Renderer implements IRenderer {
     unmountNormal.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRoutes, mismatchIndex } = hookContext;
 
-      // 倒序销毁当前渲染的应用
+      // 倒序销毁当前渲染的应用，保证被依赖的应用后销毁
       for (let i = currentRoutes.length - 1; i >= 0; i--) {
         const apps = currentRoutes[i].apps;
 
@@ -136,7 +138,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 销毁根部路由碎片应用 */
-  protected _tapUnmountRootRootFragmentApps(): void {
+  protected _tapUnmountRootFragmentApps(): void {
     this._hooks.unmountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
 
@@ -157,13 +159,15 @@ export class Renderer implements IRenderer {
 
   /** 渲染应用 */
   protected _tapMount(): void {
-    const { mount, mountMainApp } = this._hooks;
+    const { mount, mountMainApp, mountRootFragmentApps, mountFragmentApps } = this._hooks;
 
     mount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const { switcherContext } = hookContext;
 
       switcherContext.status = this._SwitcherStatus.Mounting;
       await switcherContext.runTask(async () => mountMainApp.call(hookContext));
+      await switcherContext.runTask(async () => mountRootFragmentApps.call(hookContext));
+      await switcherContext.runTask(async () => mountFragmentApps.call(hookContext));
       switcherContext.status = this._SwitcherStatus.Mounted;
     });
   }
@@ -171,7 +175,7 @@ export class Renderer implements IRenderer {
   /** 渲染主应用 */
   protected _tapMountMainApp(): void {
     this._hooks.mountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { currentRoutes, targetRoutes, rendererStore } = hookContext;
+      const { switcherContext, currentRoutes, targetRoutes, rendererStore } = hookContext;
 
       for (let i = 0; i < targetRoutes.length; i++) {
         const targetRoute = targetRoutes[i];
@@ -180,10 +184,52 @@ export class Renderer implements IRenderer {
           // 当前路由主应用与上一个路由的主应用不同，需要渲染主路由应用
           const lastApp: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
           if (mainApp !== lastApp) {
-            await hookContext.bootstrapAndMount(mainApp, targetRoute);
+            await switcherContext.runTask(async () => hookContext.bootstrapAndMount(mainApp, targetRoute));
           }
           rendererStore.appendRoute(targetRoute, [mainApp]);
         }
+      }
+    });
+  }
+
+  /** 渲染根部路由碎片应用 */
+  protected _tapMountRootFragmentApps(): void {
+    this._hooks.mountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
+      const { currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
+
+      const differentRoutes = differenceWith(
+        (route1, route2) => {
+          return route1.path === route2.path && route1.apps[0] === route2.apps[0];
+        },
+        targetRootFragmentRoutes,
+        currentRootFragmentRoutes,
+      );
+      await Promise.all(
+        differentRoutes.map(async (route) => {
+          await hookContext.bootstrapAndMount(route.apps[0], route);
+          rendererStore.appendRootFragmentRoute(route);
+        }),
+      );
+    });
+  }
+
+  protected _tapMountFragmentApps(): void {
+    this._hooks.mountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
+      const { switcherContext, currentRoutes, targetRoutes, rendererStore } = hookContext;
+
+      for (let i = 0; i < targetRoutes.length; i++) {
+        const targetRoute = targetRoutes[i];
+        const apps = differenceWith(
+          (app1, app2) => app1 === app2,
+          targetRoute.apps.slice(1),
+          currentRoutes[i].apps.slice(1),
+        );
+        if (apps.length > 0) {
+          await switcherContext.runTask(async () =>
+            Promise.all(apps.map(async (app) => hookContext.bootstrapAndMount(app, targetRoute))),
+          );
+        }
+        rendererStore.setApps(i, [...targetRoute.apps]);
       }
     });
   }

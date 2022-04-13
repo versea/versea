@@ -26,4 +26,8 @@ export class Hooks implements IHooks {
   public mount = new AsyncSeriesHook<IRendererHookContext>();
 
   public mountMainApp = new AsyncSeriesHook<IRendererHookContext>();
+
+  public mountRootFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
+
+  public mountFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 }

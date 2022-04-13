@@ -29,4 +29,7 @@ export interface IRendererStore {
 
   /** 设置 currentRoutes 该 index 对应的 route 的 apps */
   setApps: (index: number, apps: IApp[]) => void;
+
+  /** 向 currentRootFragmentRoutes 的末尾增加 route */
+  appendRootFragmentRoute: (route: MatchedRoute) => void;
 }
