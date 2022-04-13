@@ -32,4 +32,18 @@ export class RendererStore implements IRendererStore {
       currentRootFragmentRoutes.splice(index, 1);
     }
   }
+
+  public appendRoute(route: MatchedRoute, apps?: IApp[]): void {
+    const currentRoute = route.clone();
+    if (apps?.length) {
+      currentRoute.apps = apps;
+    }
+    this.currentRoutes.push(currentRoute);
+  }
+
+  public setApps(index: number, apps: IApp[]): void {
+    if (index >= 0 && index < this.currentRoutes.length) {
+      this.currentRoutes[index].apps = apps;
+    }
+  }
 }

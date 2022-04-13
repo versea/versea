@@ -18,28 +18,31 @@ export interface IHooks {
 
   /**
    * 执行销毁应用的勾子
-   * @description 作用于整个销毁应用的生命周期，可以通过优先级决定 Unmount 之前与之后
+   * @description 作用于整个销毁应用的生命周期，可以通过优先级决定 unmount 之前与之后
    */
   unmount: AsyncSeriesHook<IRendererHookContext>;
 
   /**
    * 执行销毁普通路由应用的勾子
-   * @description 作用于整个销毁应用的生命周期，可以通过优先级决定 Unmount 之前与之后
+   * @description 作用于整个销毁应用的生命周期，可以通过优先级决定 unmountNormal 之前与之后
    */
   unmountNormal: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 执行销毁单条碎片应用的勾子 */
+  /** 执行销毁单条碎片应用数据的勾子 */
   unmountFragmentApps: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 执行销毁单条主应用的勾子 */
+  /** 执行销毁单条主应用数据的勾子 */
   unmountMainApp: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 执行销毁单条根部碎片应用的勾子 */
-  unmountRoot: AsyncSeriesHook<IRendererHookContext>;
+  /** 执行销毁单条根部碎片应用数据的勾子 */
+  unmountRootFragmentApps: AsyncSeriesHook<IRendererHookContext>;
 
   /**
    * 执行渲染应用的勾子
-   * @description 作用于整个渲染应用的生命周期，可以通过优先级决定 Mount 之前与之后
+   * @description 作用于整个渲染应用的生命周期，可以通过优先级决定 mount 之前与之后
    */
   mount: AsyncSeriesHook<IRendererHookContext>;
+
+  /** 执行渲染单条主应用数据勾子 */
+  mountMainApp: AsyncSeriesHook<IRendererHookContext>;
 }

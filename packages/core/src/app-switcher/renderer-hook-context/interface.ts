@@ -1,5 +1,7 @@
 import { HookContext } from '@versea/tapable';
 
+import { IAppService } from '../../application/app-service/service';
+import { IApp } from '../../application/app/service';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
@@ -41,6 +43,9 @@ export interface IRendererHookContext extends HookContext {
   setTarget: (index: number) => void;
 
   resetTarget: () => void;
+
+  /** bootstrap 之后再 mount 应用 */
+  bootstrapAndMount: (app: IApp, route: MatchedRoute) => Promise<void>;
 }
 
 /** 普通路由的操作对象 */
@@ -54,4 +59,5 @@ export interface RendererHookContextOptions {
   matchedResult: MatchedResult;
   switcherContext: IAppSwitcherContext;
   rendererStore: IRendererStore;
+  appService: IAppService;
 }

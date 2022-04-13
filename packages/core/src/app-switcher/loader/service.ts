@@ -43,31 +43,33 @@ export class Loader implements ILoader {
   }
 
   protected _initHooks(): void {
+    this._tapLoad();
+    this._tapLoadApps();
+  }
+
+  /** 加载应用 */
+  protected _tapLoad(): void {
     const { load, loadApps } = this._hooks;
+    load.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
+      const { switcherContext } = hookContext;
 
-    // 执行加载应用的勾子
-    load.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onLoad(hookContext));
-
-    // 执行加载单条应用数据的勾子
-    loadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
-      const apps = hookContext.currentLoadApps;
-      await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
+      // 开始加载应用
+      switcherContext.status = this._SwitcherStatus.Loading;
+      for (const apps of hookContext.targetApps) {
+        hookContext.currentLoadApps = apps;
+        await switcherContext.runTask(async () => loadApps.call(hookContext));
+        hookContext.currentLoadApps = [];
+      }
+      // 加载应用完成，修改状态
+      hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
     });
   }
 
-  protected async _onLoad(hookContext: ILoaderHookContext): Promise<void> {
-    const { loadApps } = this._hooks;
-    const { switcherContext } = hookContext;
-
-    // 开始加载应用
-    switcherContext.status = this._SwitcherStatus.Loading;
-    for (const apps of hookContext.targetApps) {
-      hookContext.currentLoadApps = apps;
-      await switcherContext.runTask(async () => loadApps.call(hookContext));
-      hookContext.currentLoadApps = [];
-    }
-    // 加载应用完成，修改状态
-    hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
+  protected _tapLoadApps(): void {
+    this._hooks.loadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
+      const apps = hookContext.currentLoadApps;
+      await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
+    });
   }
 
   protected _createLoaderHookContext(switcherContext: IAppSwitcherContext): ILoaderHookContext {

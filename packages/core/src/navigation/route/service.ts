@@ -133,7 +133,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     });
   }
 
-  public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
+  public toMatchedRoute(options: ToMatchedRouteOptions, parentAppName?: string): MatchedRoute {
     if (this.isFragment) {
       throw new VerseaError(`Can not match route path "${this.fullPath}" with only fragment routes.`);
     }
@@ -155,11 +155,11 @@ export class Route extends ExtensibleEntity implements IRoute {
       ...extensibleObject,
       path: this.path,
       apps,
-      meta: { parentContainerName: this.fill, ...clone(this.meta) },
+      meta: { parentContainerName: this.fill, ...clone(this.meta), parentAppName },
       fullPath,
       params: options.params ?? {},
       query: options.query ?? {},
-      clone: (): MatchedRoute => this.toMatchedRoute(options),
+      clone: (): MatchedRoute => this.toMatchedRoute(options, parentAppName),
       getRoute: (): IRoute => this,
       equal: (route: MatchedRoute): boolean => fullPath === route.fullPath && apps[0] === route.apps[0],
     };
