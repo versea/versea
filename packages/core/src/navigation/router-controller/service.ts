@@ -5,8 +5,8 @@ import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
 import { MatchedResult } from '../matcher/service';
 import { bindRouter } from '../navigation-events';
-import { IRouteKey, RouteConfig } from '../route/service';
-import { IRouter } from '../router/service';
+import { RouteConfig } from '../route/service';
+import { IRouter, IRouterKey } from '../router/service';
 import { IRouterController, IRouterControllerKey } from './interface';
 
 export * from './interface';
@@ -20,7 +20,7 @@ export class RouterController implements IRouterController {
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
   protected _hasBindRouter = false;
 
-  constructor(@inject(IAppSwitcherKey) appSwitcher: IAppSwitcher, @inject(IRouteKey) router: IRouter) {
+  constructor(@inject(IAppSwitcherKey) appSwitcher: IAppSwitcher, @inject(IRouterKey) router: IRouter) {
     this._appSwitcher = appSwitcher;
     this._router = router;
   }
