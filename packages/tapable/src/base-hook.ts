@@ -26,6 +26,11 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
       priority,
       once: options.once,
     };
+
+    if (this._taps.length == 0) {
+      this._taps.push(newTap);
+    }
+
     for (let i = this._taps.length - 1; i >= 0; i--) {
       const currentTap = this._taps[i];
       if (currentTap.priority <= priority) {
