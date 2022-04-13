@@ -28,7 +28,7 @@ export class Router implements IRouter {
   public match(): MatchedResult {
     const path = window.location.pathname;
     const query = parse(window.location.search);
-    return this._matcher.match(path, query);
+    return this._matcher.match(path.endsWith('/') ? path : `${path}/`, query);
   }
 
   public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
