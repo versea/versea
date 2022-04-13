@@ -57,22 +57,22 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   @memoizePromise(0, false)
-  public async run({ logicRenderer, logicLoader }: RunOptions): Promise<void> {
+  public async run({ renderer, loader }: RunOptions): Promise<void> {
     if (this.status !== this._SwitcherStatus.NotStart) {
       throw new VerseaError(`Can not load apps with status "${this.status}".`);
     }
 
     const restoreAndResolveCanceled = (cancel: boolean): void => {
-      logicLoader.restore();
-      logicRenderer.restore();
+      renderer.restore();
+      loader.restore();
       this._resolveCanceledDeferred(cancel);
     };
 
     try {
-      await logicLoader.load(this);
+      await loader.load(this);
       if (this._router.isStarted) {
         this.status = this._SwitcherStatus.NotUnmounted;
-        await logicRenderer.render(this);
+        await renderer.render(this);
       }
     } catch (error) {
       if (error instanceof VerseaCanceledError) {
@@ -182,16 +182,6 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   //   if (type === this._ActionType.Mounted) {
   //     this._resolveCanceledDeferred(false);
   //     this.status = this._SwitcherStatus.Done;
-  //   }
-  // }
-
-  // protected async _runSingleTask(apps: IApp[], fn: (app: IApp, index: number) => Promise<void>): Promise<void> {
-  //   try {
-  //     await Promise.all(apps.map(fn));
-  //   } catch (error) {
-  //     this._resolveCanceledDeferred(false);
-  //     this.status = this._SwitcherStatus.Broken;
-  //     throw error;
   //   }
   // }
 }

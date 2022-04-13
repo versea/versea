@@ -7,19 +7,19 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { ILogicRendererHookContext, ILogicRendererHookContextKey } from '../logic-renderer-hook-context/service';
+import { IRendererHookContext, IRendererHookContextKey } from '../renderer-hook-context/service';
 import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
-import { ILogicRenderer, ILogicRendererKey } from './interface';
+import { IRenderer, IRendererKey } from './interface';
 
 export * from './interface';
 
-@provide(ILogicRendererKey)
-export class LogicRenderer implements ILogicRenderer {
+@provide(IRendererKey)
+export class Renderer implements IRenderer {
   protected readonly _hooks: IHooks;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
-  protected readonly _HookContext: interfaces.Newable<ILogicRendererHookContext>;
+  protected readonly _HookContext: interfaces.Newable<IRendererHookContext>;
 
   protected readonly _rendererStore: IRendererStore;
 
@@ -28,7 +28,7 @@ export class LogicRenderer implements ILogicRenderer {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(ILogicRendererHookContextKey) HookContext: interfaces.Newable<ILogicRendererHookContext>,
+    @inject(IRendererHookContextKey) HookContext: interfaces.Newable<IRendererHookContext>,
     @inject(IRendererStoreKey) rendererStore: IRendererStore,
   ) {
     this._hooks = hooks;
@@ -40,12 +40,12 @@ export class LogicRenderer implements ILogicRenderer {
   }
 
   public async render(switcherContext: IAppSwitcherContext): Promise<void> {
-    const { logicUnmount, logicMount } = this._hooks;
-    const hookContext = this._createLogicRendererHookContext(switcherContext);
+    const { unmount, mount } = this._hooks;
+    const hookContext = this._createRendererHookContext(switcherContext);
 
-    await switcherContext.runTask(async () => logicUnmount.call(hookContext));
+    await switcherContext.runTask(async () => unmount.call(hookContext));
     switcherContext.callEvent();
-    await switcherContext.runTask(async () => logicMount.call(hookContext));
+    await switcherContext.runTask(async () => mount.call(hookContext));
   }
 
   public restore(): void {
@@ -53,54 +53,48 @@ export class LogicRenderer implements ILogicRenderer {
   }
 
   protected _initHooks(): void {
-    const {
-      logicUnmount,
-      logicUnmountNormal,
-      logicUnmountFragmentApps,
-      logicUnmountMainApp,
-      logicUnmountRoot,
-      logicMount,
-    } = this._hooks;
+    const { unmount, unmountNormal, unmountFragmentApps, unmountMainApp, unmountRoot, mount } = this._hooks;
 
-    // 执行逻辑销毁应用
-    logicUnmount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmount(hookContext));
+    // 执行销毁应用
+    unmount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmount(hookContext));
 
-    // 执行逻辑销毁普通路由
-    logicUnmountNormal.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountNormal(hookContext));
+    // 执行销毁普通路由
+    unmountNormal.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountNormal(hookContext));
 
     // 执行销毁普通路由碎片应用
-    logicUnmountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountFragmentApps(hookContext));
+    unmountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountFragmentApps(hookContext));
 
     // 执行销毁普通路由主应用
-    logicUnmountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountMainApp(hookContext));
+    unmountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountMainApp(hookContext));
 
     // 执行销毁根部路由碎片应用
-    logicUnmountRoot.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountRoot(hookContext));
+    unmountRoot.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onUnmountRoot(hookContext));
 
-    // 执行逻辑渲染应用
-    logicMount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onMount(hookContext));
+    // 执行渲染应用
+    mount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => this._onMount(hookContext));
   }
 
-  protected async _onUnmount(hookContext: ILogicRendererHookContext): Promise<void> {
-    const { logicUnmountNormal, logicUnmountRoot } = this._hooks;
+  protected async _onUnmount(hookContext: IRendererHookContext): Promise<void> {
+    const { unmountNormal, unmountRoot } = this._hooks;
     const { switcherContext } = hookContext;
 
     switcherContext.status = this._SwitcherStatus.Unmounting;
-    await switcherContext.runTask(async () => logicUnmountNormal.call(hookContext));
-    await switcherContext.runTask(async () => logicUnmountRoot.call(hookContext));
+    await switcherContext.runTask(async () => unmountNormal.call(hookContext));
+    await switcherContext.runTask(async () => unmountRoot.call(hookContext));
     switcherContext.status = this._SwitcherStatus.Unmounted;
   }
 
-  protected async _onMount(hookContext: ILogicRendererHookContext): Promise<void> {
+  protected async _onMount(hookContext: IRendererHookContext): Promise<void> {
     const { switcherContext } = hookContext;
 
     switcherContext.status = this._SwitcherStatus.Mounting;
+    // TODO: mount
     await Promise.resolve();
     switcherContext.status = this._SwitcherStatus.Mounted;
   }
 
-  protected async _onUnmountNormal(hookContext: ILogicRendererHookContext): Promise<void> {
-    const { logicUnmountFragmentApps, logicUnmountMainApp } = this._hooks;
+  protected async _onUnmountNormal(hookContext: IRendererHookContext): Promise<void> {
+    const { unmountFragmentApps, unmountMainApp } = this._hooks;
     const { switcherContext, currentRoutes, mismatchIndex } = hookContext;
 
     // 倒序销毁当前渲染的应用
@@ -109,16 +103,16 @@ export class LogicRenderer implements ILogicRenderer {
 
       hookContext.setTarget(i);
       if (apps.length > 1) {
-        await switcherContext.runTask(async () => logicUnmountFragmentApps.call(hookContext));
+        await switcherContext.runTask(async () => unmountFragmentApps.call(hookContext));
       }
       if (i >= mismatchIndex) {
-        await switcherContext.runTask(async () => logicUnmountMainApp.call(hookContext));
+        await switcherContext.runTask(async () => unmountMainApp.call(hookContext));
       }
       hookContext.resetTarget();
     }
   }
 
-  protected async _onUnmountFragmentApps(hookContext: ILogicRendererHookContext): Promise<void> {
+  protected async _onUnmountFragmentApps(hookContext: IRendererHookContext): Promise<void> {
     const { target, switcherContext, mismatchIndex, rendererStore } = hookContext;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { currentRoute, targetRoute, index } = target!;
@@ -131,7 +125,7 @@ export class LogicRenderer implements ILogicRenderer {
     rendererStore.removeApps(index, apps);
   }
 
-  protected async _onUnmountMainApp(hookContext: ILogicRendererHookContext): Promise<void> {
+  protected async _onUnmountMainApp(hookContext: IRendererHookContext): Promise<void> {
     const { target, switcherContext, currentRoutes, rendererStore } = hookContext;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const { currentRoute, index } = target!;
@@ -143,7 +137,7 @@ export class LogicRenderer implements ILogicRenderer {
     rendererStore.removeRoute(index);
   }
 
-  protected async _onUnmountRoot(hookContext: ILogicRendererHookContext): Promise<void> {
+  protected async _onUnmountRoot(hookContext: IRendererHookContext): Promise<void> {
     const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
 
     // 销毁当前多余的根部路由的对应的应用
@@ -160,7 +154,7 @@ export class LogicRenderer implements ILogicRenderer {
     );
   }
 
-  protected _createLogicRendererHookContext(switcherContext: IAppSwitcherContext): ILogicRendererHookContext {
+  protected _createRendererHookContext(switcherContext: IAppSwitcherContext): IRendererHookContext {
     // @ts-expect-error 需要传入参数
     // eslint-disable-next-line prettier/prettier
     return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult, rendererStore: this._rendererStore });

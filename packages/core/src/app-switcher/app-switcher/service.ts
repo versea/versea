@@ -4,9 +4,9 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
-import { ILogicLoaderKey, ILogicLoader } from '../logic-loader/service';
-import { ILogicRendererKey, ILogicRenderer } from '../logic-renderer/service';
+import { ILoaderKey, ILoader } from '../loader/service';
 import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
+import { IRendererKey, IRenderer } from '../renderer/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
@@ -23,9 +23,9 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _router: IRouter;
 
-  protected readonly _logicLoader: ILogicLoader;
+  protected readonly _loader: ILoader;
 
-  protected readonly _logicRenderer: ILogicRenderer;
+  protected readonly _renderer: IRenderer;
 
   protected readonly _rendererStore: IRendererStore;
 
@@ -35,16 +35,16 @@ export class AppSwitcher implements IAppSwitcher {
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     /* eslint-enable @typescript-eslint/naming-convention */
     @inject(IRouterKey) router: IRouter,
-    @inject(ILogicLoaderKey) logicLoader: ILogicLoader,
-    @inject(ILogicRendererKey) logicRenderer: ILogicRenderer,
+    @inject(ILoaderKey) loader: ILoader,
+    @inject(IRendererKey) renderer: IRenderer,
     @inject(IRendererStoreKey) rendererStore: IRendererStore,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
 
     this._router = router;
-    this._logicLoader = logicLoader;
-    this._logicRenderer = logicRenderer;
+    this._loader = loader;
+    this._renderer = renderer;
     this._rendererStore = rendererStore;
   }
 
@@ -68,8 +68,8 @@ export class AppSwitcher implements IAppSwitcher {
 
     this.currentContext = nextContext;
     return nextContext?.run({
-      logicLoader: this._logicLoader,
-      logicRenderer: this._logicRenderer,
+      loader: this._loader,
+      renderer: this._renderer,
     });
   }
 

@@ -1,11 +1,11 @@
 import { createServiceSymbol } from '../../utils';
 import { AppSwitcherContext } from '../app-switcher-context/service';
 
-export const ILogicRendererKey = createServiceSymbol('ILogicRenderer');
+export const IRendererKey = createServiceSymbol('IRenderer');
 
-export interface ILogicRenderer {
+export interface IRenderer {
   /**
-   * 计算和执行渲染逻辑
+   * 计算和执行渲染
    * @description 根据 matchedRoutes 计算出 unmount 和 mount 的应用和顺序
    * ------
    * 不能直接 unmount 所有当前已经 mounted 的 apps，否则每一次切换路由，代价会非常高。我们应该保证最大可复用能力，尽量减少 unmount 和 mount 的应用。
