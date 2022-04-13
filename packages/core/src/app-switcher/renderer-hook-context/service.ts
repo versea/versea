@@ -1,6 +1,8 @@
 import { ExtensibleEntity } from '@versea/shared';
 
-import { MatchedRoute } from '../../navigation/route/service';
+import { IAppService } from '../../application/app-service/interface';
+import { IApp } from '../../application/app/service';
+import { MatchedRoute, RouteMeta } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 import { IRendererStore } from '../renderer-store/service';
@@ -29,10 +31,13 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   public bail = false;
 
+  protected readonly _appService: IAppService;
+
   constructor(options: RendererHookContextOptions) {
     super(options);
     this.switcherContext = options.switcherContext;
     this.rendererStore = options.rendererStore;
+    this._appService = options.appService;
 
     // 保存目标路由信息
     const { routes, fragmentRoutes } = options.matchedResult;
@@ -60,6 +65,19 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   public resetTarget(): void {
     this.target = null;
+  }
+
+  public async bootstrapAndMount(app: IApp, route: MatchedRoute): Promise<void> {
+    const switcherContext = this.switcherContext;
+    if (!app.isBootstrapped) {
+      await app.bootstrap(switcherContext);
+    }
+    const meta: RouteMeta = route.apps[0] === app ? route.meta : (route.meta[app.name] as RouteMeta);
+    if (meta.parentAppName && meta.parentContainerName) {
+      const parentApp = this._appService.getApp(meta.parentAppName);
+      await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);
+    }
+    return app.mount(switcherContext);
   }
 
   protected _getMismatchIndex(): number {

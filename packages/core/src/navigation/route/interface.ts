@@ -57,7 +57,7 @@ export interface IRoute {
   appendChild: (route: IRoute) => void;
 
   /** 将 route 转化成 matchedRoute 对象 */
-  toMatchedRoute: (options: ToMatchedRouteOptions) => MatchedRoute;
+  toMatchedRoute: (options: ToMatchedRouteOptions, parentAppName?: string) => MatchedRoute;
 
   /** 获取该 route 匹配路径的正则表达式 */
   compile: (keys: Key[]) => RegExp;

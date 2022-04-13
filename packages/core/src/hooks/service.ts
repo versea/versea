@@ -21,7 +21,9 @@ export class Hooks implements IHooks {
 
   public unmountMainApp = new AsyncSeriesHook<IRendererHookContext>();
 
-  public unmountRoot = new AsyncSeriesHook<IRendererHookContext>();
+  public unmountRootFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public mount = new AsyncSeriesHook<IRendererHookContext>();
+
+  public mountMainApp = new AsyncSeriesHook<IRendererHookContext>();
 }

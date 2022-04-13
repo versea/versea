@@ -64,12 +64,22 @@ export class Matcher implements IMatcher {
       const params: Record<string, string> = {};
       const isMatched = this._matchRoute(path, route, params);
       if (isMatched) {
-        result.push(route.toMatchedRoute({ params, query }));
+        const parentAppName = this._getParentAppName(result, route);
+        result.push(route.toMatchedRoute({ params, query }, parentAppName));
         return this._matchTree(path, query, route.children, result);
       }
     }
 
     return result;
+  }
+
+  /** 获取嵌套路由的父应用名称 */
+  protected _getParentAppName(routes: MatchedRoute[], route: IRoute): string | undefined {
+    const lastRoute = routes[routes.length - 1];
+    if (!lastRoute || lastRoute.apps[0] === route.apps[0]) {
+      return;
+    }
+    return lastRoute.apps[0].name;
   }
 
   protected _matchFragment(path: string, query: queryString.ParsedQuery): MatchedRoute[] {

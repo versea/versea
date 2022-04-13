@@ -15,7 +15,7 @@ export interface IRendererStore {
   /** 当前正在运行的根部碎片路由 */
   readonly currentRootFragmentRoutes: MatchedRoute[];
 
-  /** 删除 currentRoutes 该 index 中的 apps */
+  /** 删除 currentRoutes 该 index 对应的 route 的 apps */
   removeApps: (index: number, apps: IApp[]) => void;
 
   /** 删除 currentRoutes 该 index 的 route */
@@ -23,4 +23,10 @@ export interface IRendererStore {
 
   /** 删除 currentRootFragmentRoutes 中的 route */
   removeRootFragmentRoute: (route: MatchedRoute) => void;
+
+  /** 向 currentRoutes 的末尾增加 route */
+  appendRoute: (route: MatchedRoute, apps?: IApp[]) => void;
+
+  /** 设置 currentRoutes 该 index 对应的 route 的 apps */
+  setApps: (index: number, apps: IApp[]) => void;
 }
