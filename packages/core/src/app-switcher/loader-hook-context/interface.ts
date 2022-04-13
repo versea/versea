@@ -5,17 +5,17 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 
-export const ILogicLoaderHookContextKey = createServiceSymbol('ILogicLoaderHookContext');
+export const ILoaderHookContextKey = createServiceSymbol('ILoaderHookContext');
 
 /**
- * 逻辑 Loader 的 Hook 上下文
+ * Loader 的 Hook 上下文
  * @description 在整个 load 的过程中会一直存在，会传给给中 load 的 hook。
  */
-export interface ILogicLoaderHookContext extends HookContext {
-  switcherContext: IAppSwitcherContext;
+export interface ILoaderHookContext extends HookContext {
+  readonly switcherContext: IAppSwitcherContext;
 
   /** 路由匹配的结果 */
-  matchedResult: MatchedResult;
+  readonly matchedResult: MatchedResult;
 
   /**
    * 需要加载的应用
@@ -28,7 +28,7 @@ export interface ILogicLoaderHookContext extends HookContext {
   currentLoadApps: IApp[];
 }
 
-export interface LogicLoaderHookContextOptions {
+export interface LoaderHookContextOptions {
   matchedResult: MatchedResult;
   switcherContext: IAppSwitcherContext;
 }

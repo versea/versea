@@ -1,13 +1,13 @@
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 
-export const ILogicLoaderKey = createServiceSymbol('ILogicLoader');
+export const ILoaderKey = createServiceSymbol('ILoader');
 
 /**
- * 逻辑 Loader
+ * Loader
  * @description 仅仅执行加载函数，并不会真实的加载资源文件。
  */
-export interface ILogicLoader {
+export interface ILoader {
   /** 根据匹配的的路由加载应用 */
   load: (switcherContext: IAppSwitcherContext) => Promise<void>;
 

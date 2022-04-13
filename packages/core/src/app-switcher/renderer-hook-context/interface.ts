@@ -6,9 +6,9 @@ import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 import { IRendererStore } from '../renderer-store/service';
 
-export const ILogicRendererHookContextKey = createServiceSymbol('ILogicRendererHookContext');
+export const IRendererHookContextKey = createServiceSymbol('IRendererHookContext');
 
-export interface ILogicRendererHookContext extends HookContext {
+export interface IRendererHookContext extends HookContext {
   readonly switcherContext: IAppSwitcherContext;
 
   /**
@@ -50,7 +50,7 @@ export interface NormalRendererTarget {
   targetRoute: MatchedRoute;
 }
 
-export interface LogicRendererHookContextOptions {
+export interface RendererHookContextOptions {
   matchedResult: MatchedResult;
   switcherContext: IAppSwitcherContext;
   rendererStore: IRendererStore;

@@ -3,9 +3,9 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
-import { ILogicLoader } from '../logic-loader/service';
-import { ILogicRenderer } from '../logic-renderer/service';
+import { ILoader } from '../loader/service';
 import { IRendererStore } from '../renderer-store/service';
+import { IRenderer } from '../renderer/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
@@ -61,8 +61,8 @@ export interface IAppSwitcherContext {
 }
 
 export interface RunOptions {
-  logicLoader: ILogicLoader;
-  logicRenderer: ILogicRenderer;
+  loader: ILoader;
+  renderer: IRenderer;
 }
 
 export interface AppSwitcherContextDependencies {

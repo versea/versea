@@ -1,7 +1,7 @@
 import { AsyncSeriesHook } from '@versea/tapable';
 
-import { ILogicLoaderHookContext } from '../app-switcher/logic-loader-hook-context/service';
-import { ILogicRendererHookContext } from '../app-switcher/logic-renderer-hook-context/service';
+import { ILoaderHookContext } from '../app-switcher/loader-hook-context/service';
+import { IRendererHookContext } from '../app-switcher/renderer-hook-context/service';
 import { provide } from '../provider';
 import { IHooks, IHooksKey } from './interface';
 
@@ -9,19 +9,19 @@ export * from './interface';
 
 @provide(IHooksKey)
 export class Hooks implements IHooks {
-  public logicLoad = new AsyncSeriesHook<ILogicLoaderHookContext>();
+  public load = new AsyncSeriesHook<ILoaderHookContext>();
 
-  public logicLoadApps = new AsyncSeriesHook<ILogicLoaderHookContext>();
+  public loadApps = new AsyncSeriesHook<ILoaderHookContext>();
 
-  public logicUnmount = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public unmount = new AsyncSeriesHook<IRendererHookContext>();
 
-  public logicUnmountNormal = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public unmountNormal = new AsyncSeriesHook<IRendererHookContext>();
 
-  public logicUnmountFragmentApps = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public unmountFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 
-  public logicUnmountMainApp = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public unmountMainApp = new AsyncSeriesHook<IRendererHookContext>();
 
-  public logicUnmountRoot = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public unmountRoot = new AsyncSeriesHook<IRendererHookContext>();
 
-  public logicMount = new AsyncSeriesHook<ILogicRendererHookContext>();
+  public mount = new AsyncSeriesHook<IRendererHookContext>();
 }

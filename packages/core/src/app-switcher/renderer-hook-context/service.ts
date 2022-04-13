@@ -5,16 +5,16 @@ import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 import { IRendererStore } from '../renderer-store/service';
 import {
-  ILogicRendererHookContext,
-  ILogicRendererHookContextKey,
-  LogicRendererHookContextOptions,
+  IRendererHookContext,
+  IRendererHookContextKey,
+  RendererHookContextOptions,
   NormalRendererTarget,
 } from './interface';
 
 export * from './interface';
 
-@provide(ILogicRendererHookContextKey, 'Constructor')
-export class LogicRendererHookContext extends ExtensibleEntity implements ILogicRendererHookContext {
+@provide(IRendererHookContextKey, 'Constructor')
+export class RendererHookContext extends ExtensibleEntity implements IRendererHookContext {
   public readonly switcherContext: IAppSwitcherContext;
 
   public targetRoutes: MatchedRoute[];
@@ -29,7 +29,7 @@ export class LogicRendererHookContext extends ExtensibleEntity implements ILogic
 
   public bail = false;
 
-  constructor(options: LogicRendererHookContextOptions) {
+  constructor(options: RendererHookContextOptions) {
     super(options);
     this.switcherContext = options.switcherContext;
     this.rendererStore = options.rendererStore;

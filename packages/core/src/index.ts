@@ -1,9 +1,9 @@
 export * from './app-switcher/app-switcher/service';
 export * from './app-switcher/app-switcher-context/service';
-export * from './app-switcher/logic-loader/service';
-export * from './app-switcher/logic-loader-hook-context/service';
-export * from './app-switcher/logic-renderer/service';
-export * from './app-switcher/logic-renderer-hook-context/service';
+export * from './app-switcher/loader/service';
+export * from './app-switcher/loader-hook-context/service';
+export * from './app-switcher/renderer/service';
+export * from './app-switcher/renderer-hook-context/service';
 export * from './app-switcher/renderer-store/service';
 
 export * from './application/app/service';

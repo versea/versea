@@ -5,12 +5,12 @@ import { IApp } from '../../application/app/service';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { ILogicLoaderHookContext, ILogicLoaderHookContextKey, LogicLoaderHookContextOptions } from './interface';
+import { ILoaderHookContext, ILoaderHookContextKey, LoaderHookContextOptions } from './interface';
 
 export * from './interface';
 
-@provide(ILogicLoaderHookContextKey, 'Constructor')
-export class LogicLoaderHookContext extends ExtensibleEntity implements ILogicLoaderHookContext {
+@provide(ILoaderHookContextKey, 'Constructor')
+export class LoaderHookContext extends ExtensibleEntity implements ILoaderHookContext {
   public readonly matchedResult: MatchedResult;
 
   public readonly switcherContext: IAppSwitcherContext;
@@ -21,7 +21,7 @@ export class LogicLoaderHookContext extends ExtensibleEntity implements ILogicLo
 
   public bail = false;
 
-  constructor(options: LogicLoaderHookContextOptions) {
+  constructor(options: LoaderHookContextOptions) {
     super(options);
     this.matchedResult = options.matchedResult;
     this.switcherContext = options.switcherContext;
