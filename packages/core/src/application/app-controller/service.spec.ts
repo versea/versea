@@ -52,7 +52,7 @@ function getAppWithLoadHook(
  */
 describe('App', () => {
   describe('App.load', () => {
-    test('load 应用之前和之后，应用的状态变化应该正确', async () => {
+    test('应用 load 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppInstance({
         name: 'app',
         loadApp: async () => {
@@ -68,7 +68,7 @@ describe('App', () => {
       expect(app.status).toBe(Status.NotBootstrapped);
     });
 
-    test('实例化时没有 loadApp 参数，加载应用时会报错', () => {
+    test('实例化应用时没有 loadApp 参数，加载应用时会报错', () => {
       const app = getAppInstance({ name: 'app' });
 
       expect(app.status).toBe(Status.NotLoaded);
@@ -78,7 +78,7 @@ describe('App', () => {
       expect(app.status).toBe(Status.Broken);
     });
 
-    test('load 应用失败，应用的状态变化为 LoadError', async () => {
+    test('应用 load 失败，应用的状态变化为 LoadError', async () => {
       const app = getAppInstance({
         name: 'app',
         loadApp: async () => {
@@ -96,7 +96,7 @@ describe('App', () => {
   });
 
   describe('App.bootstrap', () => {
-    test('bootstrap 应用之前和之后，应用的状态变化应该正确', async () => {
+    test('应用 bootstrap 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' });
       await app.load({} as IAppSwitcherContext);
 
@@ -116,7 +116,7 @@ describe('App', () => {
       expect(app.status).toBe(Status.NotMounted);
     });
 
-    test('bootstrap 应用失败，应用的状态变化为 broken', async () => {
+    test('应用 bootstrap 失败，应用的状态变化为 broken', async () => {
       const app = getAppWithLoadHook(
         { name: 'app' },
         {
@@ -137,7 +137,7 @@ describe('App', () => {
   });
 
   describe('App.mount', () => {
-    test('mount 应用之前和之后，应用的状态变化应该正确', async () => {
+    test('应用 mount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' });
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
@@ -159,7 +159,7 @@ describe('App', () => {
       expect(app.status).toBe(Status.Mounted);
     });
 
-    test('mount 应用失败，应用的状态变化为 broken', async () => {
+    test('应用 mount 失败，应用的状态变化为 broken', async () => {
       const app = getAppWithLoadHook(
         { name: 'app' },
         {
@@ -181,7 +181,7 @@ describe('App', () => {
   });
 
   describe('App.waitForChildContainer', () => {
-    test('mount 应之后，可以等待该应用的子容器渲染完成。', async () => {
+    test('应用 mount 之后，可以等待该应用的子容器渲染完成。', async () => {
       const test = jest.fn(() => 1);
       const app = getAppWithLoadHook(
         { name: 'app' },
@@ -204,7 +204,7 @@ describe('App', () => {
   });
 
   describe('App.unmount', () => {
-    test('unmount 应用之前和之后，应用的状态变化应该正确', async () => {
+    test('应用 unmount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, {});
       await app.load({} as IAppSwitcherContext);
       await app.bootstrap({} as IAppSwitcherContext);
@@ -228,7 +228,7 @@ describe('App', () => {
       expect(app.status).toBe(Status.NotMounted);
     });
 
-    test('unmount 应用失败，应用的状态变化为 broken', async () => {
+    test('应用 unmount 失败，应用的状态变化为 broken', async () => {
       const app = getAppWithLoadHook(
         { name: 'app' },
         {

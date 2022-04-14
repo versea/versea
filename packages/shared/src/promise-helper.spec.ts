@@ -11,7 +11,7 @@ async function delay(time: number): Promise<void> {
  * @author huchao
  */
 describe('Deferred', () => {
-  test('新建一个 Deferred, 调用 deferred.resolve，deferred.promise 应该能被正常 resolve 并 返回正确的值', async () => {
+  test('新建一个 Deferred, 调用 deferred.resolve，deferred.promise 应该能被正常 resolve 并返回正确的值', async () => {
     const test = 'test';
     const deferred = new Deferred<string>();
 
@@ -60,7 +60,7 @@ describe('memoizePromise', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  test('新建一个类，其中异步函数使用 memoizePromise 装饰，在 promise settled 之前调用，但使用不同的参数，内部逻辑应该只会调用多次', async () => {
+  test('新建一个类，其中异步函数使用 memoizePromise 装饰，在 promise settled 之前调用，但使用不同的参数，内部逻辑应该会调用多次', async () => {
     class Test {
       @memoizePromise()
       public async func(a: number): Promise<void> {

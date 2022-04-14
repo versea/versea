@@ -10,14 +10,14 @@ describe('ExtensibleEntity', () => {
     jest.restoreAllMocks();
   });
 
-  test('新建一个类，继承 ExtensibleEntity，不调用 defineProp，应该不会报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，不调用 defineProp，应该不会报错', () => {
     class Test extends ExtensibleEntity {}
 
     const test = new Test();
     expect(test).toMatchObject({});
   });
 
-  test('新建一个类，继承 ExtensibleEntity，使用 defineProp，实例化的这个类应该可以自动增加这个属性', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp，实例化的这个类应该可以自动增加这个属性', () => {
     class Test extends ExtensibleEntity {}
     Test.defineProp('key', { default: 1 });
 
@@ -25,7 +25,7 @@ describe('ExtensibleEntity', () => {
     expect(test).toMatchObject({ key: 1 });
   });
 
-  test('新建一个类，继承 ExtensibleEntity，使用 defineProp 两次使用相同的 key，应该会报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 两次使用相同的 key，应该会报错', () => {
     class Test extends ExtensibleEntity {}
     Test.defineProp('key');
 
@@ -34,7 +34,7 @@ describe('ExtensibleEntity', () => {
     }).toThrowError('Duplicate prop');
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp，新建一个类 B 继承于 A，使用 defineProp，A 的实例应该仅仅包含 A defineProp 的属性', () => {
+  test('多级继承，使用 defineProp，父类应该不会受子类干扰。', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { default: 1 });
 
@@ -45,7 +45,7 @@ describe('ExtensibleEntity', () => {
     expect(a).toMatchObject({ keyA: 1 });
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp，新建一个类 B 继承于 A，使用 defineProp，B 的实例应该同时包含 A defineProp 的属性和 B defineProp 的属性', () => {
+  test('多级继承，使用 defineProp 应该能获取到所有父类扩展的属性。', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { default: 1 });
 
@@ -56,7 +56,7 @@ describe('ExtensibleEntity', () => {
     expect(b).toMatchObject({ keyA: 1, keyB: 2 });
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp，新建一个类 B 继承于 A，使用 defineProp，新建一个类 C 继承于 A，使用 defineProp，ABC 三个类应该互不干扰', () => {
+  test('多级继承，使用 defineProp 应该互不干扰。', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { default: 1 });
 
@@ -73,7 +73,7 @@ describe('ExtensibleEntity', () => {
     expect(c).toMatchObject({ keyA: 1, keyC: 3 });
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 default 是一个对象，应该有一条警告', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 传入 default 是一个对象，应该有一条警告。', () => {
     const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     class A extends ExtensibleEntity {}
@@ -82,28 +82,28 @@ describe('ExtensibleEntity', () => {
     expect(consoleWarnSpy).toHaveBeenCalled();
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 required，不传这个参数应该报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 传入 required，不传这个参数应该报错', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { required: true });
 
     expect(() => new A()).toThrowError('Missing required prop');
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 required，传入这个参数应该没有报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 传入 required，传入这个参数应该没有报错', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { required: true });
 
     expect(() => new A({ keyA: 1 })).not.toThrowError('Missing required prop');
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 validator，验证参数不正确应该报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 传入 validator，验证参数不正确应该报错', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { validator: (value) => typeof value === 'number' });
 
     expect(() => new A({ keyA: '1' })).toThrowError('custom validator check failed');
   });
 
-  test('新建一个类 A 继承于 ExtensibleEntity，使用 defineProp 传入 validator，验证参数正确应该不报错', () => {
+  test('新建一个继承 ExtensibleEntity 的类，使用 defineProp 传入 validator，验证参数正确应该不报错', () => {
     class A extends ExtensibleEntity {}
     A.defineProp('keyA', { validator: (value) => typeof value === 'number' });
 
