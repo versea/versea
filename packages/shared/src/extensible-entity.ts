@@ -67,9 +67,7 @@ export class ExtensibleEntity {
     });
   }
 
-  /**
-   * 在实体类上新增一个字段
-   */
+  /** 在实体类上新增一个字段 */
   public static defineProp(key: string, description: ExtensiblePropDescription = {}): void {
     if (!Object.prototype.hasOwnProperty.call(this, '__ExtensiblePropDescriptions__')) {
       this.__ExtensiblePropDescriptions__ = {};

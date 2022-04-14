@@ -15,6 +15,7 @@ export class Deferred<T> {
   }
 }
 
+/** 缓存 Promise 实例直到该 Promise 执行完成 */
 export function memoizePromise(index = 0, deleteMemo = true) {
   return function (_target: unknown, _propertyKey: string, descriptor: PropertyDescriptor): void {
     const originValue = descriptor.value as (...args: unknown[]) => Promise<unknown>;
@@ -26,7 +27,7 @@ export function memoizePromise(index = 0, deleteMemo = true) {
       }
       key = `${_propertyKey}_${key}`;
 
-      // promise 存在实例上
+      // 在类的实例上存储 promise
       if (!(this as any).__PromiseMemo__) {
         (this as any).__PromiseMemo__ = {};
       }
