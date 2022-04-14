@@ -26,8 +26,10 @@ export class Router implements IRouter {
   }
 
   public match(): MatchedResult {
+    // TODO: handle hash mode
     const path = window.location.pathname;
     const query = parse(window.location.search);
+    // 匹配路由时，需要再末尾加上 "/"
     return this._matcher.match(path.endsWith('/') ? path : `${path}/`, query);
   }
 

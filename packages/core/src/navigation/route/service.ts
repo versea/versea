@@ -1,10 +1,10 @@
 import { ExtensibleEntity, VerseaError } from '@versea/shared';
 import { pathToRegexp, Key } from 'path-to-regexp';
-import { mergeRight, clone } from 'ramda';
+import { mergeRight } from 'ramda';
 
 import { IApp } from '../../application/app/service';
 import { provide } from '../../provider';
-import { traverse } from '../../utils';
+import { cloneObjectWith, traverse } from '../../utils';
 import { IRoute, IRouteKey, MatchedRoute, RouteConfig, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
 
 export * from './interface';
@@ -32,7 +32,6 @@ export class Route extends ExtensibleEntity implements IRoute {
   constructor(config: RouteConfig, app: IApp, parent: IRoute | null = null) {
     super(config);
 
-    // 检查输入参数
     this._validRouteConfig(config);
 
     this.path = `/${config.path.replace(/(^\/*)|(\/*$)/g, '')}`;
@@ -100,7 +99,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     this.isFragment = this.isFragment && route.isFragment;
 
-    // 合并之后可能导致 parent 和 children 都不正确，需要修改他们
+    // 合并之后可能导致 parent 和 children 不正确，需要修改指向
     if (!this.parent && route.parent) {
       this.parent = route.parent;
       const index = this.parent.children.findIndex((child) => child === route);
@@ -117,7 +116,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
     route.parent = this;
 
-    // 保证添加的子路由节点在 (.*) 的路由匹配节点之前
+    // 保证添加的子路由节点在 "/(.*)" 的路由节点之前
     const wildChildIndex = this.children.findIndex((child) => ['/(.*)'].includes(child.path));
     if (wildChildIndex < 0) {
       this.children.push(route);
@@ -133,7 +132,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     });
   }
 
-  public toMatchedRoute(options: ToMatchedRouteOptions, parentAppName?: string): MatchedRoute {
+  public toMatchedRoute(options: ToMatchedRouteOptions): MatchedRoute {
     if (this.isFragment) {
       throw new VerseaError(`Can not match route path "${this.fullPath}" with only fragment routes.`);
     }
@@ -148,23 +147,33 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    const apps = this.apps;
-    const fullPath = this.fullPath;
+    // apps 不能被深拷贝，必须保证同一对象
+    const handlers = {
+      apps: (value: IApp[]): IApp[] => [...value],
+    } as Record<string, (value: unknown) => unknown>;
 
-    return {
-      ...extensibleObject,
-      path: this.path,
-      apps,
-      meta: { parentContainerName: this.fill, ...clone(this.meta), parentAppName },
-      fullPath,
-      params: options.params ?? {},
-      query: options.query ?? {},
-      clone: (): MatchedRoute => this.toMatchedRoute(options, parentAppName),
-      getRoute: (): IRoute => this,
-      equal: (route: MatchedRoute): boolean => fullPath === route.fullPath && apps[0] === route.apps[0],
-    };
+    return cloneObjectWith(
+      {
+        ...extensibleObject,
+        path: this.path,
+        apps: this.apps,
+        meta: { parentContainerName: this.fill, ...this.meta },
+        fullPath: this.fullPath,
+        params: options.params ?? {},
+        query: options.query ?? {},
+        cloneDeep(): MatchedRoute {
+          return cloneObjectWith(this, handlers);
+        },
+        getRoute: (): IRoute => this,
+        equal(route: MatchedRoute): boolean {
+          return this.fullPath === route.fullPath && this.apps[0] === route.apps[0];
+        },
+      },
+      handlers,
+    );
   }
 
+  /** 检查输入参数 */
   protected _validRouteConfig(config: RouteConfig): void {
     if (config.isFragment) {
       ['slot', 'pathToRegexpOptions', 'children'].forEach((key) => {

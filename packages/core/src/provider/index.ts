@@ -1,4 +1,4 @@
-import { VERSEA_METADATA_PROVIDE_KEY } from '../constants/constants';
+import { VERSEA_METADATA_PROVIDE_KEY } from '../constants';
 import { createProvider } from './creator';
 
 const { provide, provideValue, buildProviderModule } = createProvider(VERSEA_METADATA_PROVIDE_KEY);

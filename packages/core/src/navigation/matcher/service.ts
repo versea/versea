@@ -14,14 +14,14 @@ export * from './interface';
 @provide(IMatcherKey)
 export class Matcher implements IMatcher {
   /**
-   * 普通路由树
-   * @description 数组的每一项都是树结构。
+   * 普通路由
+   * @description 数组的每一项都是路由树结构。
    */
   protected readonly _trees: IRoute[] = [];
 
   /**
-   * 根部碎片路由数组
-   * @description 数组的每一项都是一个没有 children 的 Route。
+   * 根部碎片路由
+   * @description 数组的每一项都是一个仅有空 children 的 Route。
    */
   protected readonly _rootFragments: IRoute[] = [];
 
@@ -38,7 +38,7 @@ export class Matcher implements IMatcher {
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
       const route = new this._RouteConstructor(routeConfig, app);
       if (!routeConfig.isRootFragment) {
-        this._trees.push(route);
+        this._appendTree(route);
       } else {
         this._rootFragments.push(route);
       }
@@ -48,10 +48,24 @@ export class Matcher implements IMatcher {
   }
 
   public match(path: string, query: queryString.ParsedQuery): MatchedResult {
+    const routes = this._matchTree(path, query);
+    // 补充 parentAppName
+    this._addParentAppName(routes);
     return {
-      routes: this._matchTree(path, query),
+      routes: routes,
       fragmentRoutes: this._matchFragment(path, query),
     };
+  }
+
+  /** 向普通路由中添加路由树 */
+  protected _appendTree(route: IRoute): void {
+    // 路径是 "/(.*)" 的路由节点放在最后
+    const wildIndex = this._trees.findIndex((tree) => ['/(.*)'].includes(tree.path));
+    if (wildIndex < 0) {
+      this._trees.push(route);
+      return;
+    }
+    this._trees.splice(wildIndex, 0, route);
   }
 
   protected _matchTree(
@@ -64,8 +78,7 @@ export class Matcher implements IMatcher {
       const params: Record<string, string> = {};
       const isMatched = this._matchRoute(path, route, params);
       if (isMatched) {
-        const parentAppName = this._getParentAppName(result, route);
-        result.push(route.toMatchedRoute({ params, query }, parentAppName));
+        result.push(route.toMatchedRoute({ params, query }));
         return this._matchTree(path, query, route.children, result);
       }
     }
@@ -74,12 +87,16 @@ export class Matcher implements IMatcher {
   }
 
   /** 获取嵌套路由的父应用名称 */
-  protected _getParentAppName(routes: MatchedRoute[], route: IRoute): string | undefined {
-    const lastRoute = routes[routes.length - 1];
-    if (!lastRoute || lastRoute.apps[0] === route.apps[0]) {
+  protected _addParentAppName(routes: MatchedRoute[]): void {
+    if (routes.length <= 1) {
       return;
     }
-    return lastRoute.apps[0].name;
+    for (let i = 1; i < routes.length; i++) {
+      const parentAppLike = routes[i - 1].apps[0];
+      if (parentAppLike !== routes[i].apps[0]) {
+        routes[i].meta.parentAppName = parentAppLike.name;
+      }
+    }
   }
 
   protected _matchFragment(path: string, query: queryString.ParsedQuery): MatchedRoute[] {

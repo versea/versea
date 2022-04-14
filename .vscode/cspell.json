@@ -8,6 +8,7 @@
     "inversify",
     "unmount",
     "middlewares",
-    "tapable"
+    "tapable",
+    "builtins"
   ]
 }

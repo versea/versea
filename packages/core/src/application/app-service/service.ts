@@ -3,7 +3,7 @@ import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
-import { IStatus, IStatusKey } from '../../constants/status';
+import { IStatus, IStatusKey } from '../../enum/status';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IApp, IAppKey, AppConfig } from '../app/service';
@@ -34,7 +34,6 @@ export class AppService implements IAppService {
     const app = new this._AppConstructor(config, { Status: this._Status });
     this._appMap.set(app.name, app);
 
-    // 创建 routes
     if (config.routes?.length) {
       router.addRoutes(config.routes, app);
     }

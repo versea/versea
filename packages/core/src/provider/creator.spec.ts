@@ -12,7 +12,7 @@ afterEach(() => {
  * @author huchao
  */
 describe('createProvider', () => {
-  test('新建一个类，使用 provide 装饰，应当自动绑定成功。', () => {
+  test('创建一个使用 provide 装饰的类，应该自动绑定该类到容器。', () => {
     const { provide, buildProviderModule } = createProvider('metaKey');
 
     @provide('test')
@@ -23,7 +23,7 @@ describe('createProvider', () => {
     expect(container.get('test')).toBeInstanceOf(Test);
   });
 
-  test('新建一个类，使用 provide 装饰，然后继承该类，也使用 provide 装饰并使用相同的 key，应当自动绑定继承的类。', () => {
+  test('同名继承使用 provide 装饰的类，绑定类型相同，应该自动绑定该继承的类到容器。', () => {
     const { provide, buildProviderModule } = createProvider('metaKey');
 
     @provide('test')
@@ -38,7 +38,7 @@ describe('createProvider', () => {
     expect(container.get('test')).toBeInstanceOf(OtherTest);
   });
 
-  test('新建一个类，使用 provide 装饰，然后不继承该类，也使用 provide 装饰并使用相同的 key，应当报错。', () => {
+  test('同名不继承使用 provide 装饰的类，因为同名没有继承关系应该报错。', () => {
     const { provide } = createProvider('metaKey');
 
     @provide('test')
@@ -52,7 +52,7 @@ describe('createProvider', () => {
     }).toThrowError('Provide Error: replace serviceIdentifier');
   });
 
-  test('新建一个类，使用 provide 装饰，然后继承该类，也使用 provide 装饰并使用相同的 key 和不同的绑定类型，应当报错。', () => {
+  test('同名继承使用 provide 装饰的类，绑定类型不同，应该报错。', () => {
     const { provide } = createProvider('metaKey');
 
     @provide('test')
@@ -66,7 +66,7 @@ describe('createProvider', () => {
     }).toThrowError('Provide Error: replace serviceIdentifier');
   });
 
-  test('创建两个不同的 provide，绑定相同的 provide key，应该互不干扰。', () => {
+  test('两个不同的 provide 应该互不干扰。', () => {
     const { provide, buildProviderModule } = createProvider('metaKey');
     const { provide: otherProvide, buildProviderModule: otherBuildProviderModule } = createProvider('otherMetaKey');
 
@@ -85,7 +85,7 @@ describe('createProvider', () => {
     expect(otherContainer.get('test')).toBeInstanceOf(OtherTest);
   });
 
-  test('创建一个常量，调用 provideValue，应当自动绑定成功。', () => {
+  test('调用 provideValue 绑定常量，应该自动绑定该常量到容器。', () => {
     const { provideValue, buildProviderModule } = createProvider('metaKey');
 
     provideValue('foo', 'test');
@@ -95,7 +95,7 @@ describe('createProvider', () => {
     expect(container.get('test')).toBe('foo');
   });
 
-  test('两次调用 provideValue 绑定同一个 key，应当绑定新值。', () => {
+  test('两次调用 provideValue 绑定同名 key，应该绑定新值到容器。', () => {
     const { provideValue, buildProviderModule } = createProvider('metaKey');
 
     provideValue('foo', 'test');

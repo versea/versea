@@ -3,8 +3,8 @@ import { differenceWith } from 'ramda';
 
 import { IAppService, IAppServiceKey } from '../../application/app-service/interface';
 import { IApp } from '../../application/app/service';
-import { VERSEA_INTERNAL_TAP } from '../../constants/constants';
-import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
+import { VERSEA_INTERNAL_TAP } from '../../constants';
+import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';

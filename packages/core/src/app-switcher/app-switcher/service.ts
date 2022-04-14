@@ -1,6 +1,6 @@
 import { inject, interfaces } from 'inversify';
 
-import { ISwitcherStatus, ISwitcherStatusKey } from '../../constants/status';
+import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';

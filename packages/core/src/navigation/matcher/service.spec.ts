@@ -3,7 +3,7 @@
 import { Container, interfaces } from 'inversify';
 
 import { IApp, IAppKey } from '../../application/app/service';
-import { IStatusKey } from '../../constants/status';
+import { IStatusKey } from '../../enum/status';
 import { buildProviderModule } from '../../provider';
 import { IMatcher, IMatcherKey } from './service';
 
@@ -26,8 +26,8 @@ function getAppInstance(appName: string): IApp {
  * @author huchao
  */
 describe('Matcher', () => {
-  describe('创建并合并路由节点', () => {
-    test('创建一个 route 节点，Matcher.trees 应该返回配置的节点信息。', () => {
+  describe('创建与合并路由节点', () => {
+    test('创建 route 节点，Matcher.trees 应该返回节点信息。', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
@@ -45,7 +45,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path1 的 route 节点，后创建一个路径为 path1 的 route 节点，Matcher.trees 应该能合并节点。', () => {
+    test('创建两个相同路径的 route 根节点，Matcher.trees 应该合并节点。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', meta: { test: 'test' } }], app1);
@@ -77,7 +77,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('创建多个路径相同的 route 节点，Matcher.trees 应该能合并节点。', () => {
+    test('创建多个相同路径的 route 的子节点，Matcher.trees 应该合并节点。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app1);
@@ -130,7 +130,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path1 的 route 节点，具有插槽能力，后创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，Matcher.trees 应该能返回嵌套的结构。', () => {
+    test('创建两个具有嵌套能力的节点（先创建插槽，后创建填充），Matcher.trees 应该返回嵌套的结构。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -159,7 +159,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，后创建一个路径为 path1 的 route 节点，具有插槽能力，Matcher.trees 应该能返回嵌套的结构。', () => {
+    test('创建两个具有嵌套能力的节点（先创建填充，后创建插槽），Matcher.trees 应该返回嵌套的结构。', () => {
       const matcher = getMatcher();
       const app2 = getAppInstance('name2');
       matcher.addRoutes([{ path: 'path2', fill: 'foo' }], app2);
@@ -188,7 +188,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path1 的 route 节点，具有插槽能力，后创建一个路径为 path2 的 route 节点，插入 path3 的 route 节点，Matcher.trees 应该能返回非嵌套的结构。', () => {
+    test('创建两个具有嵌套能力的节点，填充和插槽不匹配，Matcher.trees 应该返回非嵌套的结构。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -215,7 +215,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test(`先创建一个路径为 path1 的 route 节点，具有插槽能力，节点具有 wild 匹配，后创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，Matcher.trees 应该能返回嵌套的结构，且 path2 应该在 wild 匹配 之前，在非 wild 匹配 之后。`, () => {
+    test('合并路由树时，具有 wildcard 匹配的节点应该在 children 数组的最后。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo', children: [{ path: 'path1' }, { path: '(.*)' }] }], app1);
@@ -260,7 +260,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path1 的 route 节点，具有插槽能力，后创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，再创建一个路径为 path3 的 route 节点，插入 path1 的 route 节点，Matcher.trees 应该能返回嵌套的结构。', () => {
+    test('创建多个具有嵌套能力的节点，Matcher.trees 应该能返回嵌套的结构。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -299,7 +299,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('先创建一个路径为 path1 的 route 节点，具有插槽能力，后创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，再创建一个路径为 path2 的 route 节点，插入 path1 的 route 节点，Matcher.trees 应该能返回嵌套的结构且合并了 path2 节点信息。', () => {
+    test('创建多个具有嵌套能力的节点，相同路径的结点应该可以正确合并，Matcher.trees 应该返回正确的嵌套结构。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -343,7 +343,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('同上，合并路由时，合并的路由的 children 的 parent 应该能指向正确', () => {
+    test('创建多个具有嵌套能力的节点，相同路径的结点合并，合并的路由的 children 的 parent 应该能指向正确', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -365,7 +365,7 @@ describe('Matcher', () => {
       expect((matcher as any)._trees[0].children[0].children[0].parent).toBe((matcher as any)._trees[0].children[0]);
     });
 
-    test('同上，合并路由时，都不是 Fragment 的路由合并应该 throw error。', () => {
+    test('创建多个具有嵌套能力的节点，相同路径的结点合并时，路由都不是碎片的路由合并应该 throw error。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -378,7 +378,7 @@ describe('Matcher', () => {
       }).toThrowError('Can not Merge route(same path)');
     });
 
-    test('声明两个具有相同插槽字段的路由节点，应当 throw error。', () => {
+    test('声明两个具有相同插槽名称的路由节点，应当 throw error。', () => {
       const matcher = getMatcher();
       const app1 = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1', slot: 'foo' }], app1);
@@ -399,7 +399,7 @@ describe('Matcher', () => {
   });
 
   describe('匹配路由节点', () => {
-    test('节点路由信息与传入的路由相同，应该可以匹配', () => {
+    test('节点路由与传入的路由相同，应该可以匹配', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
@@ -417,7 +417,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('节点路由信息与传入的路由相同，应该可以匹配，反查匹配的 route 节点，应该能正确返回信息', () => {
+    test('根据匹配的结果反查的 route 节点，应该能正确返回 route 节点', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
@@ -434,7 +434,7 @@ describe('Matcher', () => {
       });
     });
 
-    test('节点路由信息与传入的路由不同，应该不可以匹配', () => {
+    test('节点路由与传入的路由不同，应该不可以匹配', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1' }], app);
@@ -442,7 +442,7 @@ describe('Matcher', () => {
       expect(matcher.match('/path2', {}).routes).toEqual([]);
     });
 
-    test('带有参数的路径且路径相同，应当匹配成功且返回正确的参数', () => {
+    test('带有参数的路径且路径相同，应该匹配成功且返回正确的参数', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/:id' }], app);
@@ -463,7 +463,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('带有多个参数的路径且路径相同，应当匹配成功且返回正确的参数', () => {
+    test('带有多个参数的路径且路径相同，应该匹配成功且返回正确的参数', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/:id/:type' }], app);
@@ -485,7 +485,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('带有 wildcard 的路径且路径相同，应当匹配成功且返回正确的参数', () => {
+    test('带有 wildcard 的路径且路径相同，应该匹配成功且返回正确的参数', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes([{ path: 'path1/(.*)' }], app);
@@ -506,7 +506,7 @@ describe('Matcher', () => {
       ]);
     });
 
-    test('带有嵌套的路由，应该可以匹配多级', () => {
+    test('嵌套的路由，应该可以多级匹配', () => {
       const matcher = getMatcher();
       const app = getAppInstance('name1');
       matcher.addRoutes(
@@ -553,6 +553,14 @@ describe('Matcher', () => {
           },
         },
       ]);
+    });
+
+    test('匹配的结果的 App 的实例应该与创建的 App 是同一个实例。', () => {
+      const matcher = getMatcher();
+      const app = getAppInstance('name1');
+      matcher.addRoutes([{ path: 'path1' }], app);
+
+      expect(matcher.match('/path1', {}).routes[0].apps[0]).toBe(app);
     });
   });
 });
