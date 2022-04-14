@@ -9,13 +9,13 @@ export interface IRouterController {
   /** 是否已经执行 start */
   readonly isStarted: boolean;
 
-  /** 增加路由配置信息 */
+  /** 增加路由 */
   addRoutes: (routes: RouteConfig[], app: IApp) => void;
 
   /** 使用当前路径匹配路由 */
-  match: (location?: Location) => MatchedResult;
+  match: () => MatchedResult;
 
-  /** 增加路由拦截 */
+  /** 执行路由匹配和应用切换 */
   reroute: (navigationEvent?: Event) => Promise<void>;
 
   /**

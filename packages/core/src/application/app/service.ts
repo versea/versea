@@ -1,7 +1,7 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { IStatus } from '../../constants/status';
+import { IStatus } from '../../enum/status';
 import { provide } from '../../provider';
 import {
   IApp,
@@ -33,10 +33,10 @@ export class App extends ExtensibleEntity implements IApp {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _Status: IStatus;
 
-  /** 应用加载函数的返回的 Hooks */
+  /** 加载应用返回的 Hooks */
   protected _hooks: AppHooks = {};
 
-  /** “等待应用内部容器渲染完成”的 Hooks */
+  /** "等待应用内部容器渲染完成"的 Hooks */
   protected _waitForChildrenContainerHooks: Record<string, AppHookFunction> = {};
 
   /**
@@ -165,7 +165,6 @@ export class App extends ExtensibleEntity implements IApp {
     const props: Record<string, unknown> = typeof this._props === 'function' ? this._props(this.name) : this._props;
     return {
       ...props,
-      name: this.name,
       app: this,
       context,
     };

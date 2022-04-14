@@ -1,7 +1,7 @@
 import { Container } from 'inversify';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { Status } from '../../constants/status';
+import { Status } from '../../enum/status';
 import { buildProviderModule } from '../../provider';
 import { AppHooks, AppConfig, IApp, AppHookFunction } from '../app/service';
 import { IAppController, IAppControllerKey } from './service';

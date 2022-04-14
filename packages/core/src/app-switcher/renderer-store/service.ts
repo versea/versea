@@ -34,7 +34,7 @@ export class RendererStore implements IRendererStore {
   }
 
   public appendRoute(route: MatchedRoute, apps?: IApp[]): void {
-    const currentRoute = route.clone();
+    const currentRoute = route.cloneDeep();
     if (apps?.length) {
       currentRoute.apps = apps;
     }
@@ -48,6 +48,6 @@ export class RendererStore implements IRendererStore {
   }
 
   public appendRootFragmentRoute(route: MatchedRoute): void {
-    this.currentRootFragmentRoutes.push(route.clone());
+    this.currentRootFragmentRoutes.push(route.cloneDeep());
   }
 }

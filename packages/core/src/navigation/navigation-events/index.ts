@@ -3,9 +3,9 @@ import { IRouterController } from '../router-controller/service';
 import { HistoryFunctionName, LocationEventName, HistoryEventListenersType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-let _routerController: IRouterController | null = null;
-export function bindRouter(routerController: IRouterController): void {
-  _routerController = routerController;
+let _router: IRouterController | null = null;
+export function bindRouter(router: IRouterController): void {
+  _router = router;
 }
 
 const capturedEventListeners: Record<LocationEventName, EventListener[]> = {
@@ -32,8 +32,8 @@ export function callCapturedEventListeners(navigationEvent?: Event): void {
 
 // 监听路由事件
 const handleUrlChange = (navigationEvent?: HashChangeEvent | PopStateEvent): void => {
-  if (_routerController) {
-    void _routerController.reroute(navigationEvent);
+  if (_router) {
+    void _router.reroute(navigationEvent);
     return;
   }
   callCapturedEventListeners(navigationEvent);
@@ -97,12 +97,12 @@ function patchedUpdateState(updateState: HistoryEventListenersType, methodName: 
     const urlAfter = window.location.href;
 
     if (urlBefore !== urlAfter) {
-      if (_routerController?.isStarted) {
-        // 如果已经启动应用，需要触发一个 popstate 事件，这样才能通知那些已经注册的应用知晓路由变更，他们的路由状态和页面状态才会发生变更。
-        // 如果不触发 popstate 事件，可能会导致路由切换了，但那些已经注册的应用的页面未发生变更
+      if (_router?.isStarted) {
+        // 如果已经启动应用，需要触发一个 popstate 事件，这样才能通知已经注册的应用知晓路由变更，这些应用的路由状态和页面状态才会发生变更。
+        // 如果不触发 popstate 事件，可能导致路由切换成功，但那些已经注册的应用的页面未发生变更
         window.dispatchEvent(createPopStateEvent(window.history.state as PopStateEventInit, methodName));
       } else {
-        void _routerController?.reroute();
+        void _router?.reroute();
       }
     }
   };

@@ -1,4 +1,4 @@
-import { ISwitcherStatus } from '../../constants/status';
+import { ISwitcherStatus } from '../../enum/status';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';

@@ -1,5 +1,5 @@
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { IStatus } from '../../constants/status';
+import { IStatus } from '../../enum/status';
 import { RouteConfig } from '../../navigation/route/service';
 import { createServiceSymbol } from '../../utils';
 
@@ -7,11 +7,8 @@ export const IAppKey = createServiceSymbol('IApp');
 
 export type AppConfigProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
 
-/** 最终传给加载和挂载的各个阶段函数的属性 */
+/** 传给加载和挂载的各个阶段的 Hooks 函数的属性 */
 export interface AppProps extends Record<string, unknown> {
-  /** 应用名称 */
-  name: string;
-
   /** 应用实例 */
   app: IApp;
 
@@ -23,7 +20,7 @@ export type AppHookFunction<T = unknown> = (props: AppProps) => Promise<T>;
 
 /**
  * 应用加载函数的返回的 Hooks
- * @description 应用加载和挂载的各个阶段会分别调用这些 Hooks
+ * @description 应用加载和挂载的各个阶段会分别调用这些 Hooks。
  */
 export interface AppHooks {
   bootstrap?: AppHookFunction;
@@ -41,7 +38,7 @@ export interface IApp {
   /** 应用是否已经加载 */
   isLoaded: boolean;
 
-  /** 应用是否已经成功运行过 bootstrap 函数 */
+  /** 应用是否已经执行引导 */
   isBootstrapped: boolean;
 
   /** 加载应用 */
@@ -59,7 +56,7 @@ export interface IApp {
   /** 卸载应用 */
   unmount: (context: IAppSwitcherContext) => Promise<void>;
 
-  /** 获取最终传给加载和挂载的各个阶段函数的属性 */
+  /** 获取传给加载和挂载的各个阶段 Hooks 函数的属性 */
   getProps: (context: IAppSwitcherContext) => AppProps;
 
   /**
@@ -80,11 +77,11 @@ export interface AppConfig {
 
   /**
    * 应用的属性
-   * @description 透传给应用加载和挂载的各个阶段的函数。
+   * @description 透传给应用加载和挂载的各个阶段 Hooks 函数的属性。
    */
   props?: AppConfigProps;
 
-  /** 加载应用的方法 */
+  /** 加载应用 */
   loadApp?: (props: AppProps) => Promise<AppHooks>;
 }
 

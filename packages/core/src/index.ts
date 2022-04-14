@@ -10,8 +10,7 @@ export * from './application/app/service';
 export * from './application/app-controller/service';
 export * from './application/app-service/service';
 
-export * from './constants/constants';
-export * from './constants/status';
+export * from './enum/status';
 
 export * from './hooks/service';
 
@@ -21,4 +20,5 @@ export * from './navigation/router/service';
 export * from './navigation/router-controller/service';
 
 export * from './provider';
+export * from './constants';
 export { createServiceSymbol } from './utils';
