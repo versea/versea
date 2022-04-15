@@ -18,11 +18,16 @@ export function traverse<T extends Tree>(node: T, callback: (node: T) => void): 
   }
 }
 
-export function cloneObjectWith<T extends object, K extends keyof T>(
-  obj: T,
-  handlers: Record<string, (value: unknown) => unknown> = {},
-): T {
-  const store: Record<string, unknown> = {};
+type FunctionalValue<T extends object> = {
+  [key in keyof T]?: (value: T[key]) => T[key];
+};
+
+/**
+ * ramda clone 方法增加自定义处理 key
+ * @description ramda clone 无法跳过某些字段深拷贝，这里加上一个自定义处理
+ */
+export function cloneObjectWith<T extends object, K extends keyof T>(obj: T, handlers: FunctionalValue<T> = {}): T {
+  const store: Pick<T, keyof FunctionalValue<T>> = {} as T;
   for (const key in obj) {
     const handler = handlers[key];
     // eslint-disable-next-line no-prototype-builtins
@@ -33,9 +38,10 @@ export function cloneObjectWith<T extends object, K extends keyof T>(
     }
   }
   const result = clone(obj);
-  Object.keys(store).forEach((key) => {
-    const handler = handlers[key];
-    result[key as unknown as K] = handler(store[key]) as T[K];
+  (Object.keys(store) as K[]).forEach((key) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const handler = handlers[key]!;
+    result[key] = handler(store[key]);
   });
   return result;
 }

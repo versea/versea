@@ -29,6 +29,7 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
 
     if (this._taps.length == 0) {
       this._taps.push(newTap);
+      return;
     }
 
     for (let i = this._taps.length - 1; i >= 0; i--) {
@@ -52,6 +53,7 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
   }
 
   protected _removeOnce(index: number = this._taps.length - 1): void {
+    console.log(index, this._taps);
     for (let i = index; i >= 0; i--) {
       const tap = this._taps[i];
       if (tap.once) {
