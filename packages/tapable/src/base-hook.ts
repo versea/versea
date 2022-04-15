@@ -53,7 +53,6 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
   }
 
   protected _removeOnce(index: number = this._taps.length - 1): void {
-    console.log(index, this._taps);
     for (let i = index; i >= 0; i--) {
       const tap = this._taps[i];
       if (tap.once) {
