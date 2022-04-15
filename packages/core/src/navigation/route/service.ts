@@ -88,7 +88,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    // 主路由应用放在碎片应用之前
+    // 主应用放在碎片应用之前
     this.apps = [...this.apps, ...route.apps];
 
     // 碎片应用的 meta 需要 scoped
