@@ -147,11 +147,6 @@ export class Route extends ExtensibleEntity implements IRoute {
       }
     });
 
-    // apps 不能被深拷贝，必须保证同一对象
-    const handlers = {
-      apps: (value: IApp[]): IApp[] => [...value],
-    } as Record<string, (value: unknown) => unknown>;
-
     return cloneObjectWith(
       {
         ...extensibleObject,
@@ -162,14 +157,18 @@ export class Route extends ExtensibleEntity implements IRoute {
         params: options.params ?? {},
         query: options.query ?? {},
         cloneDeep(): MatchedRoute {
-          return cloneObjectWith(this, handlers);
+          return cloneObjectWith(this, {
+            apps: (value) => [...value],
+          });
         },
         getRoute: (): IRoute => this,
         equal(route: MatchedRoute): boolean {
           return this.fullPath === route.fullPath && this.apps[0] === route.apps[0];
         },
       },
-      handlers,
+      {
+        apps: (value) => [...value],
+      },
     );
   }
 
