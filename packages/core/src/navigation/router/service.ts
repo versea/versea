@@ -14,8 +14,6 @@ export * from './interface';
 
 @provide(IRouterKey)
 export class Router implements IRouter {
-  public isStarted = false;
-
   protected readonly _matcher: IMatcher;
 
   constructor(@inject(IMatcherKey) matcher: IMatcher) {
@@ -47,17 +45,5 @@ export class Router implements IRouter {
 
   public callCapturedEventListeners(navigationEvent?: Event): void {
     callCapturedEventListeners(navigationEvent);
-  }
-
-  public async start(appSwitcher: IAppSwitcher): Promise<void> {
-    if (this.isStarted) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Versea has already started, it should not start again.');
-        return;
-      }
-    }
-
-    this.isStarted = true;
-    return this.reroute(appSwitcher);
   }
 }

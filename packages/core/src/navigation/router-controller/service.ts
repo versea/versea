@@ -6,6 +6,7 @@ import { provide } from '../../provider';
 import { MatchedRoutes } from '../matcher/service';
 import { bindRouter } from '../navigation-events';
 import { IRouteKey, RouteConfig } from '../route/service';
+import { IRouterStarter, IRouterStarterKey } from '../router-start/service';
 import { IRouter } from '../router/service';
 import { IRouterController, IRouterControllerKey } from './interface';
 
@@ -17,16 +18,23 @@ export class RouterController implements IRouterController {
 
   protected readonly _appSwitcher: IAppSwitcher;
 
+  protected readonly _routerStarter: IRouterStarter;
+
   /** 标识是否已经给 navigationEvent 传入 router 的实例 */
   protected _hasBindRouter = false;
 
-  constructor(@inject(IAppSwitcherKey) appSwitcher: IAppSwitcher, @inject(IRouteKey) router: IRouter) {
+  constructor(
+    @inject(IAppSwitcherKey) appSwitcher: IAppSwitcher,
+    @inject(IRouteKey) router: IRouter,
+    @inject(IRouterStarterKey) routerStarter: IRouterStarter,
+  ) {
     this._appSwitcher = appSwitcher;
     this._router = router;
+    this._routerStarter = routerStarter;
   }
 
   public get isStarted(): boolean {
-    return this._router.isStarted;
+    return this._routerStarter.isStarted;
   }
 
   public addRoutes(routes: RouteConfig[], app: IApp): void {
@@ -47,6 +55,6 @@ export class RouterController implements IRouterController {
   }
 
   public async start(): Promise<void> {
-    return this._router.start(this._appSwitcher);
+    return this._routerStarter.start(this._appSwitcher);
   }
 }

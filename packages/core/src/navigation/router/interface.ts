@@ -7,9 +7,6 @@ import { RouteConfig } from '../route/service';
 export const IRouterKey = createServiceSymbol('IRouter');
 
 export interface IRouter {
-  /** 是否已经执行 start */
-  isStarted: boolean;
-
   /** 增加路由 */
   addRoutes: (routes: RouteConfig[], app: IApp) => void;
 
@@ -21,7 +18,4 @@ export interface IRouter {
 
   /** 调用 popstate 或 hashchange 事件监听函数 */
   callCapturedEventListeners: (navigationEvent?: Event) => void;
-
-  /** 启动应用 */
-  start: (appSwitcher: IAppSwitcher) => Promise<void>;
 }
