@@ -11,6 +11,7 @@ import {
   IRendererHookContextKey,
   RendererHookContextOptions,
   NormalRendererTarget,
+  RendererHookContextDependencies,
 } from './interface';
 
 export * from './interface';
@@ -33,11 +34,15 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   protected readonly _appService: IAppService;
 
-  constructor(options: RendererHookContextOptions) {
+  constructor(
+    options: RendererHookContextOptions,
+    { switcherContext, rendererStore, appService }: RendererHookContextDependencies,
+  ) {
     super(options);
-    this.switcherContext = options.switcherContext;
-    this.rendererStore = options.rendererStore;
-    this._appService = options.appService;
+    // 绑定依赖
+    this.switcherContext = switcherContext;
+    this.rendererStore = rendererStore;
+    this._appService = appService;
 
     // 保存目标路由信息
     const { routes, fragmentRoutes } = options.matchedResult;

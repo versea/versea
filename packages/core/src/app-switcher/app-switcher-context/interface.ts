@@ -20,16 +20,13 @@ export interface IAppSwitcherContext {
   /** 匹配的路由 */
   readonly matchedResult: MatchedResult;
 
-  /** 当前正在运行的路由以及渲染的应用 */
+  /** 渲染信息 Store */
   readonly rendererStore: IRendererStore;
 
-  /**
-   * 当前正在运行的路由
-   * @description 包含整个路由信息，主路由应用和碎片路由应用。
-   */
+  /** 当前的普通路由 */
   readonly currentRoutes: MatchedRoute[];
 
-  /** 当前正在运行的根部碎片路由 */
+  /** 当前的根部碎片路由 */
   readonly currentRootFragmentRoutes: MatchedRoute[];
 
   /**

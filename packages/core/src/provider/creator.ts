@@ -128,7 +128,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
   function buildProviderModule(): interfaces.ContainerModule {
     return new ContainerModule((bind) => {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
-      provideMetadata.map(({ serviceIdentifier, implementationType, bindingType }) => {
+      provideMetadata.forEach(({ serviceIdentifier, implementationType, bindingType }) => {
         if (bindingType === BindingTypeEnum.Factory) {
           throw new VerseaError('Auto Binding Module Error: can not auto bind factory.');
         }

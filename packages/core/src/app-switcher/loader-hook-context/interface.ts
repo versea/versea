@@ -9,7 +9,7 @@ export const ILoaderHookContextKey = createServiceSymbol('ILoaderHookContext');
 
 /**
  * Loader 的 Hook 上下文
- * @description 在整个 load 的过程中会一直存在，会传给给中 load 的 hook。
+ * @description 在整个 load 的过程中会一直存在，，会传给中 load 的每一个 hook。
  */
 export interface ILoaderHookContext extends HookContext {
   readonly switcherContext: IAppSwitcherContext;

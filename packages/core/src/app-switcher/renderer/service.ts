@@ -55,9 +55,10 @@ export class Renderer implements IRenderer {
   }
 
   public restore(): void {
-    // 销毁本次加载的副作用，暂无
+    // 销毁加载的副作用
   }
 
+  /** 添加内置渲染 Hooks */
   protected _initHooks(): void {
     this._tapUnmount();
     this._tapUnmountNormal();
@@ -84,7 +85,7 @@ export class Renderer implements IRenderer {
     });
   }
 
-  /** 销毁普通路由上的应用 */
+  /** 销毁普通路由的应用 */
   protected _tapUnmountNormal(): void {
     const { unmountNormal, unmountFragmentApps, unmountMainApp } = this._hooks;
 
@@ -129,9 +130,9 @@ export class Renderer implements IRenderer {
       const { target, switcherContext, currentRoutes, rendererStore } = hookContext;
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const { currentRoute, index } = target!;
-      // 当前路由主应用与上一个路由的主应用不同，需要卸载主路由应用
-      const lastApp: IApp | null = index === 0 ? null : currentRoutes[index - 1].apps[0];
-      if (currentRoute.apps[0] !== lastApp) {
+      // 遍历到最后一个包含该主应用的路由节点时需要销毁这个主应用
+      const parentAppLike: IApp | null = index === 0 ? null : currentRoutes[index - 1].apps[0];
+      if (currentRoute.apps[0] !== parentAppLike) {
         await currentRoute.apps[0].unmount(switcherContext);
       }
       rendererStore.removeRoute(index);
@@ -143,7 +144,7 @@ export class Renderer implements IRenderer {
     this._hooks.unmountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
 
-      // 销毁当前多余的根部路由的对应的应用
+      // 销毁当前多余的根部碎片应用
       const differentRoutes = differenceWith(
         (route1, route2) => route1.equal(route2),
         currentRootFragmentRoutes,
@@ -182,9 +183,9 @@ export class Renderer implements IRenderer {
         const targetRoute = targetRoutes[i];
         const mainApp = targetRoute.apps[0];
         if (!currentRoutes[i]) {
-          // 当前路由主应用与上一个路由的主应用不同，需要渲染主路由应用
-          const lastApp: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
-          if (mainApp !== lastApp) {
+          const parentAppLike: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
+          // 不相等证明 parentAppLike 是 mainApp 的父应用
+          if (mainApp !== parentAppLike) {
             await switcherContext.runTask(async () => hookContext.bootstrapAndMount(mainApp, targetRoute));
           }
           rendererStore.appendRoute(targetRoute, [mainApp]);
@@ -236,8 +237,10 @@ export class Renderer implements IRenderer {
   }
 
   protected _createRendererHookContext(switcherContext: IAppSwitcherContext): IRendererHookContext {
-    // @ts-expect-error 需要传入参数
-    // eslint-disable-next-line prettier/prettier
-    return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult, rendererStore: this._rendererStore, appService: this._appService });
+    return new this._HookContext(
+      // @ts-expect-error 需要传入参数
+      { matchedResult: switcherContext.matchedResult },
+      { switcherContext, rendererStore: this._rendererStore, appService: this._appService },
+    );
   }
 }
