@@ -1,7 +1,7 @@
 import {
   buildProviderModule,
-  IAppController,
-  IAppControllerKey,
+  IAppService,
+  IAppServiceKey,
   App,
   AppConfig,
   IAppKey,
@@ -41,11 +41,11 @@ parent.rebind('TestData').toConstantValue('test2');
 
 // parent.rebind(IAppKey).toConstructor(NewApp);
 
-const app1 = parent.get<IAppController>(IAppControllerKey).registerApp({
+const app1 = parent.get<IAppService>(IAppServiceKey).registerApp({
   name: 'app1',
   path: 'app1_path',
 } as AppConfig);
-const app2 = parent.get<IAppController>(IAppControllerKey).registerApp({
+const app2 = parent.get<IAppService>(IAppServiceKey).registerApp({
   name: 'app2',
   path: 'app2_path',
   routes: [

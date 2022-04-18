@@ -4,7 +4,7 @@ import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/ser
 import { Status } from '../../enum/status';
 import { buildProviderModule } from '../../provider';
 import { AppHooks, AppConfig, IApp, AppHookFunction } from '../app/service';
-import { IAppController, IAppControllerKey } from './service';
+import { IAppService, IAppServiceKey } from './service';
 
 async function delay(time: number): Promise<void> {
   return new Promise((resolve) => {
@@ -15,8 +15,8 @@ async function delay(time: number): Promise<void> {
 function getAppInstance(config: AppConfig): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
-  const appController = container.get<IAppController>(IAppControllerKey);
-  return appController.registerApp(config);
+  const appService = container.get<IAppService>(IAppServiceKey);
+  return appService.registerApp(config);
 }
 
 function getAppWithLoadHook(

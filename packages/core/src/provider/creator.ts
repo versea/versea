@@ -11,6 +11,8 @@ import {
   BindingTypeEnum,
 } from 'inversify';
 
+import { VERSEA_METADATA_LAZY_INJECT_KEY, VERSEA_METADATA_INJECTION_KEY } from '../constants';
+
 interface ProvideSyntax {
   implementationType: unknown;
   bindingType: interfaces.BindingType;
@@ -128,6 +130,32 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
   function buildProviderModule(): interfaces.ContainerModule {
     return new ContainerModule((bind) => {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
+
+      function onActivationCallBack(context: interfaces.Context, implementation: unknown): unknown {
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+        const metadata: Record<string, interfaces.ServiceIdentifier> =
+          Reflect.getMetadata(VERSEA_METADATA_LAZY_INJECT_KEY, implementation as object) || {};
+        Object.keys(metadata).forEach((key) => {
+          Object.defineProperty(implementation, key, {
+            configurable: true,
+            enumerable: true,
+            get(this: object) {
+              if (Reflect.hasMetadata(VERSEA_METADATA_INJECTION_KEY, this, key)) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                return Reflect.getMetadata(VERSEA_METADATA_INJECTION_KEY, this, key);
+              } else {
+                return context.container.get(metadata[key]);
+              }
+            },
+            set(this: object, newVal: any) {
+              Reflect.defineMetadata(VERSEA_METADATA_INJECTION_KEY, newVal, this, key);
+            },
+          });
+        });
+        /* eslint-enable @typescript-eslint/no-unsafe-member-access */
+        return implementation;
+      }
+
       provideMetadata.forEach(({ serviceIdentifier, implementationType, bindingType }) => {
         if (bindingType === BindingTypeEnum.Factory) {
           throw new VerseaError('Auto Binding Module Error: can not auto bind factory.');
@@ -148,7 +176,9 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
         if (bindingType === BindingTypeEnum.Provider) {
           return bind(serviceIdentifier).toProvider(implementationType as interfaces.ProviderCreator<unknown>);
         }
-        return bind(serviceIdentifier).to(implementationType as new (...args: never[]) => unknown);
+        return bind(serviceIdentifier)
+          .to(implementationType as new (...args: never[]) => unknown)
+          .onActivation(onActivationCallBack);
       });
     });
   }

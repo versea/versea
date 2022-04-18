@@ -1,4 +1,8 @@
 export const VERSEA_METADATA_PROVIDE_KEY = 'VERSEA_METADATA_PROVIDE_KEY';
 
+export const VERSEA_METADATA_LAZY_INJECT_KEY = Symbol.for('VERSEA_METADATA_LAZY_INJECT_KEY');
+
+export const VERSEA_METADATA_INJECTION_KEY = Symbol.for('VERSEA_METADATA_INJECTION_KEY');
+
 /** versea 默认 tap 名称 */
 export const VERSEA_INTERNAL_TAP = 'versea-internal-tap';

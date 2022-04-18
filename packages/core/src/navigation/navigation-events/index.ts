@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { IRouterController } from '../router-controller/service';
+import { IRouter } from '../router/service';
 import { HistoryFunctionName, LocationEventName, HistoryEventListenersType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-let _router: IRouterController | null = null;
-export function bindRouter(router: IRouterController): void {
+let _router: IRouter | null = null;
+export function bindRouter(router: IRouter): void {
   _router = router;
 }
 
