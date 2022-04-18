@@ -131,7 +131,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     return new ContainerModule((bind) => {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
 
-      function onActivationCallBack(context: interfaces.Context, implementation: unknown): unknown {
+      function bindLazyInjection(context: interfaces.Context, implementation: unknown): unknown {
         /* eslint-disable @typescript-eslint/no-unsafe-member-access */
         const metadata: Record<string, interfaces.ServiceIdentifier> =
           Reflect.getMetadata(VERSEA_METADATA_LAZY_INJECT_KEY, implementation as object) || {};
@@ -178,7 +178,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
         }
         return bind(serviceIdentifier)
           .to(implementationType as new (...args: never[]) => unknown)
-          .onActivation(onActivationCallBack);
+          .onActivation(bindLazyInjection);
       });
     });
   }
