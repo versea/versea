@@ -39,6 +39,7 @@ export function cloneObjectWith<T extends object, K extends keyof T>(obj: T, han
   }
   const result = clone(obj);
   (Object.keys(store) as K[]).forEach((key) => {
+    obj[key] = store[key];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const handler = handlers[key]!;
     result[key] = handler(store[key]);

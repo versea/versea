@@ -94,6 +94,6 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
       }
     }
 
-    return 0;
+    return currentRoutes.length;
   }
 }
