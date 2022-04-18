@@ -162,8 +162,8 @@ export class Route extends ExtensibleEntity implements IRoute {
           });
         },
         getRoute: (): IRoute => this,
-        equal(route: MatchedRoute): boolean {
-          return this.fullPath === route.fullPath && this.apps[0] === route.apps[0];
+        equal(route?: MatchedRoute): boolean {
+          return !!route && this.fullPath === route.fullPath && this.apps[0] === route.apps[0];
         },
       },
       {
