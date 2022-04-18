@@ -141,14 +141,15 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
             enumerable: true,
             get(this: object) {
               if (Reflect.hasMetadata(VERSEA_METADATA_INJECTION_KEY, this, key)) {
+                /* istanbul ignore next */
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return Reflect.getMetadata(VERSEA_METADATA_INJECTION_KEY, this, key);
-              } else {
-                return context.container.get(metadata[key]);
               }
+              return context.container.get(metadata[key]);
             },
-            set(this: object, newVal: any) {
-              Reflect.defineMetadata(VERSEA_METADATA_INJECTION_KEY, newVal, this, key);
+            set(this: object, newValue: any) {
+              /* istanbul ignore next */
+              Reflect.defineMetadata(VERSEA_METADATA_INJECTION_KEY, newValue, this, key);
             },
           });
         });
@@ -158,6 +159,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
 
       provideMetadata.forEach(({ serviceIdentifier, implementationType, bindingType }) => {
         if (bindingType === BindingTypeEnum.Factory) {
+          /* istanbul ignore next */
           throw new VerseaError('Auto Binding Module Error: can not auto bind factory.');
         }
 
@@ -168,12 +170,15 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
           return bind(serviceIdentifier).toConstructor(implementationType as interfaces.Newable<unknown>);
         }
         if (bindingType === BindingTypeEnum.DynamicValue) {
+          /* istanbul ignore next */
           return bind(serviceIdentifier).toDynamicValue(implementationType as interfaces.DynamicValue<unknown>);
         }
         if (bindingType === BindingTypeEnum.Function) {
+          /* istanbul ignore next */
           return bind(serviceIdentifier).toFunction(implementationType);
         }
         if (bindingType === BindingTypeEnum.Provider) {
+          /* istanbul ignore next */
           return bind(serviceIdentifier).toProvider(implementationType as interfaces.ProviderCreator<unknown>);
         }
         return bind(serviceIdentifier)
