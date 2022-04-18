@@ -2,7 +2,7 @@ import { inject, interfaces } from 'inversify';
 
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
-import { provide } from '../../provider';
+import { lazyInject, provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILoaderKey, ILoader } from '../loader/service';
 import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
@@ -13,6 +13,8 @@ export * from './interface';
 
 @provide(IAppSwitcherKey)
 export class AppSwitcher implements IAppSwitcher {
+  @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+
   public context: IAppSwitcherContext | null = null;
 
   public currentContext: IAppSwitcherContext | null = null;
@@ -20,8 +22,6 @@ export class AppSwitcher implements IAppSwitcher {
   protected readonly _AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
-
-  protected readonly _router: IRouter;
 
   protected readonly _loader: ILoader;
 
@@ -34,7 +34,6 @@ export class AppSwitcher implements IAppSwitcher {
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     /* eslint-enable @typescript-eslint/naming-convention */
-    @inject(IRouterKey) router: IRouter,
     @inject(ILoaderKey) loader: ILoader,
     @inject(IRendererKey) renderer: IRenderer,
     @inject(IRendererStoreKey) rendererStore: IRendererStore,
@@ -42,7 +41,6 @@ export class AppSwitcher implements IAppSwitcher {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
 
-    this._router = router;
     this._loader = loader;
     this._renderer = renderer;
     this._rendererStore = rendererStore;

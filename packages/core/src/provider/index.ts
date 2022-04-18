@@ -5,3 +5,4 @@ const { provide, provideValue, buildProviderModule } = createProvider(VERSEA_MET
 
 export { provide, provideValue, buildProviderModule };
 export * from './creator';
+export * from './lazy-inject';

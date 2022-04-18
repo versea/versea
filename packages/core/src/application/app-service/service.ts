@@ -2,10 +2,9 @@
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
-import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
 import { IStatus, IStatusKey } from '../../enum/status';
-import { IRouter } from '../../navigation/router/service';
-import { provide } from '../../provider';
+import { IRouter, IRouterKey } from '../../navigation/router/interface';
+import { provide, lazyInject } from '../../provider';
 import { IApp, IAppKey, AppConfig } from '../app/service';
 import { IAppService, IAppServiceKey } from './interface';
 
@@ -13,6 +12,8 @@ export * from './interface';
 
 @provide(IAppServiceKey)
 export class AppService implements IAppService {
+  @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+
   /** App 实例的 Map */
   protected readonly _appMap: Map<string, IApp> = new Map();
 
@@ -25,7 +26,7 @@ export class AppService implements IAppService {
     this._Status = Status;
   }
 
-  public registerApp(config: AppConfig, router: IRouter, appSwitcher?: IAppSwitcher): IApp {
+  public registerApp(config: AppConfig, reroute = true): IApp {
     if (this._appMap.has(config.name)) {
       throw new VerseaError(`Duplicate app name: "${config.name}".`);
     }
@@ -35,19 +36,19 @@ export class AppService implements IAppService {
     this._appMap.set(app.name, app);
 
     if (config.routes?.length) {
-      router.addRoutes(config.routes, app);
+      this._router.addRoutes(config.routes, app);
     }
 
-    if (appSwitcher) {
-      void router.reroute(appSwitcher);
+    if (reroute) {
+      void this._router.reroute();
     }
 
     return app;
   }
 
-  public registerApps(configList: AppConfig[], router: IRouter, appSwitcher: IAppSwitcher): IApp[] {
-    const apps = configList.map((config) => this.registerApp(config, router));
-    void router.reroute(appSwitcher);
+  public registerApps(configList: AppConfig[]): IApp[] {
+    const apps = configList.map((config) => this.registerApp(config, false));
+    void this._router.reroute();
     return apps;
   }
 

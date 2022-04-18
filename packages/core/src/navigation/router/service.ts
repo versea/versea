@@ -1,11 +1,11 @@
 import { inject } from 'inversify';
 import { parse } from 'query-string';
 
-import { IAppSwitcher } from '../../app-switcher/app-switcher/service';
+import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/interface';
 import { IApp } from '../../application/app/service';
-import { provide } from '../../provider';
+import { lazyInject, provide } from '../../provider';
 import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/service';
-import { callCapturedEventListeners } from '../navigation-events';
+import { bindRouter, callCapturedEventListeners } from '../navigation-events';
 import { RouteConfig } from '../route/service';
 import { IRouter, IRouterKey } from './interface';
 
@@ -13,9 +13,14 @@ export * from './interface';
 
 @provide(IRouterKey)
 export class Router implements IRouter {
+  @lazyInject(IAppSwitcherKey) protected readonly _appSwitcher!: IAppSwitcher;
+
   public isStarted = false;
 
   protected readonly _matcher: IMatcher;
+
+  /** 标识是否已经把 router 传给 navigation */
+  protected _hasBindRouter = false;
 
   constructor(@inject(IMatcherKey) matcher: IMatcher) {
     this._matcher = matcher;
@@ -23,6 +28,11 @@ export class Router implements IRouter {
 
   public addRoutes(routes: RouteConfig[], app: IApp): void {
     this._matcher.addRoutes(routes, app);
+    if (!this._hasBindRouter) {
+      this._hasBindRouter = true;
+      // 把 router 传给 navigation
+      bindRouter(this);
+    }
   }
 
   public match(): MatchedResult {
@@ -33,8 +43,8 @@ export class Router implements IRouter {
     return this._matcher.match(path.endsWith('/') ? path : `${path}/`, query);
   }
 
-  public async reroute(appSwitcher: IAppSwitcher, navigationEvent?: Event): Promise<void> {
-    await appSwitcher.switch({
+  public async reroute(navigationEvent?: Event): Promise<void> {
+    await this._appSwitcher.switch({
       navigationEvent,
       matchedResult: this.match(),
     });
@@ -44,7 +54,7 @@ export class Router implements IRouter {
     callCapturedEventListeners(navigationEvent);
   }
 
-  public async start(appSwitcher: IAppSwitcher): Promise<void> {
+  public async start(): Promise<void> {
     if (this.isStarted) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('Versea has already started, it should not start again.');
@@ -53,6 +63,6 @@ export class Router implements IRouter {
     }
 
     this.isStarted = true;
-    return this.reroute(appSwitcher);
+    return this.reroute();
   }
 }
