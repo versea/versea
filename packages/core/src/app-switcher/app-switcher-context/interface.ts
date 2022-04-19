@@ -5,6 +5,7 @@ import { IHooks } from '../../hooks/service';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
+import { IStarter } from '../../starter/interface';
 import { createServiceSymbol } from '../../utils';
 import { ILoader } from '../loader/service';
 import { IRenderer } from '../renderer/service';
@@ -68,7 +69,8 @@ export interface RunOptions {
 export interface AppSwitcherContextDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   SwitcherStatus: ISwitcherStatus;
-  routeState: IRouteState;
   router: IRouter;
+  routeState: IRouteState;
   hooks: IHooks;
+  starter: IStarter;
 }

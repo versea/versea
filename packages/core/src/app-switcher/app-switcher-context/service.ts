@@ -6,6 +6,7 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
+import { IStarter } from '../../starter/interface';
 import { SwitcherOptions } from '../app-switcher/service';
 import { IRouteState } from '../route-state/service';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
@@ -32,19 +33,32 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   protected readonly _router: IRouter;
 
+<<<<<<< HEAD
   protected readonly _hooks: IHooks;
+=======
+  protected readonly _starter: IStarter;
+>>>>>>> 3d78b85 (feat: add starter)
 
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
+<<<<<<< HEAD
     { SwitcherStatus, router, routeState, hooks }: AppSwitcherContextDependencies,
+=======
+    { SwitcherStatus, router, starter, rendererStore }: AppSwitcherContextDependencies,
+>>>>>>> 3d78b85 (feat: add starter)
   ) {
     super(options);
     // 绑定依赖
     this.routeState = routeState;
     this._SwitcherStatus = SwitcherStatus;
     this._router = router;
+<<<<<<< HEAD
     this._hooks = hooks;
+=======
+    this._starter = starter;
+    this.rendererStore = rendererStore;
+>>>>>>> 3d78b85 (feat: add starter)
 
     this.matchedResult = options.matchedResult;
     this._navigationEvent = options.navigationEvent;
@@ -79,7 +93,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     try {
       await this._hooks.beforeSwitch.call(this);
       await loader.load(this);
-      if (this._router.isStarted) {
+      if (this._starter.isStarted) {
         this.status = this._SwitcherStatus.NotUnmounted;
         await renderer.render(this);
       }

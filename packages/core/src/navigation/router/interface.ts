@@ -8,7 +8,7 @@ import { RouteConfig } from '../route/service';
 export const IRouterKey = createServiceSymbol('IRouter');
 
 export interface IRouter {
-  /** 是否已经执行 start */
+  /** starter 状态 */
   isStarted: boolean;
 
   /** 增加路由 */
@@ -22,9 +22,6 @@ export interface IRouter {
 
   /** 调用 popstate 或 hashchange 的事件监听函数 */
   callCapturedEventListeners: (navigationEvent?: Event) => void;
-
-  /** 启动应用 */
-  start: () => Promise<void>;
 }
 
 export interface RerouteHookContext extends HookContext {
