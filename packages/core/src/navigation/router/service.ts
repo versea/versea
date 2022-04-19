@@ -6,6 +6,7 @@ import { IApp } from '../../application/app/service';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { lazyInject, provide } from '../../provider';
+import { IStarter, IStarterKey } from '../../starter/service';
 import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/service';
 import { bindRouter, callCapturedEventListeners } from '../navigation-events';
 import { RouteConfig } from '../route/service';
@@ -15,9 +16,9 @@ export * from './interface';
 
 @provide(IRouterKey)
 export class Router implements IRouter {
-  @lazyInject(IAppSwitcherKey) protected readonly _appSwitcher!: IAppSwitcher;
+  @lazyInject(IStarterKey) protected readonly _starter!: IStarter;
 
-  public isStarted = false;
+  @lazyInject(IAppSwitcherKey) protected readonly _appSwitcher!: IAppSwitcher;
 
   protected readonly _matcher: IMatcher;
 
@@ -31,6 +32,10 @@ export class Router implements IRouter {
     this._hooks = hooks;
 
     this._initHooks();
+  }
+
+  public get isStarted(): boolean {
+    return this._starter.isStarted;
   }
 
   public addRoutes(routes: RouteConfig[], app: IApp): void {
@@ -61,18 +66,6 @@ export class Router implements IRouter {
 
   public callCapturedEventListeners(navigationEvent?: Event): void {
     callCapturedEventListeners(navigationEvent);
-  }
-
-  public async start(): Promise<void> {
-    if (this.isStarted) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Versea has already started, it should not start again.');
-        return;
-      }
-    }
-
-    this.isStarted = true;
-    return this.reroute();
   }
 
   protected _initHooks(): void {

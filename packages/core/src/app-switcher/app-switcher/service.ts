@@ -4,6 +4,7 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { lazyInject, provide } from '../../provider';
+import { IStarter, IStarterKey } from '../../starter/interface';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILoaderKey, ILoader } from '../loader/service';
 import { IRendererKey, IRenderer } from '../renderer/service';
@@ -15,6 +16,8 @@ export * from './interface';
 @provide(IAppSwitcherKey)
 export class AppSwitcher implements IAppSwitcher {
   @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+
+  @lazyInject(IStarterKey) protected readonly _starter!: IStarter;
 
   public context: IAppSwitcherContext | null = null;
 
@@ -83,6 +86,7 @@ export class AppSwitcher implements IAppSwitcher {
       router: this._router,
       routeState: this._routeState,
       hooks: this._hooks,
+      starter: this._starter,
     });
   }
 }
