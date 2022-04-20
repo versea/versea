@@ -15,17 +15,13 @@ export class Hooks implements IHooks {
 
   public unmount = new AsyncSeriesHook<IRendererHookContext>();
 
-  public unmountNormal = new AsyncSeriesHook<IRendererHookContext>();
-
-  public unmountFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
-
-  public unmountMainApp = new AsyncSeriesHook<IRendererHookContext>();
+  public unmountApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public unmountRootFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public mount = new AsyncSeriesHook<IRendererHookContext>();
 
-  public mountMainApp = new AsyncSeriesHook<IRendererHookContext>();
+  public mountMainApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public mountRootFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 

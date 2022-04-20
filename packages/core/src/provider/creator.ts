@@ -17,16 +17,18 @@ interface ProvideSyntax {
   implementationType: unknown;
   bindingType: interfaces.BindingType;
   serviceIdentifier: interfaces.ServiceIdentifier;
+  replace?: (current: unknown, previous: unknown) => unknown;
 }
 interface CreateProviderReturnType {
   provide: (
     serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType?: 'Constructor' | 'Instance',
   ) => (target: any) => any;
-  provideValue: (
+  provideValue: <T = unknown>(
     target: any,
     serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType?: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider',
+    replace?: (previous: T, current: T) => T,
   ) => any;
   buildProviderModule: () => interfaces.ContainerModule;
 }
@@ -43,12 +45,12 @@ function toString(serviceIdentifier: interfaces.ServiceIdentifier): string {
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
-  let newMetadata: ProvideSyntax[] = [];
   const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
+  const newMetadata: ProvideSyntax[] = [...previousMetadata];
 
   const index = previousMetadata.findIndex((item) => item.serviceIdentifier === metadata.serviceIdentifier);
   if (index < 0) {
-    newMetadata = [...previousMetadata, metadata];
+    newMetadata.push(metadata);
   } else {
     const previousBindingType = previousMetadata[index].bindingType;
     const currentBindingType = metadata.bindingType;
@@ -71,16 +73,26 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
       }
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(
-        `Provide Warning: duplicated serviceIdentifier ${toString(
-          metadata.serviceIdentifier,
-        )}, use new value to replace old value.`,
-      );
-    }
+    const previous = newMetadata[index];
+    const replace = metadata.replace ?? previous.replace;
 
-    newMetadata = [...previousMetadata];
-    newMetadata[index] = metadata;
+    if (replace) {
+      newMetadata[index] = {
+        ...metadata,
+        implementationType: replace(previous.implementationType, metadata.implementationType),
+        replace,
+      };
+    } else {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          `Provide Warning: duplicated serviceIdentifier ${toString(
+            metadata.serviceIdentifier,
+          )}, use new value to replace old value.`,
+        );
+      }
+
+      newMetadata[index] = metadata;
+    }
   }
 
   Reflect.defineMetadata(MetaDataKey, newMetadata, Reflect);
@@ -111,16 +123,18 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     };
   }
 
-  function provideValue(
+  function provideValue<T = unknown>(
     target: any,
     serviceIdentifier: interfaces.ServiceIdentifier,
     bindingType: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider' = 'ConstantValue',
+    replace?: (previous: T, current: T) => T,
   ): any {
     appendMetadata(
       {
         serviceIdentifier,
         bindingType,
         implementationType: target,
+        replace: replace as (current: unknown, previous: unknown) => unknown,
       },
       MetaDataKey,
     );

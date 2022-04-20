@@ -17,13 +17,7 @@ export interface IHooks {
   unmount: AsyncSeriesHook<IRendererHookContext>;
 
   /** 销毁匹配的普通路由对应的应用 */
-  unmountNormal: AsyncSeriesHook<IRendererHookContext>;
-
-  /** 销毁单组碎片应用 */
-  unmountFragmentApps: AsyncSeriesHook<IRendererHookContext>;
-
-  /** 销毁单个主应用 */
-  unmountMainApp: AsyncSeriesHook<IRendererHookContext>;
+  unmountApps: AsyncSeriesHook<IRendererHookContext>;
 
   /** 销毁根部碎片应用 */
   unmountRootFragmentApps: AsyncSeriesHook<IRendererHookContext>;
@@ -32,7 +26,7 @@ export interface IHooks {
   mount: AsyncSeriesHook<IRendererHookContext>;
 
   /** 渲染主应用 */
-  mountMainApp: AsyncSeriesHook<IRendererHookContext>;
+  mountMainApps: AsyncSeriesHook<IRendererHookContext>;
 
   /** 渲染根部碎片应用 */
   mountRootFragmentApps: AsyncSeriesHook<IRendererHookContext>;

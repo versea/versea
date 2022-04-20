@@ -1,7 +1,7 @@
 import { Container } from 'inversify';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
-import { Status } from '../../enum/status';
+import { IStatus, IStatusKey } from '../../enum/status';
 import { buildProviderModule } from '../../provider';
 import { AppHooks, AppConfig, IApp, AppHookFunction } from '../app/service';
 import { IAppService, IAppServiceKey } from './service';
@@ -12,9 +12,12 @@ async function delay(time: number): Promise<void> {
   });
 }
 
+let Status: IStatus = undefined;
+
 function getAppInstance(config: AppConfig): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
+  Status = container.get(IStatusKey);
   const appService = container.get<IAppService>(IAppServiceKey);
   return appService.registerApp(config);
 }

@@ -2,7 +2,7 @@ import { provideValue } from '../provider';
 import { createServiceSymbol } from '../utils';
 
 export const IStatusKey = createServiceSymbol('IStatus');
-export const Status = {
+const Status = {
   NotLoaded: 'NotLoaded',
   LoadingSourceCode: 'LoadingSourceCode',
   NotBootstrapped: 'NotBootstrapped',
@@ -24,7 +24,7 @@ type IStatusTyped = typeof Status;
 export interface IStatus extends IStatusTyped {}
 
 export const ISwitcherStatusKey = createServiceSymbol('ISwitcherStatus');
-export const SwitcherStatus = {
+const SwitcherStatus = {
   NotStart: 'NotStart',
   Loading: 'Loading',
   Loaded: 'Loaded',

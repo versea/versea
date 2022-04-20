@@ -5,8 +5,8 @@ import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { lazyInject, provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILoaderKey, ILoader } from '../loader/service';
-import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
 import { IRendererKey, IRenderer } from '../renderer/service';
+import { IRouteStateKey, IRouteState } from '../route-state/service';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';
@@ -27,7 +27,7 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _renderer: IRenderer;
 
-  protected readonly _rendererStore: IRendererStore;
+  protected readonly _routeState: IRouteState;
 
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -36,14 +36,14 @@ export class AppSwitcher implements IAppSwitcher {
     /* eslint-enable @typescript-eslint/naming-convention */
     @inject(ILoaderKey) loader: ILoader,
     @inject(IRendererKey) renderer: IRenderer,
-    @inject(IRendererStoreKey) rendererStore: IRendererStore,
+    @inject(IRouteStateKey) routeState: IRouteState,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
 
     this._loader = loader;
     this._renderer = renderer;
-    this._rendererStore = rendererStore;
+    this._routeState = routeState;
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -76,7 +76,7 @@ export class AppSwitcher implements IAppSwitcher {
     return new this._AppSwitcherContext(options, {
       SwitcherStatus: this._SwitcherStatus,
       router: this._router,
-      rendererStore: this._rendererStore,
+      routeState: this._routeState,
     });
   }
 }

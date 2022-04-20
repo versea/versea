@@ -4,8 +4,8 @@ import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { createServiceSymbol } from '../../utils';
 import { ILoader } from '../loader/service';
-import { IRendererStore } from '../renderer-store/service';
 import { IRenderer } from '../renderer/service';
+import { IRouteState } from '../route-state/service';
 
 export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
 
@@ -20,8 +20,8 @@ export interface IAppSwitcherContext {
   /** 匹配的路由 */
   readonly matchedResult: MatchedResult;
 
-  /** 渲染信息 Store */
-  readonly rendererStore: IRendererStore;
+  /** 路由状态 */
+  readonly routeState: IRouteState;
 
   /** 当前的普通路由 */
   readonly currentRoutes: MatchedRoute[];
@@ -65,6 +65,6 @@ export interface RunOptions {
 export interface AppSwitcherContextDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   SwitcherStatus: ISwitcherStatus;
+  routeState: IRouteState;
   router: IRouter;
-  rendererStore: IRendererStore;
 }

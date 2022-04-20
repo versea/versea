@@ -6,7 +6,7 @@ import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
 import { SwitcherOptions } from '../app-switcher/service';
-import { IRendererStore } from '../renderer-store/service';
+import { IRouteState } from '../route-state/service';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';
@@ -19,7 +19,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   /** 匹配的路由 */
   public readonly matchedResult: MatchedResult;
 
-  public readonly rendererStore: IRendererStore;
+  public readonly routeState: IRouteState;
 
   /** 路由事件 */
   protected _navigationEvent?: Event;
@@ -34,13 +34,13 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    { SwitcherStatus, router, rendererStore }: AppSwitcherContextDependencies,
+    { SwitcherStatus, router, routeState }: AppSwitcherContextDependencies,
   ) {
     super(options);
     // 绑定依赖
     this._SwitcherStatus = SwitcherStatus;
     this._router = router;
-    this.rendererStore = rendererStore;
+    this.routeState = routeState;
 
     this.matchedResult = options.matchedResult;
     this._navigationEvent = options.navigationEvent;
@@ -49,11 +49,11 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
   }
 
   public get currentRoutes(): MatchedRoute[] {
-    return this.rendererStore.currentRoutes;
+    return this.routeState.current;
   }
 
   public get currentRootFragmentRoutes(): MatchedRoute[] {
-    return this.rendererStore.currentRootFragmentRoutes;
+    return this.routeState.currentRootFragments;
   }
 
   @memoizePromise(0, false)
@@ -103,7 +103,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   public ensureNotCanceled(): void {
     if (this.status === this._SwitcherStatus.WaitForCancel) {
-      throw new VerseaCanceledError('Cancel switcher task.');
+      throw new VerseaCanceledError('Cancel app switcher task.');
     }
   }
 

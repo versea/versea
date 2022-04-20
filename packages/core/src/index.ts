@@ -4,7 +4,7 @@ export * from './app-switcher/loader/service';
 export * from './app-switcher/loader-hook-context/service';
 export * from './app-switcher/renderer/service';
 export * from './app-switcher/renderer-hook-context/service';
-export * from './app-switcher/renderer-store/service';
+export * from './app-switcher/route-state/service';
 
 export * from './application/app/service';
 export * from './application/app-service/service';

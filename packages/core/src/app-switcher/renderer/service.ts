@@ -9,37 +9,37 @@ import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
 import { IRendererHookContext, IRendererHookContextKey } from '../renderer-hook-context/service';
-import { IRendererStore, IRendererStoreKey } from '../renderer-store/service';
+import { IRouteState, IRouteStateKey } from '../route-state/service';
 import { IRenderer, IRendererKey } from './interface';
 
 export * from './interface';
 
 @provide(IRendererKey)
 export class Renderer implements IRenderer {
-  protected readonly _hooks: IHooks;
-
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
   protected readonly _HookContext: interfaces.Newable<IRendererHookContext>;
 
+  protected readonly _hooks: IHooks;
+
   protected readonly _appService: IAppService;
 
-  protected readonly _rendererStore: IRendererStore;
+  protected readonly _routeState: IRouteState;
 
   constructor(
-    @inject(IHooksKey) hooks: IHooks,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     @inject(IRendererHookContextKey) HookContext: interfaces.Newable<IRendererHookContext>,
+    @inject(IHooksKey) hooks: IHooks,
     @inject(IAppServiceKey) appService: IAppService,
-    @inject(IRendererStoreKey) rendererStore: IRendererStore,
+    @inject(IRouteStateKey) routeState: IRouteState,
   ) {
-    this._hooks = hooks;
     this._SwitcherStatus = SwitcherStatus;
     this._HookContext = HookContext;
+    this._hooks = hooks;
     this._appService = appService;
-    this._rendererStore = rendererStore;
+    this._routeState = routeState;
 
     this._initHooks();
   }
@@ -61,9 +61,7 @@ export class Renderer implements IRenderer {
   /** 添加内置渲染 Hooks */
   protected _initHooks(): void {
     this._tapUnmount();
-    this._tapUnmountNormal();
-    this._tapUnmountFragmentApps();
-    this._tapUnmountMainApp();
+    this._tapUnmountApps();
     this._tapUnmountRootFragmentApps();
     this._tapMount();
     this._tapMountMainApp();
@@ -73,76 +71,54 @@ export class Renderer implements IRenderer {
 
   /** 销毁应用 */
   protected _tapUnmount(): void {
-    const { unmount, unmountNormal, unmountRootFragmentApps } = this._hooks;
+    const { unmount, unmountApps, unmountRootFragmentApps } = this._hooks;
 
     unmount.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext } = hookContext;
 
       switcherContext.status = this._SwitcherStatus.Unmounting;
-      await switcherContext.runTask(async () => unmountNormal.call(hookContext));
+      await switcherContext.runTask(async () => unmountApps.call(hookContext));
       await switcherContext.runTask(async () => unmountRootFragmentApps.call(hookContext));
       switcherContext.status = this._SwitcherStatus.Unmounted;
     });
   }
 
   /** 销毁普通路由的应用 */
-  protected _tapUnmountNormal(): void {
-    const { unmountNormal, unmountFragmentApps, unmountMainApp } = this._hooks;
+  protected _tapUnmountApps(): void {
+    this._hooks.unmountApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
+      const { switcherContext, currentRoutes, targetRoutes, mismatchIndex, routeState } = hookContext;
 
-    unmountNormal.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { switcherContext, currentRoutes, mismatchIndex } = hookContext;
-
-      // 倒序销毁当前渲染的应用，保证被依赖的应用后销毁
+      // 倒序销毁当前渲染的应用，以此保证被依赖的应用后销毁
       for (let i = currentRoutes.length - 1; i >= 0; i--) {
-        const apps = currentRoutes[i].apps;
+        const currentRoute = currentRoutes[i];
+        const targetRoute = targetRoutes[i];
+        const [mainApp, ...fragmentApps] = currentRoute.apps;
 
-        hookContext.setTarget(i);
-        if (apps.length > 1) {
-          await switcherContext.runTask(async () => unmountFragmentApps.call(hookContext));
+        if (fragmentApps.length) {
+          const toUnmountFragmentApps =
+            i < mismatchIndex
+              ? differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1))
+              : fragmentApps;
+          await switcherContext.runTask(async () =>
+            Promise.all(toUnmountFragmentApps.map(async (app) => app.unmount(switcherContext))),
+          );
+          routeState.removeApps(i, toUnmountFragmentApps);
         }
         if (i >= mismatchIndex) {
-          await switcherContext.runTask(async () => unmountMainApp.call(hookContext));
+          const parentAppLike: IApp | null = i === 0 ? null : currentRoutes[i - 1].apps[0];
+          if (mainApp !== parentAppLike) {
+            await switcherContext.runTask(async () => currentRoute.apps[0].unmount(switcherContext));
+          }
+          routeState.pop();
         }
-        hookContext.resetTarget();
       }
-    });
-  }
-
-  /** 销毁普通路由碎片应用 */
-  protected _tapUnmountFragmentApps(): void {
-    this._hooks.unmountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { target, switcherContext, mismatchIndex, rendererStore } = hookContext;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { currentRoute, targetRoute, index } = target!;
-      const fragmentApps = currentRoute.apps.slice(1);
-      const apps =
-        index < mismatchIndex
-          ? differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1))
-          : fragmentApps;
-      await Promise.all(apps.map(async (app) => app.unmount(switcherContext)));
-      rendererStore.removeApps(index, apps);
-    });
-  }
-
-  /** 销毁普通路由主应用 */
-  protected _tapUnmountMainApp(): void {
-    this._hooks.unmountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { target, switcherContext, currentRoutes, rendererStore } = hookContext;
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const { currentRoute, index } = target!;
-      // 遍历到最后一个包含该主应用的路由节点时需要销毁这个主应用
-      const parentAppLike: IApp | null = index === 0 ? null : currentRoutes[index - 1].apps[0];
-      if (currentRoute.apps[0] !== parentAppLike) {
-        await currentRoute.apps[0].unmount(switcherContext);
-      }
-      rendererStore.removeRoute(index);
     });
   }
 
   /** 销毁根部路由碎片应用 */
   protected _tapUnmountRootFragmentApps(): void {
     this._hooks.unmountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
+      const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, routeState } = hookContext;
 
       // 销毁当前多余的根部碎片应用
       const differentRoutes = differenceWith(
@@ -153,7 +129,7 @@ export class Renderer implements IRenderer {
       await Promise.all(
         differentRoutes.map(async (route) => {
           await route.apps[0].unmount(switcherContext);
-          rendererStore.removeRootFragmentRoute(route);
+          routeState.removeRootFragment(route);
         }),
       );
     });
@@ -161,13 +137,13 @@ export class Renderer implements IRenderer {
 
   /** 渲染应用 */
   protected _tapMount(): void {
-    const { mount, mountMainApp, mountRootFragmentApps, mountFragmentApps } = this._hooks;
+    const { mount, mountMainApps, mountRootFragmentApps, mountFragmentApps } = this._hooks;
 
     mount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const { switcherContext } = hookContext;
 
       switcherContext.status = this._SwitcherStatus.Mounting;
-      await switcherContext.runTask(async () => mountMainApp.call(hookContext));
+      await switcherContext.runTask(async () => mountMainApps.call(hookContext));
       await switcherContext.runTask(async () => mountRootFragmentApps.call(hookContext));
       await switcherContext.runTask(async () => mountFragmentApps.call(hookContext));
       switcherContext.status = this._SwitcherStatus.Mounted;
@@ -176,8 +152,8 @@ export class Renderer implements IRenderer {
 
   /** 渲染主应用 */
   protected _tapMountMainApp(): void {
-    this._hooks.mountMainApp.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { switcherContext, currentRoutes, targetRoutes, rendererStore } = hookContext;
+    this._hooks.mountMainApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
+      const { switcherContext, currentRoutes, targetRoutes, routeState } = hookContext;
 
       for (let i = 0; i < targetRoutes.length; i++) {
         const targetRoute = targetRoutes[i];
@@ -188,7 +164,7 @@ export class Renderer implements IRenderer {
           if (mainApp !== parentAppLike) {
             await switcherContext.runTask(async () => hookContext.bootstrapAndMount(mainApp, targetRoute));
           }
-          rendererStore.appendRoute(targetRoute, [mainApp]);
+          routeState.append(targetRoute, [mainApp]);
         }
       }
     });
@@ -197,7 +173,7 @@ export class Renderer implements IRenderer {
   /** 渲染根部路由碎片应用 */
   protected _tapMountRootFragmentApps(): void {
     this._hooks.mountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { currentRootFragmentRoutes, targetRootFragmentRoutes, rendererStore } = hookContext;
+      const { currentRootFragmentRoutes, targetRootFragmentRoutes, routeState } = hookContext;
 
       const differentRoutes = differenceWith(
         (route1, route2) => {
@@ -209,7 +185,7 @@ export class Renderer implements IRenderer {
       await Promise.all(
         differentRoutes.map(async (route) => {
           await hookContext.bootstrapAndMount(route.apps[0], route);
-          rendererStore.appendRootFragmentRoute(route);
+          routeState.appendRootFragment(route);
         }),
       );
     });
@@ -217,21 +193,21 @@ export class Renderer implements IRenderer {
 
   protected _tapMountFragmentApps(): void {
     this._hooks.mountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
-      const { switcherContext, currentRoutes, targetRoutes, rendererStore } = hookContext;
+      const { switcherContext, currentRoutes, targetRoutes, routeState } = hookContext;
 
       for (let i = 0; i < targetRoutes.length; i++) {
         const targetRoute = targetRoutes[i];
-        const apps = differenceWith(
+        const toMountFragmentApps = differenceWith(
           (app1, app2) => app1 === app2,
           targetRoute.apps.slice(1),
           currentRoutes[i].apps.slice(1),
         );
-        if (apps.length > 0) {
+        if (toMountFragmentApps.length > 0) {
           await switcherContext.runTask(async () =>
-            Promise.all(apps.map(async (app) => hookContext.bootstrapAndMount(app, targetRoute))),
+            Promise.all(toMountFragmentApps.map(async (app) => hookContext.bootstrapAndMount(app, targetRoute))),
           );
+          routeState.appendApps(i, toMountFragmentApps);
         }
-        rendererStore.setApps(i, [...targetRoute.apps]);
       }
     });
   }
@@ -240,7 +216,7 @@ export class Renderer implements IRenderer {
     return new this._HookContext(
       // @ts-expect-error 需要传入参数
       { matchedResult: switcherContext.matchedResult },
-      { switcherContext, rendererStore: this._rendererStore, appService: this._appService },
+      { switcherContext, appService: this._appService, routeState: this._routeState },
     );
   }
 }

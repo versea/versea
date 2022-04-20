@@ -105,4 +105,17 @@ describe('createProvider', () => {
 
     expect(container.get('test')).toBe('bar');
   });
+
+  test('两次调用 provideValue 绑定同名 key，并提供合并函数，应该绑定函数返回值到容器。', () => {
+    const { provideValue, buildProviderModule } = createProvider('metaKey');
+
+    provideValue('foo', 'test');
+    provideValue<string>('bar', 'test', 'ConstantValue', (previous, current) => `${previous}|${current}`);
+    provideValue('zoo', 'test');
+
+    const container = new Container({ defaultScope: 'Singleton' });
+    container.load(buildProviderModule());
+
+    expect(container.get('test')).toBe('foo|bar|zoo');
+  });
 });

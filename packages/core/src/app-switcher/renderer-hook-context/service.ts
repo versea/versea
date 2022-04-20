@@ -5,12 +5,11 @@ import { IApp } from '../../application/app/service';
 import { MatchedRoute, RouteMeta } from '../../navigation/route/service';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { IRendererStore } from '../renderer-store/service';
+import { IRouteState } from '../route-state/service';
 import {
   IRendererHookContext,
   IRendererHookContextKey,
   RendererHookContextOptions,
-  NormalRendererTarget,
   RendererHookContextDependencies,
 } from './interface';
 
@@ -24,11 +23,9 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   public targetRootFragmentRoutes: MatchedRoute[];
 
-  public readonly rendererStore: IRendererStore;
+  public readonly routeState: IRouteState;
 
   public readonly mismatchIndex: number;
-
-  public target: NormalRendererTarget | null = null;
 
   public bail = false;
 
@@ -36,15 +33,14 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   constructor(
     options: RendererHookContextOptions,
-    { switcherContext, rendererStore, appService }: RendererHookContextDependencies,
+    { appService, routeState, switcherContext }: RendererHookContextDependencies,
   ) {
     super(options);
     // 绑定依赖
-    this.switcherContext = switcherContext;
-    this.rendererStore = rendererStore;
     this._appService = appService;
+    this.routeState = routeState;
+    this.switcherContext = switcherContext;
 
-    // 保存目标路由信息
     const { routes, fragmentRoutes } = options.matchedResult;
     this.targetRoutes = routes;
     this.targetRootFragmentRoutes = fragmentRoutes;
@@ -53,23 +49,11 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
   }
 
   public get currentRoutes(): MatchedRoute[] {
-    return this.rendererStore.currentRoutes;
+    return this.routeState.current;
   }
 
   public get currentRootFragmentRoutes(): MatchedRoute[] {
-    return this.rendererStore.currentRootFragmentRoutes;
-  }
-
-  public setTarget(index: number): void {
-    this.target = {
-      index,
-      currentRoute: this.currentRoutes[index],
-      targetRoute: this.targetRoutes[index],
-    };
-  }
-
-  public resetTarget(): void {
-    this.target = null;
+    return this.routeState.currentRootFragments;
   }
 
   public async bootstrapAndMount(app: IApp, route: MatchedRoute): Promise<void> {
@@ -77,6 +61,7 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
     if (!app.isBootstrapped) {
       await app.bootstrap(switcherContext);
     }
+    // 解构出应用对应的 meta 信息
     const meta: RouteMeta = route.apps[0] === app ? route.meta : (route.meta[app.name] as RouteMeta);
     if (meta.parentAppName && meta.parentContainerName) {
       const parentApp = this._appService.getApp(meta.parentAppName);
@@ -87,9 +72,8 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   protected _getMismatchIndex(): number {
     const currentRoutes = this.currentRoutes;
-    const targetRoutes = this.targetRoutes;
     for (let i = 0; i < currentRoutes.length; i++) {
-      if (!currentRoutes[i].equal(targetRoutes[i])) {
+      if (!currentRoutes[i].equal(this.targetRoutes[i])) {
         return i;
       }
     }
