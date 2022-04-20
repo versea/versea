@@ -16,7 +16,7 @@ export interface IHooks {
   /** 销毁应用 */
   unmount: AsyncSeriesHook<IRendererHookContext>;
 
-  /** 销毁匹配的普通路由对应的应用 */
+  /** 销毁主应用和碎片应用 */
   unmountApps: AsyncSeriesHook<IRendererHookContext>;
 
   /** 销毁根部碎片应用 */
