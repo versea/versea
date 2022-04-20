@@ -13,10 +13,8 @@ export * from './interface';
 
 @provide(IAppSwitcherContextKey, 'Constructor')
 export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcherContext {
-  /** SwitcherContext 运行状态 */
   public status: ISwitcherStatus[keyof ISwitcherStatus];
 
-  /** 匹配的路由 */
   public readonly matchedResult: MatchedResult;
 
   public readonly routeState: IRouteState;
