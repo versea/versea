@@ -1,3 +1,5 @@
+import { HookContext } from '@versea/tapable';
+
 import { createServiceSymbol } from '../../utils';
 import { AppConfig, IApp } from '../app/service';
 
@@ -12,4 +14,9 @@ export interface IAppService {
 
   /** 根据应用名称获取应用实例 */
   getApp: (name: string) => IApp;
+}
+
+export interface RegisterAppHookContext extends HookContext {
+  config: AppConfig;
+  app?: IApp;
 }

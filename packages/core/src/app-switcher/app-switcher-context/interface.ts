@@ -1,4 +1,7 @@
+import { HookContext } from '@versea/tapable';
+
 import { ISwitcherStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/service';
 import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
@@ -13,7 +16,7 @@ export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext')
  * 应用切换上下文
  * @description 执行 load app 和 mount app 和 unmount app。
  */
-export interface IAppSwitcherContext {
+export interface IAppSwitcherContext extends HookContext {
   /** SwitcherContext 运行状态 */
   status: ISwitcherStatus[keyof ISwitcherStatus];
 
@@ -67,4 +70,5 @@ export interface AppSwitcherContextDependencies {
   SwitcherStatus: ISwitcherStatus;
   routeState: IRouteState;
   router: IRouter;
+  hooks: IHooks;
 }

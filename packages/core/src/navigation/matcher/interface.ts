@@ -1,8 +1,9 @@
+import { HookContext } from '@versea/tapable';
 import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
-import { MatchedRoute, RouteConfig } from '../route/service';
+import { IRoute, MatchedRoute, RouteConfig } from '../route/service';
 
 export const IMatcherKey = createServiceSymbol('IMatcher');
 
@@ -20,4 +21,20 @@ export interface MatchedResult {
 
   /** 匹配的根部碎片路由结果 */
   fragmentRoutes: MatchedRoute[];
+}
+
+export interface MatchRoutesHookContext extends HookContext {
+  path: string;
+  query: queryString.ParsedQuery;
+  matchRoute: (path: string, route: IRoute, params?: Record<string, string>) => boolean;
+  routes: MatchedRoute[];
+  fragmentRoutes: MatchedRoute[];
+  trees: IRoute[];
+  rootFragments: IRoute[];
+}
+
+export interface MatchRouteHookContext extends MatchRoutesHookContext {
+  route: IRoute;
+  params?: Record<string, string>;
+  isMatched: boolean;
 }

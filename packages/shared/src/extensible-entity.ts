@@ -4,7 +4,8 @@ import { VerseaError } from './error';
 export interface ExtensiblePropDescription {
   required?: boolean;
   default?: unknown;
-  validator?: (value: unknown) => boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validator?: (value: unknown, options: Record<string, any>) => boolean;
   onMerge?: (value: unknown, otherValue: unknown) => unknown;
   onClone?: (value: unknown) => unknown;
 }
@@ -63,7 +64,7 @@ export class ExtensibleEntity {
     });
 
     Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
-      this._setEntityProp(key, options[key], this._extensiblePropDescriptions[key]);
+      this._setEntityProp(key, options[key], this._extensiblePropDescriptions[key], options);
     });
   }
 
@@ -90,18 +91,24 @@ export class ExtensibleEntity {
     this.__ExtensiblePropDescriptions__![key] = description;
   }
 
-  private _setEntityProp(key: string, value: unknown, description: ExtensiblePropDescription): void {
+  private _setEntityProp(
+    key: string,
+    value: unknown,
+    description: ExtensiblePropDescription,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    options: Record<string, any>,
+  ): void {
     if (value === undefined) {
       const defaultValue = description.default;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      value = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+      value = typeof defaultValue === 'function' ? defaultValue(options) : defaultValue;
     }
 
     if (description.required && value === undefined) {
       throw new VerseaError(`Missing required prop: "${key}"`);
     }
 
-    if (description.validator && !description.validator(value)) {
+    if (description.validator && !description.validator(value, options)) {
       throw new VerseaError(`Invalid prop: custom validator check failed for prop "${key}"`);
     }
 

@@ -3,6 +3,8 @@ import { parse } from 'query-string';
 
 import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/interface';
 import { IApp } from '../../application/app/service';
+import { VERSEA_INTERNAL_TAP } from '../../constants';
+import { IHooks, IHooksKey } from '../../hooks/service';
 import { lazyInject, provide } from '../../provider';
 import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/service';
 import { bindRouter, callCapturedEventListeners } from '../navigation-events';
@@ -19,11 +21,16 @@ export class Router implements IRouter {
 
   protected readonly _matcher: IMatcher;
 
+  protected readonly _hooks: IHooks;
+
   /** 标识是否已经把 router 传给 navigation */
   protected _hasBindRouter = false;
 
-  constructor(@inject(IMatcherKey) matcher: IMatcher) {
+  constructor(@inject(IMatcherKey) matcher: IMatcher, @inject(IHooksKey) hooks: IHooks) {
     this._matcher = matcher;
+    this._hooks = hooks;
+
+    this._initHooks();
   }
 
   public addRoutes(routes: RouteConfig[], app: IApp): void {
@@ -44,10 +51,12 @@ export class Router implements IRouter {
   }
 
   public async reroute(navigationEvent?: Event): Promise<void> {
-    await this._appSwitcher.switch({
+    const rerouteHookContext = {
       navigationEvent,
       matchedResult: this.match(),
-    });
+      bail: false,
+    };
+    await this._hooks.reroute.call(rerouteHookContext);
   }
 
   public callCapturedEventListeners(navigationEvent?: Event): void {
@@ -64,5 +73,14 @@ export class Router implements IRouter {
 
     this.isStarted = true;
     return this.reroute();
+  }
+
+  protected _initHooks(): void {
+    this._hooks.reroute.tap(VERSEA_INTERNAL_TAP, async (context) => {
+      await this._appSwitcher.switch({
+        navigationEvent: context.navigationEvent,
+        matchedResult: context.matchedResult,
+      });
+    });
   }
 }

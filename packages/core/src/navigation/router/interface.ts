@@ -1,3 +1,5 @@
+import { HookContext } from '@versea/tapable';
+
 import { IApp } from '../../application/app/service';
 import { createServiceSymbol } from '../../utils';
 import { MatchedResult } from '../matcher/service';
@@ -23,4 +25,9 @@ export interface IRouter {
 
   /** 启动应用 */
   start: () => Promise<void>;
+}
+
+export interface RerouteHookContext extends HookContext {
+  navigationEvent?: Event;
+  matchedResult: MatchedResult;
 }
