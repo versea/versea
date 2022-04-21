@@ -12,7 +12,7 @@ export interface IRouter {
    * starter 状态
    * @see IStarter#isStarted
    */
-  isStarted: boolean;
+  readonly isStarted: boolean;
 
   /** 增加路由 */
   addRoutes: (routes: RouteConfig[], app: IApp) => void;
