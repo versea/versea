@@ -1,4 +1,4 @@
-import { IRouter, IRouterKey } from '../navigation/router/service';
+import { IRouter, IRouterKey } from '../navigation/router/interface';
 import { lazyInject, provide } from '../provider';
 import { IStarter, IStarterKey } from './interface';
 

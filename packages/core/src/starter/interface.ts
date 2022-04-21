@@ -1,4 +1,5 @@
 import { createServiceSymbol } from '../utils';
+
 export const IStarterKey = createServiceSymbol('IStarter');
 
 export interface IStarter {

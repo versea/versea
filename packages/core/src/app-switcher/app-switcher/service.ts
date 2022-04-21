@@ -4,7 +4,7 @@ import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
 import { IHooks, IHooksKey } from '../../hooks/service';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { lazyInject, provide } from '../../provider';
-import { IStarter, IStarterKey } from '../../starter/interface';
+import { IStarter, IStarterKey } from '../../starter/service';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
 import { ILoaderKey, ILoader } from '../loader/service';
 import { IRendererKey, IRenderer } from '../renderer/service';
