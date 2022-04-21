@@ -5,9 +5,11 @@ import { Key } from 'path-to-regexp';
 import queryString from 'query-string';
 
 import { IApp } from '../../application/app/service';
+import { VERSEA_INTERNAL_TAP } from '../../constants';
+import { IHooks, IHooksKey } from '../../hooks/service';
 import { provide } from '../../provider';
 import { IRoute, IRouteKey, RouteConfig, MatchedRoute } from '../route/service';
-import { IMatcher, IMatcherKey, MatchedResult } from './interface';
+import { IMatcher, IMatcherKey, MatchedResult, MatchRoutesHookContext } from './interface';
 
 export * from './interface';
 
@@ -28,9 +30,14 @@ export class Matcher implements IMatcher {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
 
+  protected readonly _hooks: IHooks;
+
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(@inject(IRouteKey) Route: interfaces.Newable<IRoute>) {
+  constructor(@inject(IRouteKey) Route: interfaces.Newable<IRoute>, @inject(IHooksKey) hooks: IHooks) {
     this._RouteConstructor = Route;
+    this._hooks = hooks;
+
+    this._initHooks();
   }
 
   public addRoutes(routes: RouteConfig[], app: IApp): void {
@@ -48,13 +55,44 @@ export class Matcher implements IMatcher {
   }
 
   public match(path: string, query: queryString.ParsedQuery): MatchedResult {
-    const routes = this._matchTree(path, query);
-    // 补充 parentAppName
-    this._addParentAppName(routes);
-    return {
-      routes: routes,
-      fragmentRoutes: this._matchFragment(path, query),
+    const { matchTree, matchFragment } = this._hooks;
+    const matchRoutesHookContext = {
+      path,
+      query,
+      matchRoute: (p: string, route: IRoute, params?: Record<string, string>): boolean =>
+        this._matchRoute(p, route, params),
+      routes: [],
+      fragmentRoutes: [],
+      trees: this._trees,
+      rootFragments: this._rootFragments,
+      bail: false,
     };
+    // 先匹配普通路由，再匹配根部碎片路由
+    matchTree.call(matchRoutesHookContext);
+    matchFragment.call(matchRoutesHookContext);
+
+    return {
+      routes: matchRoutesHookContext.routes,
+      fragmentRoutes: matchRoutesHookContext.fragmentRoutes,
+    };
+  }
+
+  protected _initHooks(): void {
+    const { matchTree, matchFragment, matchRoute } = this._hooks;
+
+    matchTree.tap(VERSEA_INTERNAL_TAP, (context) => {
+      this._matchTree(context);
+      // 补充 parentAppName
+      this._addParentAppName(context.routes);
+    });
+
+    matchFragment.tap(VERSEA_INTERNAL_TAP, (context) => {
+      this._matchFragment(context);
+    });
+
+    matchRoute.tap(VERSEA_INTERNAL_TAP, (context) => {
+      context.isMatched = context.matchRoute(context.path, context.route, context.params);
+    });
   }
 
   /** 向普通路由中添加路由树 */
@@ -68,22 +106,21 @@ export class Matcher implements IMatcher {
     this._trees.splice(wildIndex, 0, route);
   }
 
-  protected _matchTree(
-    path: string,
-    query: queryString.ParsedQuery,
-    trees: IRoute[] = this._trees,
-    result: MatchedRoute[] = [],
-  ): MatchedRoute[] {
+  protected _matchTree(context: MatchRoutesHookContext, trees: IRoute[] = context.trees): void {
     for (const route of trees) {
-      const params: Record<string, string> = {};
-      const isMatched = this._matchRoute(path, route, params);
+      const matchRouteHookContext = {
+        ...context,
+        route,
+        params: {},
+        isMatched: false,
+      };
+      this._hooks.matchRoute.call(matchRouteHookContext);
+      const isMatched = matchRouteHookContext.isMatched;
       if (isMatched) {
-        result.push(route.toMatchedRoute({ params, query }));
-        return this._matchTree(path, query, route.children, result);
+        context.routes.push(route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }));
+        this._matchTree(context, route.children);
       }
     }
-
-    return result;
   }
 
   /** 获取嵌套路由的父应用名称 */
@@ -99,16 +136,22 @@ export class Matcher implements IMatcher {
     }
   }
 
-  protected _matchFragment(path: string, query: queryString.ParsedQuery): MatchedRoute[] {
-    const result: MatchedRoute[] = [];
-    this._rootFragments.forEach((route) => {
-      const params: Record<string, string> = {};
-      const isMatched = this._matchRoute(path, route, params);
+  protected _matchFragment(context: MatchRoutesHookContext): void {
+    context.rootFragments.forEach((route) => {
+      const matchRouteHookContext = {
+        ...context,
+        route,
+        params: {},
+        isMatched: false,
+      };
+      this._hooks.matchRoute.call(matchRouteHookContext);
+      const isMatched = matchRouteHookContext.isMatched;
       if (isMatched) {
-        result.push(route.toMatchedRoute({ params, query }));
+        context.fragmentRoutes.push(
+          route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }),
+        );
       }
     });
-    return result;
   }
 
   protected _matchRoute(path: string, route: IRoute, params?: Record<string, string>): boolean {

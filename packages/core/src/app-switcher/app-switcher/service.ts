@@ -1,6 +1,7 @@
 import { inject, interfaces } from 'inversify';
 
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
+import { IHooks, IHooksKey } from '../../hooks/service';
 import { IRouter, IRouterKey } from '../../navigation/router/service';
 import { lazyInject, provide } from '../../provider';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
@@ -29,6 +30,8 @@ export class AppSwitcher implements IAppSwitcher {
 
   protected readonly _routeState: IRouteState;
 
+  protected readonly _hooks: IHooks;
+
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
     @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
@@ -37,6 +40,7 @@ export class AppSwitcher implements IAppSwitcher {
     @inject(ILoaderKey) loader: ILoader,
     @inject(IRendererKey) renderer: IRenderer,
     @inject(IRouteStateKey) routeState: IRouteState,
+    @inject(IHooksKey) hooks: IHooks,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
@@ -44,6 +48,7 @@ export class AppSwitcher implements IAppSwitcher {
     this._loader = loader;
     this._renderer = renderer;
     this._routeState = routeState;
+    this._hooks = hooks;
   }
 
   public async switch(options: SwitcherOptions): Promise<void> {
@@ -77,6 +82,7 @@ export class AppSwitcher implements IAppSwitcher {
       SwitcherStatus: this._SwitcherStatus,
       router: this._router,
       routeState: this._routeState,
+      hooks: this._hooks,
     });
   }
 }
