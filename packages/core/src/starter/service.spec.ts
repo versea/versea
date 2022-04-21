@@ -5,15 +5,6 @@ import { IRouterKey, IRouter } from '../navigation/router/service';
 import { buildProviderModule } from '../provider';
 import { IStarter, IStarterKey } from './service';
 
-// @provide(IRouterKey)
-// export class Router {
-//   public static callRerouteCount = 0;
-
-//   public reroute(): void {
-//     Router.callRerouteCount++;
-//   }
-// }
-
 /**
  * unit
  * @author shushan.cai
