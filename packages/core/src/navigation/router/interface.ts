@@ -8,7 +8,10 @@ import { RouteConfig } from '../route/service';
 export const IRouterKey = createServiceSymbol('IRouter');
 
 export interface IRouter {
-  /** starter 状态 */
+  /**
+   * starter 状态
+   * @see IStarter#isStarted
+   */
   isStarted: boolean;
 
   /** 增加路由 */
