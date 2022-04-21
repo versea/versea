@@ -33,32 +33,22 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   protected readonly _router: IRouter;
 
-<<<<<<< HEAD
   protected readonly _hooks: IHooks;
-=======
+
   protected readonly _starter: IStarter;
->>>>>>> 3d78b85 (feat: add starter)
 
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-<<<<<<< HEAD
-    { SwitcherStatus, router, routeState, hooks }: AppSwitcherContextDependencies,
-=======
-    { SwitcherStatus, router, starter, rendererStore }: AppSwitcherContextDependencies,
->>>>>>> 3d78b85 (feat: add starter)
+    { SwitcherStatus, router, routeState, starter, hooks }: AppSwitcherContextDependencies,
   ) {
     super(options);
     // 绑定依赖
     this.routeState = routeState;
     this._SwitcherStatus = SwitcherStatus;
     this._router = router;
-<<<<<<< HEAD
     this._hooks = hooks;
-=======
     this._starter = starter;
-    this.rendererStore = rendererStore;
->>>>>>> 3d78b85 (feat: add starter)
 
     this.matchedResult = options.matchedResult;
     this._navigationEvent = options.navigationEvent;
