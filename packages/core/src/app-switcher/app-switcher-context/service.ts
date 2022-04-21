@@ -6,7 +6,7 @@ import { MatchedResult } from '../../navigation/matcher/service';
 import { MatchedRoute } from '../../navigation/route/service';
 import { IRouter } from '../../navigation/router/service';
 import { provide } from '../../provider';
-import { IStarter } from '../../starter/interface';
+import { IStarter } from '../../starter/service';
 import { SwitcherOptions } from '../app-switcher/service';
 import { IRouteState } from '../route-state/service';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';

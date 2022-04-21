@@ -19,6 +19,8 @@ export * from './navigation/router/service';
 
 export * from './provider';
 
+export * from './starter/service';
+
 export * from './config';
 export * from './constants';
 export { createServiceSymbol } from './utils';
