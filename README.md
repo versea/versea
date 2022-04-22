@@ -1,10 +1,8 @@
 # versea
 
 <p align="center">
-  <h1 align="center">
-    <img width="250" src="./logo.png">
-  <h1>
-  <img src="https://img.shields.io/npm/dt/@versea/antd"/>
+  <img width="500" src="./docs/.vuepress/public/assets/logo.png">
+  <img src="https://img.shields.io/npm/dt/@versea/core"/>
   <img src="https://img.shields.io/npm/dm/@versea/core"/>
   <a href="https://www.npmjs.com/package/@versea/core"><img src="https://img.shields.io/npm/v/@versea/core.svg"></a>
   <a href="https://app.codecov.io/gh/versea/versea">
@@ -21,20 +19,21 @@
 
 ### 场景实例
 - 应用嵌套
-- 更多的性能优化
-- 应用依赖，一个应用依赖另一个应用（非主应用）的导出
-- 组件化，应用即组件
+- 更好的性能
+- 应用依赖，一个应用依赖另一个应用（非主应用）
+- 微型应用
 - 权限统一，权限收到主应用
 
-以上所有，versea 都支持，versea 更注重微前端业务的发展，不仅仅解决前期多个应用聚合成一个大型微前端应用的问题，也要解决中后期各种负责的业务问题。
+以上所有应用场景，versea 都支持，versea 更注重微前端业务的发展，不仅仅解决前期多个应用聚合成一个大型微前端应用的问题，也要解决中后期各种负责的业务问题。
 
 ## 特性
 
 - 多框架兼容
+- 重路由，预先知晓子应用路由，可以实现更多功能
 - 沙箱，预加载
 - 强大的插件能力，丰富的插件
 - 强大的扩展能力
-- 重路由，预先知晓子应用路由，做可以做更多功能
+- 渐进式
 
 ## 贡献者
 
