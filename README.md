@@ -1,28 +1,45 @@
 # versea
-微前端
 
-主框架
+<p align="center">
+  <h1>微前端框架<h1>
+  <img src="https://img.shields.io/npm/dt/@versea/antd"/>
+  <img src="https://img.shields.io/npm/dm/@versea/core"/>
+  <a href="https://www.npmjs.com/package/@versea/core"><img src="https://img.shields.io/npm/v/@versea/core.svg"></a>
+  <a href="https://app.codecov.io/gh/versea/versea">
+    <img src="https://codecov.io/gh/versea/versea/branch/main/graph/badge.svg"/>
+  </a>
+  <img alt="PRs Welcome" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg"/>
+</p>
 
-需求
-1. 主框架做路由匹配，路由切换，触发应用加载和卸载
-2. 插件能力，自定义加载; js，html 入口; 沙箱
-  
-  - 支持 dependency 加载，也就是在加载特定的业务入口文件之前先加载一个公用的资源文件
-  - 支持并行加载，即一个路径匹配多个子应用
-  - 支持加载拦截，用于各种业务需求（如权限，404）
-  - 沙箱支持改写，可以支持自定义沙箱，多应用多个不同的沙箱
-  - beforeEnter 能力，从 A -> B，B 有一个 beforeEnter 的弹窗，这种情况下不应该挂载B 的 Dom
+---
 
-其他问题：
-1. 公用组件怎么处理
-2. 跨应用状态，跨技术栈状态
-3. 公用依赖更新，例如基座依赖，或公用组件变更，怎么做到同时发布或者
+## 背景
 
+随着微前端的发展，微前端需求越来越复杂，当前仅仅提供隔离性的微前端框架不再满足业务需求，业务划分从应用分治变成 应用分治 + 功能分治，微前端需要一种 业务协作 + 隔离 的方案。
 
-主要技术
-需求复杂，各种状态较多，切换麻烦，考虑使用 inversify
-插件能力过于复杂，考虑 tapable
+### 场景实例
+- 应用嵌套
+- 更多的性能优化
+- 应用依赖，一个应用依赖另一个应用（非主应用）的导出
+- 组件化，应用即组件
+- 权限统一，权限收到主应用
 
+以上所有，versea 都支持，versea 更注重微前端业务的发展，不仅仅解决前期多个应用聚合成一个大型微前端应用的问题，也要解决中后期各种负责的业务问题。
 
-仓库
-monorepo，core + inner plugin 实现自定义加载; js，html 入口; 沙箱能力
+## 特性
+
+- 多框架兼容
+- 沙箱，预加载
+- 强大的插件能力，丰富的插件
+- 强大的扩展能力
+- 重路由，预先知晓子应用路由，做可以做更多功能
+
+## 贡献者
+
+感谢所有的贡献者
+<a href="https://github.com/versea/versea/graphs/contributors"><img src="https://contrib.rocks/image?repo=versea/versea" /></a>
+
+## LICENSE
+
+Versea 是 MIT LICENSE
+[MIT](https://github.com/versea/versea/blob/main/LICENSE)

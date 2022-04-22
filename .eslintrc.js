@@ -80,7 +80,7 @@ module.exports = {
     },
   },
   parser: '@typescript-eslint/parser',
-  plugins: ['@typescript-eslint', 'jest', 'json', 'prettier', 'markdown'],
+  plugins: ['@typescript-eslint', 'jest', 'json', 'prettier'],
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 10,
@@ -90,10 +90,6 @@ module.exports = {
     project: './tsconfig.eslint.json',
   },
   overrides: [
-    {
-      files: ['**/*.md'],
-      processor: 'markdown/markdown',
-    },
     {
       files: ['**/*.{js,jsx}'],
       rules: {
