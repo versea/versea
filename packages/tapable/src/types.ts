@@ -13,6 +13,12 @@ export interface Tap<T extends object, K extends Promise<void> | void> {
 }
 
 export interface TapOptions {
+  /** 在某个监听名称之前 */
+  before?: string;
+
+  /** 在某个监听名称之后 */
+  after?: string;
+
   /** 优先级，越小越优先 */
   priority?: number;
 

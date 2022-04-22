@@ -48,6 +48,60 @@ describe('BaseHook', () => {
     ]);
   });
 
+  test('使用 before 设置监听函数顺序，应该可以正确排序。', () => {
+    const baseHook = new BaseHook();
+    const tapFn1 = jest.fn();
+    baseHook.tap('test1', tapFn1);
+    const tapFn2 = jest.fn();
+    baseHook.tap('test2', tapFn2, { before: 'test1' });
+    const tapFn3 = jest.fn();
+    baseHook.tap('test3', tapFn3, { before: 'test1' });
+
+    expect((baseHook as any)._taps).toMatchObject([
+      {
+        fn: tapFn2,
+      },
+      {
+        fn: tapFn3,
+      },
+      {
+        fn: tapFn1,
+      },
+    ]);
+  });
+
+  test('使用 before 设置不存在的监听名称，应该会报错。', () => {
+    const baseHook = new BaseHook();
+    const tapFn1 = jest.fn();
+    baseHook.tap('test1', tapFn1);
+    const tapFn2 = jest.fn();
+    expect(() => {
+      baseHook.tap('test2', tapFn2, { before: 'test3' });
+    }).toThrowError();
+  });
+
+  test('使用 after 设置监听函数顺序，应该可以正确排序。', () => {
+    const baseHook = new BaseHook();
+    const tapFn1 = jest.fn();
+    baseHook.tap('test1', tapFn1);
+    const tapFn2 = jest.fn();
+    baseHook.tap('test2', tapFn2, { after: 'test1' });
+    const tapFn3 = jest.fn();
+    baseHook.tap('test3', tapFn3, { after: 'test1' });
+
+    expect((baseHook as any)._taps).toMatchObject([
+      {
+        fn: tapFn1,
+      },
+      {
+        fn: tapFn3,
+      },
+      {
+        fn: tapFn2,
+      },
+    ]);
+  });
+
   test('添加两个相同名称的监听函数，并且声明替换，应该可以被正确替换。', () => {
     const baseHook = new BaseHook();
     const tapFn1 = jest.fn();
