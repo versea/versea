@@ -2,7 +2,7 @@
 
 <p align="center">
   <h1 align="center">
-    <img src="./logo.png">
+    <img width="250" src="./logo.png">
   <h1>
   <img src="https://img.shields.io/npm/dt/@versea/antd"/>
   <img src="https://img.shields.io/npm/dm/@versea/core"/>
