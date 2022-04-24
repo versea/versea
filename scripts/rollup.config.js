@@ -13,6 +13,7 @@ const presets = () => {
     '@versea/sandbox': 'Versea.Sandbox',
     '@versea/tapable': 'Versea.Tapable',
     '@versea/versea': 'Versea.Versea',
+    '@versea/plugin-resource-entry': 'Versea.PluginResourceEntry',
   };
 
   return [
