@@ -20,6 +20,7 @@
     "test:sandbox": "jest packages/sandbox/ --maxWorkers=8",
     "test:shared": "jest packages/shared/ --maxWorkers=8",
     "test:tapable": "jest packages/tapable/ --maxWorkers=8",
+    "test:versea": "jest packages/versea/ --maxWorkers=8",
     "test:prod": "jest --coverage --maxWorkers=8 --silent",
     "type:check": "lerna run type:check",
     "version:alpha": "lerna version prerelease --preid alpha",
