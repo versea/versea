@@ -2,10 +2,10 @@ import { inject, interfaces } from 'inversify';
 
 import { VERSEA_INTERNAL_TAP } from '../../constants';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
 import { provide } from '../../provider';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { ILoaderHookContext, ILoaderHookContextKey } from '../loader-hook-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
+import { ILoaderHookContext, ILoaderHookContextKey } from '../loader-hook-context/interface';
 import { ILoader, ILoaderKey } from './interface';
 
 export * from './interface';

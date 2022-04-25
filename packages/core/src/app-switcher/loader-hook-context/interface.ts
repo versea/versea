@@ -1,9 +1,9 @@
 import { HookContext } from '@versea/tapable';
 
-import { IApp } from '../../application/app/service';
-import { MatchedResult } from '../../navigation/matcher/service';
+import { IApp } from '../../application/app/interface';
+import { MatchedResult } from '../../navigation/matcher/interface';
 import { createServiceSymbol } from '../../utils';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
 export const ILoaderHookContextKey = createServiceSymbol('ILoaderHookContext');
 

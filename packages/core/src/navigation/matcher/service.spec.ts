@@ -2,10 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Container, interfaces } from 'inversify';
 
-import { IApp, IAppKey } from '../../application/app/service';
-import { IStatusKey } from '../../enum/status';
-import { buildProviderModule } from '../../provider';
-import { IMatcher, IMatcherKey } from './service';
+import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey } from '../../';
 
 function getMatcher(): IMatcher {
   const container = new Container({ defaultScope: 'Singleton' });

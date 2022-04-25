@@ -1,6 +1,8 @@
-import { AppConfig, IHooks, IHooksKey, provide } from '@versea/core';
+import { App, IHooks, IHooksKey, provide } from '@versea/core';
+import { VerseaError } from '@versea/shared';
 import { inject } from 'inversify';
 
+import { IAppLoaderWriter, IAppLoaderWriterKey } from '../app-loader-writer/interface';
 import { VERSEA_PLUGIN_RESOURCE_ENTRY_TAP } from '../constants';
 import { IPluginResourceEntry, IPluginResourceEntryKey } from './interface';
 
@@ -10,24 +12,31 @@ export * from './interface';
 export class PluginResourceEntry implements IPluginResourceEntry {
   protected _hooks: IHooks;
 
-  constructor(@inject(IHooksKey) hooks: IHooks) {
+  protected _appLoaderWriter: IAppLoaderWriter;
+
+  constructor(@inject(IHooksKey) hooks: IHooks, @inject(IAppLoaderWriterKey) appLoaderWriter: IAppLoaderWriter) {
     this._hooks = hooks;
+    this._appLoaderWriter = appLoaderWriter;
   }
 
   public apply(): void {
-    this._hooks.beforeRegisterApp.tap(VERSEA_PLUGIN_RESOURCE_ENTRY_TAP, (context) => {
-      this._rewriteLoadAppOption(context.config);
+    this._hooks.beforeRegisterApp.tap(VERSEA_PLUGIN_RESOURCE_ENTRY_TAP, ({ config }) => {
+      if (config.loadApp) {
+        return;
+      }
+
+      if (!config.entry) {
+        throw new VerseaError('Miss required prop "entry"');
+      }
+
+      this._appLoaderWriter.rewrite(config);
+      return;
     });
   }
-
-  protected _rewriteLoadAppOption(config: AppConfig): void {
-    if (config.loadApp) {
-      return;
-    }
-
-    return;
-  }
 }
+
+// entry 信息在 App 实例上保存一份
+App.defineProp('entry');
 
 declare module '@versea/core' {
   export interface AppConfig {
@@ -54,5 +63,13 @@ declare module '@versea/core' {
 
     /** 应用脚本路径 */
     scripts?: string[];
+  }
+
+  export interface IApp {
+    /**
+     * 应用入口路径
+     * @example http://localhost:3000/sub-app/
+     */
+    entry?: string;
   }
 }

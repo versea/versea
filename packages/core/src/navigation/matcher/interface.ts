@@ -1,9 +1,9 @@
 import { HookContext } from '@versea/tapable';
 import queryString from 'query-string';
 
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
-import { IRoute, MatchedRoute, RouteConfig } from '../route/service';
+import { IRoute, MatchedRoute, RouteConfig } from '../route/interface';
 
 export const IMatcherKey = createServiceSymbol('IMatcher');
 

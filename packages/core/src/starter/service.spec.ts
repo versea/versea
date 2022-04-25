@@ -1,9 +1,6 @@
 import { Container } from 'inversify';
 
-import '../application/app-service/service';
-import { IRouterKey, IRouter } from '../navigation/router/service';
-import { buildProviderModule } from '../provider';
-import { IStarter, IStarterKey } from './service';
+import { buildProviderModule, IRouterKey, IRouter, IStarter, IStarterKey } from '../';
 
 /**
  * unit

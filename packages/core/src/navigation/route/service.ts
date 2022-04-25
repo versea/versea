@@ -2,7 +2,7 @@ import { ExtensibleEntity, VerseaError } from '@versea/shared';
 import { pathToRegexp, Key } from 'path-to-regexp';
 import { mergeRight } from 'ramda';
 
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { provide } from '../../provider';
 import { cloneObjectWith, traverse } from '../../utils';
 import { IRoute, IRouteKey, MatchedRoute, RouteConfig, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';

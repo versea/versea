@@ -1,6 +1,6 @@
-import { MatchedResult } from '../../navigation/matcher/service';
+import { MatchedResult } from '../../navigation/matcher/interface';
 import { createServiceSymbol } from '../../utils';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
 export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
 

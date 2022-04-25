@@ -1,10 +1,10 @@
 import { ExtensibleEntity } from '@versea/shared';
 import { flatten, uniq } from 'ramda';
 
-import { IApp } from '../../application/app/service';
-import { MatchedResult } from '../../navigation/matcher/service';
+import { IApp } from '../../application/app/interface';
+import { MatchedResult } from '../../navigation/matcher/interface';
 import { provide } from '../../provider';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
 import { ILoaderHookContext, ILoaderHookContextKey, LoaderHookContextOptions } from './interface';
 
 export * from './interface';

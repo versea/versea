@@ -1,12 +1,12 @@
 import { HookContext } from '@versea/tapable';
 
-import { IAppService } from '../../application/app-service/service';
-import { IApp } from '../../application/app/service';
-import { MatchedResult } from '../../navigation/matcher/service';
-import { MatchedRoute } from '../../navigation/route/service';
+import { IAppService } from '../../application/app-service/interface';
+import { IApp } from '../../application/app/interface';
+import { MatchedResult } from '../../navigation/matcher/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { IRouteState } from '../route-state/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
+import { IRouteState } from '../route-state/interface';
 
 export const IRendererHookContextKey = createServiceSymbol('IRendererHookContext');
 

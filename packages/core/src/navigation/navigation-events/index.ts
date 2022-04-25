@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { IRouter } from '../router/service';
+import { IRouter } from '../router/interface';
 import { HistoryFunctionName, LocationEventName, HistoryEventListenersType } from './types';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

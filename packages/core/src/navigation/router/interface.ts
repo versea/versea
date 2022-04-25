@@ -1,9 +1,9 @@
 import { HookContext } from '@versea/tapable';
 
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
-import { MatchedResult } from '../matcher/service';
-import { RouteConfig } from '../route/service';
+import { MatchedResult } from '../matcher/interface';
+import { RouteConfig } from '../route/interface';
 
 export const IRouterKey = createServiceSymbol('IRouter');
 

@@ -1,14 +1,14 @@
 import { ExtensibleEntity, VerseaError, VerseaCanceledError, Deferred, memoizePromise } from '@versea/shared';
 
 import { ISwitcherStatus } from '../../enum/status';
-import { IHooks } from '../../hooks/service';
-import { MatchedResult } from '../../navigation/matcher/service';
-import { MatchedRoute } from '../../navigation/route/service';
-import { IRouter } from '../../navigation/router/service';
+import { IHooks } from '../../hooks/interface';
+import { MatchedResult } from '../../navigation/matcher/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
+import { IRouter } from '../../navigation/router/interface';
 import { provide } from '../../provider';
-import { IStarter } from '../../starter/service';
-import { SwitcherOptions } from '../app-switcher/service';
-import { IRouteState } from '../route-state/service';
+import { IStarter } from '../../starter/interface';
+import { SwitcherOptions } from '../app-switcher/interface';
+import { IRouteState } from '../route-state/interface';
 import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';

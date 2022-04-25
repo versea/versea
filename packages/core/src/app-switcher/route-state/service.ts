@@ -1,5 +1,5 @@
-import { IApp } from '../../application/app/service';
-import { MatchedRoute } from '../../navigation/route/service';
+import { IApp } from '../../application/app/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IRouteState, IRouteStateKey } from './interface';
 

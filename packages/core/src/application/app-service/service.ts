@@ -3,10 +3,10 @@ import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IStatus, IStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
 import { IRouter, IRouterKey } from '../../navigation/router/interface';
 import { provide, lazyInject } from '../../provider';
-import { IApp, IAppKey, AppConfig } from '../app/service';
+import { IApp, IAppKey, AppConfig } from '../app/interface';
 import { IAppService, IAppServiceKey, RegisterAppHookContext } from './interface';
 
 export * from './interface';

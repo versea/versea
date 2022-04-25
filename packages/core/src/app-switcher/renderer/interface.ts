@@ -1,5 +1,5 @@
 import { createServiceSymbol } from '../../utils';
-import { AppSwitcherContext } from '../app-switcher-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
 export const IRendererKey = createServiceSymbol('IRenderer');
 
@@ -40,7 +40,7 @@ export interface IRenderer {
    * #### 根部碎片路由销毁和渲染
    * 根部碎片路由的销毁和渲染较简单，只需要先销毁目标路由没有的应用，再渲染目标路由需要但当前没有渲染的应用。
    */
-  render: (switcherContext: AppSwitcherContext) => Promise<void>;
+  render: (switcherContext: IAppSwitcherContext) => Promise<void>;
 
   /** 重置为初始状态 */
   restore: () => void;

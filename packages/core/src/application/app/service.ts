@@ -1,6 +1,6 @@
 import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
-import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
+import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
 import { provide } from '../../provider';
 import {

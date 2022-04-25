@@ -1,14 +1,14 @@
 import { inject, interfaces } from 'inversify';
 
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/service';
-import { IRouter, IRouterKey } from '../../navigation/router/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
+import { IRouter, IRouterKey } from '../../navigation/router/interface';
 import { lazyInject, provide } from '../../provider';
-import { IStarter, IStarterKey } from '../../starter/service';
+import { IStarter, IStarterKey } from '../../starter/interface';
 import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
-import { ILoaderKey, ILoader } from '../loader/service';
-import { IRendererKey, IRenderer } from '../renderer/service';
-import { IRouteStateKey, IRouteState } from '../route-state/service';
+import { ILoaderKey, ILoader } from '../loader/interface';
+import { IRendererKey, IRenderer } from '../renderer/interface';
+import { IRouteStateKey, IRouteState } from '../route-state/interface';
 import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
 
 export * from './interface';

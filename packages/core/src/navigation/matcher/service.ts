@@ -4,11 +4,11 @@ import { inject, interfaces } from 'inversify';
 import { Key } from 'path-to-regexp';
 import queryString from 'query-string';
 
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
-import { IHooks, IHooksKey } from '../../hooks/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
 import { provide } from '../../provider';
-import { IRoute, IRouteKey, RouteConfig, MatchedRoute } from '../route/service';
+import { IRoute, IRouteKey, RouteConfig, MatchedRoute } from '../route/interface';
 import { IMatcher, IMatcherKey, MatchedResult, MatchRoutesHookContext } from './interface';
 
 export * from './interface';

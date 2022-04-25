@@ -1,11 +1,11 @@
 import { ExtensibleEntity } from '@versea/shared';
 
 import { IAppService } from '../../application/app-service/interface';
-import { IApp } from '../../application/app/service';
-import { MatchedRoute, RouteMeta } from '../../navigation/route/service';
+import { IApp } from '../../application/app/interface';
+import { MatchedRoute, RouteMeta } from '../../navigation/route/interface';
 import { provide } from '../../provider';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { IRouteState } from '../route-state/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
+import { IRouteState } from '../route-state/interface';
 import {
   IRendererHookContext,
   IRendererHookContextKey,

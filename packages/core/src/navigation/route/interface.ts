@@ -2,7 +2,7 @@ import { TokensToRegexpOptions, ParseOptions, Key } from 'path-to-regexp';
 import queryString from 'query-string';
 import { object } from 'typescript-lodash';
 
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IRouteKey = createServiceSymbol('IRoute');

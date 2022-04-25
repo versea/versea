@@ -2,14 +2,14 @@ import { inject } from 'inversify';
 import { parse } from 'query-string';
 
 import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/interface';
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
-import { IHooks, IHooksKey } from '../../hooks/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
 import { lazyInject, provide } from '../../provider';
-import { IStarter, IStarterKey } from '../../starter/service';
-import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/service';
+import { IStarter, IStarterKey } from '../../starter/interface';
+import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/interface';
 import { bindRouter, callCapturedEventListeners } from '../navigation-events';
-import { RouteConfig } from '../route/service';
+import { RouteConfig } from '../route/interface';
 import { IRouter, IRouterKey } from './interface';
 
 export * from './interface';

@@ -2,14 +2,14 @@ import { inject, interfaces } from 'inversify';
 import { differenceWith } from 'ramda';
 
 import { IAppService, IAppServiceKey } from '../../application/app-service/interface';
-import { IApp } from '../../application/app/service';
+import { IApp } from '../../application/app/interface';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
 import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/service';
+import { IHooks, IHooksKey } from '../../hooks/interface';
 import { provide } from '../../provider';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
-import { IRendererHookContext, IRendererHookContextKey } from '../renderer-hook-context/service';
-import { IRouteState, IRouteStateKey } from '../route-state/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
+import { IRendererHookContext, IRendererHookContextKey } from '../renderer-hook-context/interface';
+import { IRouteState, IRouteStateKey } from '../route-state/interface';
 import { IRenderer, IRendererKey } from './interface';
 
 export * from './interface';

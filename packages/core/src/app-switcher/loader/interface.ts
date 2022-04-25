@@ -1,5 +1,5 @@
 import { createServiceSymbol } from '../../utils';
-import { IAppSwitcherContext } from '../app-switcher-context/service';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
 export const ILoaderKey = createServiceSymbol('ILoader');
 

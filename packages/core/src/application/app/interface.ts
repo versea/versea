@@ -1,6 +1,6 @@
-import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/service';
+import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
-import { RouteConfig } from '../../navigation/route/service';
+import { RouteConfig } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');

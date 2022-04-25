@@ -1,11 +1,11 @@
 import { AsyncSeriesHook, BaseHook, SyncHook } from '@versea/tapable';
 
-import { IAppSwitcherContext } from '../app-switcher/app-switcher-context/service';
-import { ILoaderHookContext } from '../app-switcher/loader-hook-context/service';
-import { IRendererHookContext } from '../app-switcher/renderer-hook-context/service';
-import { RegisterAppHookContext } from '../application/app-service/service';
+import { IAppSwitcherContext } from '../app-switcher/app-switcher-context/interface';
+import { ILoaderHookContext } from '../app-switcher/loader-hook-context/interface';
+import { IRendererHookContext } from '../app-switcher/renderer-hook-context/interface';
+import { RegisterAppHookContext } from '../application/app-service/interface';
 import { MatchRouteHookContext, MatchRoutesHookContext } from '../navigation/matcher/interface';
-import { RerouteHookContext } from '../navigation/router/service';
+import { RerouteHookContext } from '../navigation/router/interface';
 import { provide } from '../provider';
 import { IHooks, IHooksKey } from './interface';
 
