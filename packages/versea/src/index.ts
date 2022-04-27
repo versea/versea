@@ -8,6 +8,7 @@ import {
   IConfigKey,
   IHooks,
   IHooksKey,
+  IPlugin,
   IRouter,
   IRouterKey,
   IRouteState,
@@ -19,6 +20,10 @@ import {
 import { Container } from 'inversify';
 
 export * from '@versea/core';
+
+export interface IVerseaPlugin {
+  apply: (container: Container) => void;
+}
 
 export class Versea {
   public container: Container;
@@ -66,31 +71,19 @@ export class Versea {
   }
 
   /** 使用插件 */
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-  /* eslint-disable @typescript-eslint/no-unsafe-call */
-  public use(plugin: object | ((container: Container) => void)): void;
-  public use(plugin: string | symbol, config?: Partial<IConfig>): void;
-  public use(plugin: object | string | symbol, config?: Partial<IConfig>): void {
+  public use(plugin: IVerseaPlugin | string | symbol | ((container: Container) => void)): void {
     if (typeof plugin === 'function') {
       plugin(this.container);
       return;
     }
 
     if (typeof plugin === 'object') {
-      (plugin as any).apply(this.container);
+      plugin.apply(this.container);
       return;
     }
 
     if (typeof plugin === 'symbol' || typeof plugin === 'string') {
-      if (config) {
-        provideValue(config, IConfigKey);
-      }
-      const pluginService = this.container.get(plugin);
-      (pluginService as any).apply();
+      this.container.get<IPlugin>(plugin).apply();
     }
   }
-  /* eslint-enable @typescript-eslint/no-explicit-any */
-  /* eslint-enable @typescript-eslint/no-unsafe-member-access */
-  /* eslint-enable @typescript-eslint/no-unsafe-call */
 }

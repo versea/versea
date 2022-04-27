@@ -1,8 +1,6 @@
-import { createServiceSymbol } from '@versea/core';
+import { createServiceSymbol, IPlugin } from '@versea/core';
 
 export const IPluginResourceEntryKey = createServiceSymbol('IPluginResourceEntry');
 
-export interface IPluginResourceEntry {
-  /** 启动插件 */
-  apply: () => void;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IPluginResourceEntry extends IPlugin {}
