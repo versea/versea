@@ -115,8 +115,7 @@ export class Matcher implements IMatcher {
         isMatched: false,
       };
       this._hooks.matchRoute.call(matchRouteHookContext);
-      const isMatched = matchRouteHookContext.isMatched;
-      if (isMatched) {
+      if (matchRouteHookContext.isMatched) {
         context.routes.push(route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }));
         this._matchTree(context, route.children);
       }
@@ -145,8 +144,7 @@ export class Matcher implements IMatcher {
         isMatched: false,
       };
       this._hooks.matchRoute.call(matchRouteHookContext);
-      const isMatched = matchRouteHookContext.isMatched;
-      if (isMatched) {
+      if (matchRouteHookContext.isMatched) {
         context.fragmentRoutes.push(
           route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }),
         );

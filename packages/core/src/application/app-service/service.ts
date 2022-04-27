@@ -49,8 +49,8 @@ export class AppService implements IAppService {
     registerAppHookContext.app = app;
     afterRegisterApp.call(registerAppHookContext);
 
-    if (config.routes?.length) {
-      this._router.addRoutes(config.routes, app);
+    if (registerAppHookContext.config.routes?.length) {
+      this._router.addRoutes(registerAppHookContext.config.routes, app);
     }
 
     if (reroute) {

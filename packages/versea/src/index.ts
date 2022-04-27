@@ -73,12 +73,12 @@ export class Versea {
   public use(plugin: string | symbol, config?: Partial<IConfig>): void;
   public use(plugin: object | string | symbol, config?: Partial<IConfig>): void {
     if (typeof plugin === 'function') {
-      plugin(this);
+      plugin(this.container);
       return;
     }
 
     if (typeof plugin === 'object') {
-      (plugin as any).apply(this);
+      (plugin as any).apply(this.container);
       return;
     }
 
