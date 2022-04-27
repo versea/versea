@@ -4,8 +4,20 @@ interface Tree {
   children?: Tree[];
 }
 
-export function createServiceSymbol(serviceIdentifier: string): symbol {
-  return Symbol.for(serviceIdentifier);
+// 存储两个 ServiceIdentifier 的关系
+const serviceIdentifierMap = new Map<symbol, string | symbol>();
+
+export function createServiceSymbol(serviceIdentifier: string, mappingSymbol?: string | symbol): symbol {
+  const serviceSymbol = Symbol.for(serviceIdentifier);
+  if (mappingSymbol) {
+    serviceIdentifierMap.set(serviceSymbol, mappingSymbol);
+  }
+
+  return serviceSymbol;
+}
+
+export function getMappingSymbol(serviceSymbol: symbol): string | symbol | undefined {
+  return serviceIdentifierMap.get(serviceSymbol);
 }
 
 /** 深度遍历树结构 */
