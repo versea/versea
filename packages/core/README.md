@@ -33,6 +33,8 @@ container.get<IAppService>(IAppServiceKey).registerApps([
     routes: [
       {
         path: 'sub-app',
+        isRootFragment: true
+        fn: 
       },
     ],
     loadApp: async (): AppHooks => {

@@ -84,5 +84,8 @@
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@jedmao/location": "^3.0.0"
   }
 }
