@@ -49,8 +49,6 @@ describe('Custom Match Route', () => {
       app,
     );
 
-    expect(matcher.match('/custom-match-root-fragment', {}).fragmentRoutes).toMatchObject([]);
-
     plugin.apply();
 
     expect(matcher.match('/custom-match-root-fragment', {}).fragmentRoutes).toMatchObject([
@@ -63,5 +61,22 @@ describe('Custom Match Route', () => {
         ],
       },
     ]);
+  });
+
+  test('PluginCustomMatchRoute 启动后, 若 Route 既是 rootFragment 且没有 customMatchRoute , 匹配时应该是用原来的 matchRoute 方法', () => {
+    const { matcher, plugin, app } = getBasicConfig('name1');
+    matcher.addRoutes(
+      [
+        {
+          path: 'path1',
+          isRootFragment: true,
+        },
+      ],
+      app,
+    );
+
+    plugin.apply();
+
+    expect(matcher.match('/custom-match-root-fragment', {}).fragmentRoutes).toMatchObject([]);
   });
 });
