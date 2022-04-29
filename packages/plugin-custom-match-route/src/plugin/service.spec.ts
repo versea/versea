@@ -50,7 +50,7 @@ describe('PluginCustomMatchRoute', () => {
     ]);
   });
 
-  test('rootFragmentRoute 类型传入 customMatchRoute, 匹配时应该是用原来的 matchRoute 方法', () => {
+  test('rootFragmentRoute 类型不传入 customMatchRoute, 匹配时应该是用原来的 matchRoute 方法', () => {
     const container = createContainerWithPlugin();
     const matcher = container.get<IMatcher>(IMatcherKey);
     matcher.addRoutes(
@@ -64,5 +64,23 @@ describe('PluginCustomMatchRoute', () => {
     );
 
     expect(matcher.match('/custom-match-root-fragment', {}).fragmentRoutes).toMatchObject([]);
+  });
+
+  test('普通 route 类型传入 customMatchRoute, 应该报错', () => {
+    const container = createContainerWithPlugin();
+    const matcher = container.get<IMatcher>(IMatcherKey);
+    expect(() => {
+      matcher.addRoutes(
+        [
+          {
+            path: 'path1',
+            customMatchRoute(path: string): boolean {
+              return path === '/custom-match-root-fragment';
+            },
+          },
+        ],
+        getAppInstance(container, 'name1'),
+      );
+    }).toThrowError();
   });
 });
