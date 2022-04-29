@@ -1,5 +1,3 @@
-import { Container } from 'inversify';
-
 import {
   buildProviderModule,
   AppConfig,
@@ -11,6 +9,7 @@ import {
   IAppSwitcherContext,
   IStatus,
   IStatusKey,
+  VerseaContainer,
 } from '../../';
 
 async function delay(time: number): Promise<void> {
@@ -22,7 +21,7 @@ async function delay(time: number): Promise<void> {
 let Status: IStatus = undefined as unknown as IStatus;
 
 function getAppInstance(config: AppConfig): IApp {
-  const container = new Container({ defaultScope: 'Singleton' });
+  const container = new VerseaContainer({ defaultScope: 'Singleton' });
   container.load(buildProviderModule());
   Status = container.get(IStatusKey);
   const appService = container.get<IAppService>(IAppServiceKey);

@@ -21,7 +21,7 @@ async function loadScript(url): Promise<void> {
 }
 
 // 创建容器
-const container = new Container({ defaultScope: 'Singleton' });
+const container = new VerseaContainer({ defaultScope: 'Singleton' });
 
 // 绑定依赖容器
 container.load(buildProviderModule());
@@ -33,8 +33,6 @@ container.get<IAppService>(IAppServiceKey).registerApps([
     routes: [
       {
         path: 'sub-app',
-        isRootFragment: true
-        fn: 
       },
     ],
     loadApp: async (): AppHooks => {

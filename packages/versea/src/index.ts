@@ -17,21 +17,21 @@ import {
   IStarter,
   IStarterKey,
   provideValue,
+  VerseaContainer,
 } from '@versea/core';
-import { Container } from 'inversify';
 
 export * from '@versea/core';
 
 export interface IVerseaPlugin {
-  apply: (container: Container) => void;
+  apply: (container: VerseaContainer) => void;
 }
 
 export class Versea {
-  public container: Container;
+  public container: VerseaContainer;
 
   constructor(config: Partial<IConfig> = {}) {
     provideValue(config, IConfigKey);
-    this.container = new Container({ defaultScope: 'Singleton' });
+    this.container = new VerseaContainer({ defaultScope: 'Singleton' });
     this.container.load(buildProviderModule());
   }
 
@@ -72,10 +72,10 @@ export class Versea {
   }
 
   /** 使用插件 */
-  public use(plugin: IVerseaPlugin | ((container: Container) => void)): void;
+  public use(plugin: IVerseaPlugin | ((container: VerseaContainer) => void)): void;
   public use(plugin: string | symbol, config?: Record<string, unknown>): void;
   public use(
-    plugin: IVerseaPlugin | string | symbol | ((container: Container) => void),
+    plugin: IVerseaPlugin | string | symbol | ((container: VerseaContainer) => void),
     config?: Record<string, unknown>,
   ): void {
     if (typeof plugin === 'function') {
