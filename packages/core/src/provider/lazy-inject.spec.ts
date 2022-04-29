@@ -21,7 +21,7 @@ describe('lazyInject', () => {
 
     @provide('test2')
     class Test2 {
-      @lazyInject('test') public test: Test;
+      @lazyInject('test') public test!: Test;
     }
 
     const container = new Container({ defaultScope: 'Singleton' });
@@ -35,12 +35,12 @@ describe('lazyInject', () => {
 
     @provide('test')
     class Test {
-      @lazyInject('test2') public test2: object;
+      @lazyInject('test2') public test2!: object;
     }
 
     @provide('test2')
     class Test2 {
-      @lazyInject('test') public test: Test;
+      @lazyInject('test') public test!: Test;
     }
 
     const container = new Container({ defaultScope: 'Singleton' });
