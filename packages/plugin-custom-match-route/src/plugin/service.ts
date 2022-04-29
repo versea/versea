@@ -29,7 +29,7 @@ export class PluginCustomMatchRoute implements IPluginCustomMatchRoute {
   }
 }
 
-// customMatchRoute 信息在 IRoute 上保存一份
+// customMatchRoute 信息在 IRoute 上保存，在路由匹配时调用
 Route.defineProp('customMatchRoute', {
   validator: (customMatchRoute, routeConfig) => !customMatchRoute || !!routeConfig.isRootFragment,
 });

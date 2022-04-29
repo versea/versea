@@ -14,6 +14,7 @@ const presets = () => {
     '@versea/tapable': 'Versea.Tapable',
     '@versea/versea': 'Versea.Versea',
     '@versea/plugin-resource-entry': 'Versea.PluginResourceEntry',
+    '@versea/plugin-custom-match-route': 'Versea.PluginCustomMatchRoute',
   };
 
   return [

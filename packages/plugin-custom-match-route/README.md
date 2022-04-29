@@ -1,6 +1,6 @@
 # @versea/plugin-custom-match-route
 
-versea 核心能力的封装。
+rootFragment 类型的路由自定义匹配。
 
 ### 安装
 
@@ -12,6 +12,7 @@ npm install --save @versea/versea @versea/plugin-custom-match-route
 
 ```ts
 import { Versea } from '@versea/versea';
+import { IPluginCustomMatchRouteKey } from '@versea/versea';
 
 async function loadScript(url): Promise<void> {
   console.log(url);
@@ -20,6 +21,7 @@ async function loadScript(url): Promise<void> {
 }
 
 const versea = new Versea();
+versea.use(IPluginCustomMatchRouteKey);
 
 // 注册子应用
 versea.registerApps([
@@ -28,6 +30,11 @@ versea.registerApps([
     routes: [
       {
         path: 'sub-app',
+        isRootFragment: true,
+        // 自定义路由匹配
+        customMatchRoute(path) {
+          return path.indexOf('test') >= 0;
+        },
       },
     ],
     loadApp: async (): AppHooks => {

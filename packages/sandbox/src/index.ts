@@ -10,10 +10,11 @@ import {
   AppDependencies,
   IRouter,
   IRouterKey,
+  VerseaContainer,
 } from '@versea/core';
-import { Container, inject } from 'inversify';
+import { inject } from 'inversify';
 
-const parent = new Container({ defaultScope: 'Singleton' });
+const parent = new VerseaContainer({ defaultScope: 'Singleton' });
 
 @provide(IAppKey, 'Constructor')
 export class NewApp extends App {
