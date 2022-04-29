@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],
-  "exclude": ["./__tests__/*", "./src/**/*.spec.ts", "./src/**/*.spec.tsx", "./esm/*", "./lib/*"],
+  "exclude": ["./esm/*", "./lib/*"],
   "compilerOptions": {
     "lib": ["ESNext", "DOM"]
   }
