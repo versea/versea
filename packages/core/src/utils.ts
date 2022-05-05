@@ -4,20 +4,8 @@ interface Tree {
   children?: Tree[];
 }
 
-// 存储两个 ServiceIdentifier 的一一对应关系
-const serviceIdentifierMap = new Map<symbol, string | symbol>();
-
-export function createServiceSymbol(serviceIdentifier: string, mappingSymbol?: string | symbol): symbol {
-  const serviceSymbol = Symbol.for(serviceIdentifier);
-  if (mappingSymbol) {
-    serviceIdentifierMap.set(serviceSymbol, mappingSymbol);
-  }
-
-  return serviceSymbol;
-}
-
-export function getMappingSymbol(serviceSymbol: symbol): string | symbol | undefined {
-  return serviceIdentifierMap.get(serviceSymbol);
+export function createServiceSymbol(serviceIdentifier: string): symbol {
+  return Symbol.for(serviceIdentifier);
 }
 
 /** 深度遍历树结构 */

@@ -44,7 +44,7 @@ function toString(serviceIdentifier: interfaces.ServiceIdentifier): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
+function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): ProvideSyntax {
   const previousMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
   const newMetadata: ProvideSyntax[] = [...previousMetadata];
 
@@ -96,6 +96,8 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): void {
   }
 
   Reflect.defineMetadata(MetaDataKey, newMetadata, Reflect);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return newMetadata.find((item) => item.serviceIdentifier === metadata.serviceIdentifier)!;
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -129,7 +131,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     bindingType: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider' = 'ConstantValue',
     replace?: (previous: T, current: T) => T,
   ): any {
-    appendMetadata(
+    const metadata = appendMetadata(
       {
         serviceIdentifier,
         bindingType,
@@ -138,7 +140,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
       },
       MetaDataKey,
     );
-    return target;
+    return metadata.implementationType;
   }
 
   function buildProviderModule(container: interfaces.Container): interfaces.ContainerModule {
