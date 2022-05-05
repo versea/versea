@@ -1,7 +1,6 @@
 import {
   AppConfig,
   buildProviderModule,
-  getMappingSymbol,
   IApp,
   IAppService,
   IAppServiceKey,
@@ -72,12 +71,7 @@ export class Versea {
   }
 
   /** 使用插件 */
-  public use(plugin: IVerseaPlugin | ((container: Container) => void)): void;
-  public use(plugin: string | symbol, config?: Record<string, unknown>): void;
-  public use(
-    plugin: IVerseaPlugin | string | symbol | ((container: Container) => void),
-    config?: Record<string, unknown>,
-  ): void {
+  public use(plugin: IVerseaPlugin | string | symbol | ((container: Container) => void)): void {
     if (typeof plugin === 'function') {
       plugin(this.container);
       return;
@@ -88,17 +82,9 @@ export class Versea {
       return;
     }
 
-    if (typeof plugin === 'string') {
+    if (typeof plugin === 'string' || typeof plugin === 'symbol') {
       this.container.get<IPlugin>(plugin).apply();
       return;
-    }
-
-    if (typeof plugin === 'symbol') {
-      const mappingSymbol = getMappingSymbol(plugin);
-      if (config && mappingSymbol) {
-        provideValue(config, mappingSymbol);
-      }
-      this.container.get<IPlugin>(plugin).apply();
     }
   }
 }
