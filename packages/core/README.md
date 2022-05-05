@@ -21,10 +21,10 @@ async function loadScript(url): Promise<void> {
 }
 
 // 创建容器
-const container = new VerseaContainer({ defaultScope: 'Singleton' });
+const container = new Container({ defaultScope: 'Singleton' });
 
 // 绑定依赖容器
-container.load(buildProviderModule());
+container.load(buildProviderModule(container));
 
 // 注册子应用
 container.get<IAppService>(IAppServiceKey).registerApps([

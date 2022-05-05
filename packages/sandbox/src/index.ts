@@ -10,11 +10,10 @@ import {
   AppDependencies,
   IRouter,
   IRouterKey,
-  VerseaContainer,
 } from '@versea/core';
-import { inject } from 'inversify';
+import { Container, inject } from 'inversify';
 
-const parent = new VerseaContainer({ defaultScope: 'Singleton' });
+const parent = new Container({ defaultScope: 'Singleton' });
 
 @provide(IAppKey, 'Constructor')
 export class NewApp extends App {
@@ -34,7 +33,7 @@ export class Test {
   constructor(@inject('TestData') public data: string) {}
 }
 
-parent.load(buildProviderModule());
+parent.load(buildProviderModule(parent));
 
 // provideValue('test2', 'TestData');
 

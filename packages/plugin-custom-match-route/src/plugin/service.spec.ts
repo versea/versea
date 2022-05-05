@@ -1,17 +1,17 @@
-import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey, VerseaContainer } from '@versea/core';
-import { interfaces } from 'inversify';
+import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey } from '@versea/core';
+import { Container, interfaces } from 'inversify';
 
 import { IPluginCustomMatchRoute, IPluginCustomMatchRouteKey } from './service';
 
-function createContainerWithPlugin(): VerseaContainer {
-  const container = new VerseaContainer({ defaultScope: 'Singleton' });
-  container.load(buildProviderModule());
+function createContainerWithPlugin(): Container {
+  const container = new Container({ defaultScope: 'Singleton' });
+  container.load(buildProviderModule(container));
   const plugin = container.get<IPluginCustomMatchRoute>(IPluginCustomMatchRouteKey);
   plugin.apply();
   return container;
 }
 
-function getAppInstance(container: VerseaContainer, appName: string): IApp {
+function getAppInstance(container: Container, appName: string): IApp {
   const App = container.get<interfaces.Newable<IApp>>(IAppKey);
   // @ts-expect-error 这里需要向 App 传入构造函数参数
   return new App({ name: appName }, { Status: container.get(IStatusKey) });

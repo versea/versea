@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { interfaces } from 'inversify';
+import { Container, interfaces } from 'inversify';
 
-import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey, VerseaContainer } from '../../';
+import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey } from '../../';
 
-function createContainer(): VerseaContainer {
-  const container = new VerseaContainer({ defaultScope: 'Singleton' });
-  container.load(buildProviderModule());
+function createContainer(): Container {
+  const container = new Container({ defaultScope: 'Singleton' });
+  container.load(buildProviderModule(container));
   return container;
 }
 
-function getAppInstance(container: VerseaContainer, appName: string): IApp {
+function getAppInstance(container: Container, appName: string): IApp {
   const App = container.get<interfaces.Newable<IApp>>(IAppKey);
   // @ts-expect-error 这里需要向 App 传入构造函数参数
   return new App({ name: appName }, { Status: container.get(IStatusKey) });
