@@ -1,15 +1,7 @@
 import { LocationMock } from '@jedmao/location';
+import { Container } from 'inversify';
 
-import {
-  buildProviderModule,
-  IRouterKey,
-  IRouter,
-  IMatcher,
-  IMatcherKey,
-  provideValue,
-  IConfigKey,
-  VerseaContainer,
-} from '../../';
+import { buildProviderModule, IRouterKey, IRouter, IMatcher, IMatcherKey, provideValue, IConfigKey } from '../../';
 
 const defaultLocation = window.location;
 afterEach(() => {
@@ -23,9 +15,9 @@ Object.defineProperty(window, 'location', {
   value: defaultLocation,
 });
 
-function createContainer(): VerseaContainer {
-  const container = new VerseaContainer({ defaultScope: 'Singleton' });
-  container.load(buildProviderModule());
+function createContainer(): Container {
+  const container = new Container({ defaultScope: 'Singleton' });
+  container.load(buildProviderModule(container));
   return container;
 }
 

@@ -23,6 +23,5 @@ export * from './starter/service';
 
 export * from './config';
 export * from './constants';
-export * from './container';
 export * from './plugin';
 export { createServiceSymbol, getMappingSymbol } from './utils';

@@ -30,7 +30,7 @@ interface CreateProviderReturnType {
     bindingType?: 'ConstantValue' | 'DynamicValue' | 'Function' | 'Provider',
     replace?: (previous: T, current: T) => T,
   ) => any;
-  buildProviderModule: () => interfaces.ContainerModule;
+  buildProviderModule: (container: interfaces.Container) => interfaces.ContainerModule;
 }
 
 function toString(serviceIdentifier: interfaces.ServiceIdentifier): string {
@@ -141,7 +141,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
     return target;
   }
 
-  function buildProviderModule(): interfaces.ContainerModule {
+  function buildProviderModule(container: interfaces.Container): interfaces.ContainerModule {
     return new ContainerModule((bind) => {
       const provideMetadata: ProvideSyntax[] = Reflect.getMetadata(MetaDataKey, Reflect) || [];
 
@@ -198,6 +198,11 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
         return bind(serviceIdentifier)
           .to(implementationType as new (...args: never[]) => unknown)
           .onActivation(bindLazyInjection);
+      });
+
+      // 自动实例化所有依赖
+      provideMetadata.forEach(({ serviceIdentifier }) => {
+        container.get(serviceIdentifier);
       });
     });
   }

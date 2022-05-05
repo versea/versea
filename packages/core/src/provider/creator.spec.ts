@@ -19,7 +19,7 @@ describe('createProvider', () => {
     class Test {}
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
     expect(container.get('test')).toBeInstanceOf(Test);
   });
 
@@ -33,7 +33,7 @@ describe('createProvider', () => {
     class OtherTest extends Test {}
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
 
     expect(container.get('test')).toBeInstanceOf(OtherTest);
   });
@@ -77,9 +77,9 @@ describe('createProvider', () => {
     class OtherTest {}
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
     const otherContainer = new Container({ defaultScope: 'Singleton' });
-    otherContainer.load(otherBuildProviderModule());
+    otherContainer.load(otherBuildProviderModule(container));
 
     expect(container.get('test')).toBeInstanceOf(Test);
     expect(otherContainer.get('test')).toBeInstanceOf(OtherTest);
@@ -90,7 +90,7 @@ describe('createProvider', () => {
 
     provideValue('foo', 'test');
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
 
     expect(container.get('test')).toBe('foo');
   });
@@ -101,7 +101,7 @@ describe('createProvider', () => {
     provideValue('foo', 'test');
     provideValue('bar', 'test');
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
 
     expect(container.get('test')).toBe('bar');
   });
@@ -114,7 +114,7 @@ describe('createProvider', () => {
     provideValue('zoo', 'test');
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
 
     expect(container.get('test')).toBe('foo|bar|zoo');
   });

@@ -25,7 +25,7 @@ describe('lazyInject', () => {
     }
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
     expect(container.get('test2')).toBeInstanceOf(Test2);
     expect(container.get<Test2>('test2').test).toBeInstanceOf(Test);
   });
@@ -44,7 +44,7 @@ describe('lazyInject', () => {
     }
 
     const container = new Container({ defaultScope: 'Singleton' });
-    container.load(buildProviderModule());
+    container.load(buildProviderModule(container));
     expect(container.get<Test>('test').test2).toBeInstanceOf(Test2);
     expect(container.get<Test2>('test2').test).toBeInstanceOf(Test);
   });
