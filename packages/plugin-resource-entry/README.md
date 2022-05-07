@@ -1,6 +1,6 @@
 # @versea/plugin-resource-entry
 
-versea 核心能力的封装。
+自动生成注册应用的 loadApp 配置。
 
 ### 安装
 
@@ -12,14 +12,10 @@ npm install --save @versea/versea @versea/plugin-resource-entry
 
 ```ts
 import { Versea } from '@versea/versea';
+import { IPluginResourceEntryKey } from '@versea/plugin-resource-entry';
 
-async function loadScript(url): Promise<void> {
-  console.log(url);
-  // ...
-  await Promise.resolve();
-}
-
-const versea = new Versea();
+const versea = new Versea({ defaultContainer: '#microApp' });
+versea.use(IPluginResourceEntryKey);
 
 // 注册子应用
 versea.registerApps([
@@ -30,10 +26,9 @@ versea.registerApps([
         path: 'sub-app',
       },
     ],
-    loadApp: async (): AppHooks => {
-      await loadScript('http://localhost:3000/static/js/bundle.js');
-      return (window as any).microApp;
-    },
+    scripts: [
+      'http://localhost:3000/static/js/bundle.js'
+    ],
   },
 ]);
 
