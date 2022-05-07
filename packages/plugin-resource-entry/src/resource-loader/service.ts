@@ -1,6 +1,7 @@
 import { AppConfig, AppHooks, provide } from '@versea/core';
 import { memoizePromise } from '@versea/shared';
 
+import { ScriptResource } from '../plugin/interface';
 import { requestIdleCallback } from '../utils';
 import { IResourceLoader, IResourceLoaderKey } from './interface';
 
@@ -53,7 +54,7 @@ export class ResourceLoader implements IResourceLoader {
       for (const script of scripts) {
         if (typeof script === 'object') {
           if (script.async) {
-            requestIdleCallback(() => void this._loadScript(script.src));
+            requestIdleCallback(() => void this._loadScript((script as ScriptResource).src));
           }
         } else {
           if (this.isInlineCode(script)) {
