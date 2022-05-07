@@ -33,6 +33,12 @@ export interface UnmountAppHookContext extends HookContext {
   result?: unknown;
 }
 
+export interface ScriptResource {
+  async?: boolean;
+  entry?: boolean;
+  src: string;
+}
+
 declare module '@versea/core' {
   export interface AppConfig {
     /**
@@ -47,11 +53,17 @@ declare module '@versea/core' {
      */
     documentFragment?: string;
 
-    /** 应用样式路径 */
+    /**
+     * 应用样式
+     * @example 'https://xxx/xxx.css' 或 <style>body { color: black; }</style>
+     */
     styles?: string[];
 
-    /** 应用脚本路径 */
-    scripts?: string[];
+    /**
+     * 应用脚本
+     * @example 'https://xxx/xxx.js' 或 <script>console.log(1);</script>
+     */
+    scripts?: (ScriptResource | string)[];
   }
 
   export interface IHooks {
