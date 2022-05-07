@@ -65,7 +65,6 @@ export class Matcher implements IMatcher {
       fragmentRoutes: [],
       trees: this._trees,
       rootFragments: this._rootFragments,
-      bail: false,
     };
     // 先匹配普通路由，再匹配根部碎片路由
     matchTree.call(matchRoutesHookContext);

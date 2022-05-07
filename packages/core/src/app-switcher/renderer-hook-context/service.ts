@@ -59,7 +59,7 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
   public async bootstrapAndMount(app: IApp, route: MatchedRoute): Promise<void> {
     const switcherContext = this.switcherContext;
     if (!app.isBootstrapped) {
-      await app.bootstrap(switcherContext);
+      await app.bootstrap(switcherContext, route);
     }
     // 解构出应用对应的 meta 信息
     const meta: RouteMeta = route.apps[0] === app ? route.meta : (route.meta[app.name] as RouteMeta);
@@ -67,7 +67,7 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
       const parentApp = this._appService.getApp(meta.parentAppName);
       await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);
     }
-    return app.mount(switcherContext);
+    return app.mount(switcherContext, route);
   }
 
   protected _getMismatchIndex(): number {

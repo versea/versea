@@ -2,6 +2,7 @@ import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import {
   IApp,
@@ -79,7 +80,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async bootstrap(context: IAppSwitcherContext): Promise<void> {
+  public async bootstrap(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotBootstrapped) {
       throw new VerseaError(`Can not bootstrap app "${this.name}" with status "${this.status}".`);
     }
@@ -91,7 +92,7 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.Bootstrapping;
     try {
-      await this._hooks.bootstrap(this.getProps(context));
+      await this._hooks.bootstrap(this.getProps(context, route));
       this.status = this._Status.NotMounted;
       this.isBootstrapped = true;
     } catch (error) {
@@ -101,7 +102,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async mount(context: IAppSwitcherContext): Promise<void> {
+  public async mount(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotMounted) {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
     }
@@ -113,7 +114,7 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.Mounting;
     try {
-      const result = await this._hooks.mount(this.getProps(context));
+      const result = await this._hooks.mount(this.getProps(context, route));
       this._waitForChildrenContainerHooks = result ?? {};
       this.status = this._Status.Mounted;
     } catch (error) {
@@ -123,7 +124,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async unmount(context: IAppSwitcherContext): Promise<void> {
+  public async unmount(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
     }
@@ -136,7 +137,7 @@ export class App extends ExtensibleEntity implements IApp {
     this.status = this._Status.Unmounting;
     try {
       // TODO: unmount parcel
-      await this._hooks.unmount(this.getProps(context));
+      await this._hooks.unmount(this.getProps(context, route));
       this.status = this._Status.NotMounted;
     } catch (error) {
       this.status = this._Status.Broken;
@@ -161,12 +162,13 @@ export class App extends ExtensibleEntity implements IApp {
     return;
   }
 
-  public getProps(context: IAppSwitcherContext): AppProps {
+  public getProps(context: IAppSwitcherContext, route?: MatchedRoute): AppProps {
     const props: Record<string, unknown> = typeof this._props === 'function' ? this._props(this.name) : this._props;
     return {
       ...props,
       app: this,
       context,
+      route,
     };
   }
 

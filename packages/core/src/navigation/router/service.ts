@@ -65,7 +65,6 @@ export class Router implements IRouter {
     const rerouteHookContext = {
       navigationEvent,
       matchedResult: this.match(),
-      bail: false,
     };
     await this._hooks.reroute.call(rerouteHookContext);
   }

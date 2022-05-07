@@ -1,5 +1,5 @@
 import { IApp } from '../../application/app/interface';
-import { MatchedRoute } from '../../navigation/route/interface';
+import { MatchedRoute, RouteMeta } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IRouteStateKey = createServiceSymbol('IRouteState');
@@ -53,7 +53,7 @@ export interface IRouteState {
   removeApps: (index: number, apps: IApp[]) => void;
 
   /** 向当前的普通路由该 index 位置对应的路由中的添加应用 */
-  appendApps: (index: number, apps: IApp[]) => void;
+  appendApps: (index: number, apps: IApp[], meta: RouteMeta) => void;
 
   /** 删除当前的普通路由末尾的路由 */
   pop: () => void;

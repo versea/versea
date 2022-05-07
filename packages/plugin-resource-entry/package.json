@@ -23,8 +23,13 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/ramda": "^0.28.3",
     "@versea/core": "0.1.0",
+    "@versea/shared": "0.1.0",
+    "@versea/tapable": "0.1.0",
     "inversify": "^6.0.1",
+    "ramda": "^0.28.0",
+    "snake-case": "^3.0.4",
     "tslib": "^2.3.1"
   },
   "publishConfig": {
