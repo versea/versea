@@ -53,7 +53,7 @@ export class ResourceLoader implements IResourceLoader {
       for (const script of scripts) {
         if (typeof script === 'object') {
           if (script.async) {
-            requestIdleCallback(() => void this._loadScript(script.src as string));
+            requestIdleCallback(() => void this._loadScript(script.src));
           }
         } else {
           if (this.isInlineCode(script)) {
@@ -93,6 +93,7 @@ export class ResourceLoader implements IResourceLoader {
     const styleNode = document.createElement('style');
     const textNode = document.createTextNode(text);
     styleNode.appendChild(textNode);
+    styleNode.setAttribute('type', 'text/css');
     document.head.appendChild(styleNode);
   }
 }
