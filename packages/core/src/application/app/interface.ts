@@ -1,6 +1,6 @@
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
-import { RouteConfig } from '../../navigation/route/interface';
+import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
 export const IAppKey = createServiceSymbol('IApp');
@@ -14,6 +14,9 @@ export interface AppProps extends Record<string, unknown> {
 
   /** 当前正在运行的应用切换上下文 */
   context: IAppSwitcherContext;
+
+  /** 当前操作的 route 节点 */
+  route?: MatchedRoute;
 }
 
 export type AppHookFunction<T = unknown> = (props: AppProps) => Promise<T>;
@@ -48,16 +51,16 @@ export interface IApp {
    * 引导
    * @description 应用内容首次挂载到页面前调用。
    */
-  bootstrap: (context: IAppSwitcherContext) => Promise<void>;
+  bootstrap: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /** 挂载应用 */
-  mount: (context: IAppSwitcherContext) => Promise<void>;
+  mount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /** 卸载应用 */
-  unmount: (context: IAppSwitcherContext) => Promise<void>;
+  unmount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /** 获取传给加载和挂载的各个阶段 Hooks 函数的属性 */
-  getProps: (context: IAppSwitcherContext) => AppProps;
+  getProps: (context: IAppSwitcherContext, route?: MatchedRoute) => AppProps;
 
   /**
    * 等待应用内部容器渲染完成

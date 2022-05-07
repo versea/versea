@@ -100,14 +100,14 @@ export class Renderer implements IRenderer {
               ? differenceWith((app1, app2) => app1 === app2, fragmentApps, targetRoute.apps.slice(1))
               : fragmentApps;
           await switcherContext.runTask(async () =>
-            Promise.all(toUnmountFragmentApps.map(async (app) => app.unmount(switcherContext))),
+            Promise.all(toUnmountFragmentApps.map(async (app) => app.unmount(switcherContext, currentRoute))),
           );
           routeState.removeApps(i, toUnmountFragmentApps);
         }
         if (i >= mismatchIndex) {
           const parentAppLike: IApp | null = i === 0 ? null : currentRoutes[i - 1].apps[0];
           if (mainApp !== parentAppLike) {
-            await switcherContext.runTask(async () => currentRoute.apps[0].unmount(switcherContext));
+            await switcherContext.runTask(async () => currentRoute.apps[0].unmount(switcherContext, currentRoute));
           }
           routeState.pop();
         }
@@ -128,7 +128,7 @@ export class Renderer implements IRenderer {
       );
       await Promise.all(
         differentRoutes.map(async (route) => {
-          await route.apps[0].unmount(switcherContext);
+          await route.apps[0].unmount(switcherContext, route);
           routeState.removeRootFragment(route);
         }),
       );
@@ -206,7 +206,7 @@ export class Renderer implements IRenderer {
           await switcherContext.runTask(async () =>
             Promise.all(toMountFragmentApps.map(async (app) => hookContext.bootstrapAndMount(app, targetRoute))),
           );
-          routeState.appendApps(i, toMountFragmentApps);
+          routeState.appendApps(i, toMountFragmentApps, targetRoute.meta);
         }
       }
     });
