@@ -10,9 +10,9 @@ import {
   AppConfig,
   AppDependencies,
   AppProps,
-  AppHooks,
   AppConfigProps,
-  AppHookFunction,
+  AppLifeCycles,
+  AppLifeCycleFunction,
 } from './interface';
 
 export * from './interface';
@@ -27,18 +27,18 @@ export class App extends ExtensibleEntity implements IApp {
 
   public isBootstrapped = false;
 
-  protected readonly _loadApp?: (props: AppProps) => Promise<AppHooks>;
+  protected readonly _loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 
   protected readonly _props: AppConfigProps;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _Status: IStatus;
 
-  /** 加载应用返回的 Hooks */
-  protected _hooks: AppHooks = {};
+  /** 加载应用返回的声明周期 */
+  protected _lifeCycles: AppLifeCycles = {};
 
   /** "等待应用内部容器渲染完成"的 Hooks */
-  protected _waitForChildrenContainerHooks: Record<string, AppHookFunction> = {};
+  protected _waitForChildrenContainerHooks: Record<string, AppLifeCycleFunction> = {};
 
   /**
    * 生成一个 App 实例
@@ -57,7 +57,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async load(context: IAppSwitcherContext): Promise<void> {
+  public async load(context: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
       throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
     }
@@ -69,10 +69,10 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.LoadingSourceCode;
     try {
-      const hooks = await this._loadApp(this.getProps(context));
-      this.status = this._Status.NotBootstrapped;
+      const lifeCycles = await this._loadApp(this.getProps(context, route));
       this.isLoaded = true;
-      this._setHooks(hooks);
+      this.status = this._Status.NotBootstrapped;
+      this._setLifeCycles(lifeCycles);
     } catch (error) {
       this.status = this._Status.LoadError;
       throw error;
@@ -85,15 +85,34 @@ export class App extends ExtensibleEntity implements IApp {
       throw new VerseaError(`Can not bootstrap app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this._hooks.bootstrap) {
+    if (!this._lifeCycles.bootstrap) {
       this.status = this._Status.NotMounted;
       return;
     }
 
     this.status = this._Status.Bootstrapping;
     try {
-      await this._hooks.bootstrap(this.getProps(context, route));
+      await this._lifeCycles.bootstrap(this.getProps(context, route));
+      this.isBootstrapped = true;
       this.status = this._Status.NotMounted;
+    } catch (error) {
+      this.status = this._Status.Broken;
+      throw error;
+    }
+  }
+
+  @memoizePromise()
+  public async bootstrapOnMounting(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
+    if (this.status !== this._Status.Mounting) {
+      throw new VerseaError(`Can not bootstrapOnMounting app "${this.name}" with status "${this.status}".`);
+    }
+
+    if (!this._lifeCycles.bootstrap) {
+      return;
+    }
+
+    try {
+      await this._lifeCycles.bootstrap(this.getProps(context, route));
       this.isBootstrapped = true;
     } catch (error) {
       this.status = this._Status.Broken;
@@ -107,14 +126,14 @@ export class App extends ExtensibleEntity implements IApp {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this._hooks.mount) {
+    if (!this._lifeCycles.mount) {
       this.status = this._Status.Mounted;
       return;
     }
 
     this.status = this._Status.Mounting;
     try {
-      const result = await this._hooks.mount(this.getProps(context, route));
+      const result = await this._lifeCycles.mount(this.getProps(context, route));
       this._waitForChildrenContainerHooks = result ?? {};
       this.status = this._Status.Mounted;
     } catch (error) {
@@ -129,7 +148,7 @@ export class App extends ExtensibleEntity implements IApp {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
     }
 
-    if (!this._hooks.unmount) {
+    if (!this._lifeCycles.unmount) {
       this.status = this._Status.NotMounted;
       return;
     }
@@ -137,7 +156,7 @@ export class App extends ExtensibleEntity implements IApp {
     this.status = this._Status.Unmounting;
     try {
       // TODO: unmount parcel
-      await this._hooks.unmount(this.getProps(context, route));
+      await this._lifeCycles.unmount(this.getProps(context, route));
       this.status = this._Status.NotMounted;
     } catch (error) {
       this.status = this._Status.Broken;
@@ -172,19 +191,19 @@ export class App extends ExtensibleEntity implements IApp {
     };
   }
 
-  protected _setHooks(hooks: AppHooks = {}): void {
+  protected _setLifeCycles(lifeCycles: AppLifeCycles = {}): void {
     if (process.env.NODE_ENV !== 'production') {
-      if (!hooks.bootstrap) {
+      if (!lifeCycles.bootstrap) {
         console.warn(`App "${this.name}" does not export a valid bootstrap function`);
       }
-      if (!hooks.mount) {
+      if (!lifeCycles.mount) {
         console.warn(`App "${this.name}" does not export a valid mount function`);
       }
-      if (!hooks.unmount) {
+      if (!lifeCycles.unmount) {
         console.warn(`App "${this.name}" does not export a valid unmount function`);
       }
     }
 
-    this._hooks = hooks;
+    this._lifeCycles = lifeCycles;
   }
 }

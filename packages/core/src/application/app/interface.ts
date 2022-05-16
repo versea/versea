@@ -7,7 +7,7 @@ export const IAppKey = createServiceSymbol('IApp');
 
 export type AppConfigProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
 
-/** 传给加载和挂载的各个阶段的 Hooks 函数的属性 */
+/** 传给加载和挂载的各个生命周期函数的属性 */
 export interface AppProps extends Record<string, unknown> {
   /** 应用实例 */
   app: IApp;
@@ -19,16 +19,16 @@ export interface AppProps extends Record<string, unknown> {
   route?: MatchedRoute;
 }
 
-export type AppHookFunction<T = unknown> = (props: AppProps) => Promise<T>;
+export type AppLifeCycleFunction<T = unknown> = (props: AppProps) => Promise<T>;
 
 /**
- * 应用加载函数的返回的 Hooks
- * @description 应用加载和挂载的各个阶段会分别调用这些 Hooks。
+ * 应用加载函数的返回的生命周期
+ * @description 应用加载和挂载的各个阶段会分别调用这些生命周期。
  */
-export interface AppHooks {
-  bootstrap?: AppHookFunction;
-  mount?: AppHookFunction<Record<string, AppHookFunction>> | AppHookFunction<void>;
-  unmount?: AppHookFunction;
+export interface AppLifeCycles {
+  bootstrap?: AppLifeCycleFunction;
+  mount?: AppLifeCycleFunction<Record<string, AppLifeCycleFunction>> | AppLifeCycleFunction<void>;
+  unmount?: AppLifeCycleFunction;
 }
 
 export interface IApp {
@@ -45,7 +45,7 @@ export interface IApp {
   isBootstrapped: boolean;
 
   /** 加载应用 */
-  load: (context: IAppSwitcherContext) => Promise<void>;
+  load: (context: IAppSwitcherContext, route?: MatchedRoute) => Promise<void>;
 
   /**
    * 引导
@@ -53,13 +53,19 @@ export interface IApp {
    */
   bootstrap: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
+  /**
+   * 在 Mounting 阶段再一次尝试执行 bootstrap。
+   * @description 应用内容首次挂载到页面前调用。
+   */
+  bootstrapOnMounting: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
+
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /** 卸载应用 */
   unmount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
-  /** 获取传给加载和挂载的各个阶段 Hooks 函数的属性 */
+  /** 获取传给加载和挂载的各个生命周期函数的属性 */
   getProps: (context: IAppSwitcherContext, route?: MatchedRoute) => AppProps;
 
   /**
@@ -80,12 +86,12 @@ export interface AppConfig {
 
   /**
    * 应用的属性
-   * @description 透传给应用加载和挂载的各个阶段 Hooks 函数的属性。
+   * @description 透传给应用加载和挂载的各个生命周期函数的属性。
    */
   props?: AppConfigProps;
 
   /** 加载应用 */
-  loadApp?: (props: AppProps) => Promise<AppHooks>;
+  loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 }
 
 export interface AppDependencies {

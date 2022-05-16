@@ -68,7 +68,9 @@ export class Loader implements ILoader {
   protected _tapLoadApps(): void {
     this._hooks.loadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const apps = hookContext.currentLoadApps;
-      await Promise.all(apps.map(async (app) => app.load(hookContext.switcherContext)));
+      await Promise.all(
+        apps.map(async (app) => app.load(hookContext.switcherContext, hookContext.findMatchedRouteByApp(app))),
+      );
     });
   }
 

@@ -1,21 +1,21 @@
-# @versea/plugin-resource-entry
+# @versea/plugin-source-entry
 
 自动生成注册应用的 loadApp 配置。
 
 ### 安装
 
 ```bash
-npm install --save @versea/versea @versea/plugin-resource-entry
+npm install --save @versea/versea @versea/plugin-source-entry
 ```
 
 ### 使用
 
 ```ts
 import { Versea } from '@versea/versea';
-import { IPluginResourceEntryKey } from '@versea/plugin-resource-entry';
+import { IPluginSourceEntryKey } from '@versea/plugin-source-entry';
 
 const versea = new Versea({ defaultContainer: '#microApp' });
-versea.use(IPluginResourceEntryKey);
+versea.use(IPluginSourceEntryKey);
 
 // 注册子应用
 versea.registerApps([

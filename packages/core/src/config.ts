@@ -3,6 +3,7 @@ import { createServiceSymbol } from './utils';
 
 export const IConfigKey = createServiceSymbol('IConfig');
 export interface IConfig {
+  /** 路由模式 */
   routerMode: 'hash' | 'history';
 }
 

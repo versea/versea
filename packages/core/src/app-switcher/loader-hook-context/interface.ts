@@ -2,6 +2,7 @@ import { HookContext } from '@versea/tapable';
 
 import { IApp } from '../../application/app/interface';
 import { MatchedResult } from '../../navigation/matcher/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
@@ -26,6 +27,9 @@ export interface ILoaderHookContext extends HookContext {
 
   /** 当前需要加载的应用 */
   currentLoadApps: IApp[];
+
+  /** 根据应用获取匹配的路由 */
+  findMatchedRouteByApp: (app: IApp) => MatchedRoute | undefined;
 }
 
 export interface LoaderHookContextOptions {

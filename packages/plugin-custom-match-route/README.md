@@ -11,7 +11,7 @@ npm install --save @versea/versea @versea/plugin-custom-match-route
 ### 使用
 
 ```ts
-import { Versea } from '@versea/versea';
+import { Versea, AppLifeCycles } from '@versea/versea';
 import { IPluginCustomMatchRouteKey } from '@versea/versea';
 
 async function loadScript(url): Promise<void> {
@@ -37,7 +37,7 @@ versea.registerApps([
         },
       },
     ],
-    loadApp: async (): AppHooks => {
+    loadApp: async (): AppLifeCycles => {
       await loadScript('http://localhost:3000/static/js/bundle.js');
       return (window as any).microApp;
     },
