@@ -11,7 +11,7 @@ npm install --save @versea/core
 ### 使用
 
 ```ts
-import { buildProviderModule, IAppService, IAppServiceKey, IStarter, IStarterKey, AppHooks } from '@versea/core';
+import { buildProviderModule, IAppService, IAppServiceKey, IStarter, IStarterKey, AppLifeCycles } from '@versea/core';
 import { Container } from 'inversify';
 
 async function loadScript(url): Promise<void> {
@@ -35,7 +35,7 @@ container.get<IAppService>(IAppServiceKey).registerApps([
         path: 'sub-app',
       },
     ],
-    loadApp: async (): AppHooks => {
+    loadApp: async (): AppLifeCycles => {
       await loadScript('http://localhost:3000/static/js/bundle.js');
       return (window as any).microApp;
     },

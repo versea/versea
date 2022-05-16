@@ -3,8 +3,8 @@ import { Container } from 'inversify';
 import {
   buildProviderModule,
   AppConfig,
-  AppHookFunction,
-  AppHooks,
+  AppLifeCycleFunction,
+  AppLifeCycles,
   IApp,
   IAppService,
   IAppServiceKey,
@@ -32,8 +32,8 @@ function getAppInstance(config: AppConfig): IApp {
 
 function getAppWithLoadHook(
   config: AppConfig,
-  hooks: AppHooks = {},
-  mountHooks: Record<string, AppHookFunction> = {},
+  hooks: AppLifeCycles = {},
+  mountHooks: Record<string, AppLifeCycleFunction> = {},
 ): IApp {
   return getAppInstance({
     loadApp: async () => {

@@ -1,11 +1,11 @@
 {
-  "name": "@versea/plugin-resource-entry",
+  "name": "@versea/plugin-source-entry",
   "version": "0.1.0",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
-  "umd:main": "dist/versea.plugin-resource-entry.umd.production.js",
-  "unpkg": "dist/versea.plugin-resource-entry.umd.production.js",
+  "umd:main": "dist/versea.plugin-source-entry.umd.production.js",
+  "unpkg": "dist/versea.plugin-source-entry.umd.production.js",
   "types": "esm/index.d.ts",
   "repository": {
     "type": "git",

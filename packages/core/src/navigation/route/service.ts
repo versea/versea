@@ -5,7 +5,15 @@ import { mergeRight } from 'ramda';
 import { IApp } from '../../application/app/interface';
 import { provide } from '../../provider';
 import { cloneObjectWith, traverse } from '../../utils';
-import { IRoute, IRouteKey, MatchedRoute, RouteConfig, PathToRegexpOptions, ToMatchedRouteOptions } from './interface';
+import {
+  IRoute,
+  IRouteKey,
+  MatchedRoute,
+  RouteConfig,
+  PathToRegexpOptions,
+  ToMatchedRouteOptions,
+  RouteMeta,
+} from './interface';
 
 export * from './interface';
 
@@ -164,6 +172,9 @@ export class Route extends ExtensibleEntity implements IRoute {
         getRoute: (): IRoute => this,
         equal(route?: MatchedRoute): boolean {
           return !!route && this.fullPath === route.fullPath && this.apps[0] === route.apps[0];
+        },
+        getMeta(app: IApp) {
+          return this.apps[0] === app ? this.meta : ((this.meta as RouteMeta)[app.name] as RouteMeta) ?? {};
         },
       },
       {

@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+export function isPromise(target: unknown): target is Promise<unknown> {
+  return toString.call(target) === '[object Promise]';
+}
+
 export class Deferred<T> {
   public promise: Promise<T>;
 
@@ -47,4 +51,42 @@ export function memoizePromise(index = 0, deleteMemo = true) {
       });
     };
   };
+}
+
+/** Promise 流 */
+export function promiseStream<T>(
+  promiseList: (Promise<T> | T)[],
+  onSuccess: (res: { data: T; index: number }) => unknown,
+  onError: (res: { error: Error; index: number }) => unknown,
+  onFinally?: () => unknown,
+): void {
+  let finishedNumber = 0;
+
+  function tryFinished(): void {
+    if (++finishedNumber === promiseList.length && onFinally) onFinally();
+  }
+
+  promiseList.forEach((p, i) => {
+    if (isPromise(p)) {
+      p.then((res) => {
+        onSuccess({
+          data: res,
+          index: i,
+        });
+        tryFinished();
+      }).catch((error: Error) => {
+        onError({
+          error,
+          index: i,
+        });
+        tryFinished();
+      });
+    } else {
+      onSuccess({
+        data: p,
+        index: i,
+      });
+      tryFinished();
+    }
+  });
 }

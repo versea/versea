@@ -2,7 +2,7 @@ import { ExtensibleEntity } from '@versea/shared';
 
 import { IAppService } from '../../application/app-service/interface';
 import { IApp } from '../../application/app/interface';
-import { MatchedRoute, RouteMeta } from '../../navigation/route/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 import { IRouteState } from '../route-state/interface';
@@ -62,7 +62,7 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
       await app.bootstrap(switcherContext, route);
     }
     // 解构出应用对应的 meta 信息
-    const meta: RouteMeta = route.apps[0] === app ? route.meta : (route.meta[app.name] as RouteMeta);
+    const meta = route.getMeta(app);
     if (meta.parentAppName && meta.parentContainerName) {
       const parentApp = this._appService.getApp(meta.parentAppName);
       await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);

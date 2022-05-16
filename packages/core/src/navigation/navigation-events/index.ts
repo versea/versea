@@ -43,8 +43,8 @@ window.addEventListener('hashchange', handleUrlChange);
 
 // 重写 addEventListener 和 removeEventListener
 // 当增加 popstate 或 hashchange 事件监听函数，把他们存储到 capturedEventListeners，在 versea 切换应用的合适时机调用
-const originalAddEventListener = window.addEventListener;
-const originalRemoveEventListener = window.removeEventListener;
+const rawAddEventListener = window.addEventListener;
+const rawRemoveEventListener = window.removeEventListener;
 
 window.addEventListener = function (
   eventName: string,
@@ -60,7 +60,7 @@ window.addEventListener = function (
       return;
     }
   }
-  originalAddEventListener.call(this, eventName, listenerFn, options);
+  rawAddEventListener.call(this, eventName, listenerFn, options);
 };
 
 window.removeEventListener = function (
@@ -77,16 +77,16 @@ window.removeEventListener = function (
     }
   }
 
-  originalRemoveEventListener.call(this, eventName, listenerFn, options);
+  rawRemoveEventListener.call(this, eventName, listenerFn, options);
 };
 
 /** 创建 popstate 事件 */
-function createPopStateEvent(state: PopStateEventInit, originalMethodName: HistoryFunctionName): Event {
+function createPopStateEvent(state: PopStateEventInit, methodName: HistoryFunctionName): Event {
   const evt = new PopStateEvent('popstate', { state });
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
   (evt as any).versea = true;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-  (evt as any).verseaTrigger = originalMethodName;
+  (evt as any).verseaTrigger = methodName;
   return evt;
 }
 

@@ -1,3 +1,5 @@
+export const isBrowser = typeof window !== 'undefined';
+
 export const requestIdleCallback =
   window.requestIdleCallback ||
   function requestIdleCallback(cb: IdleRequestCallback): number {

@@ -11,7 +11,7 @@ npm install --save @versea/core
 ### 使用
 
 ```ts
-import { Versea } from '@versea/versea';
+import { Versea, AppLifeCycles } from '@versea/versea';
 
 async function loadScript(url): Promise<void> {
   console.log(url);
@@ -30,7 +30,7 @@ versea.registerApps([
         path: 'sub-app',
       },
     ],
-    loadApp: async (): AppHooks => {
+    loadApp: async (): AppLifeCycles => {
       await loadScript('http://localhost:3000/static/js/bundle.js');
       return (window as any).microApp;
     },

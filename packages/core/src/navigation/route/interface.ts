@@ -118,6 +118,9 @@ type MatchedRouteTyped = Omit<
 
     /** 判断两个 matchedRoute 是否相等 */
     equal: (route: MatchedRoute) => boolean;
+
+    /** 获取应用对应的 meta 信息 */
+    getMeta: (app: IApp) => RouteMeta;
   };
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

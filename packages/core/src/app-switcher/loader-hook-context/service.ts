@@ -3,6 +3,7 @@ import { flatten, uniq } from 'ramda';
 
 import { IApp } from '../../application/app/interface';
 import { MatchedResult } from '../../navigation/matcher/interface';
+import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 import { ILoaderHookContext, ILoaderHookContextKey, LoaderHookContextOptions } from './interface';
@@ -26,6 +27,14 @@ export class LoaderHookContext extends ExtensibleEntity implements ILoaderHookCo
     this.matchedResult = options.matchedResult;
     this.switcherContext = options.switcherContext;
     this.targetApps = this._getTargetApps(this.matchedResult);
+  }
+
+  public findMatchedRouteByApp(app: IApp): MatchedRoute | undefined {
+    const matchedRoute = this.matchedResult.routes.find((route) => route.apps.includes(app));
+    if (matchedRoute) {
+      return matchedRoute;
+    }
+    return this.matchedResult.fragmentRoutes.find((route) => route.apps[0] === app);
   }
 
   protected _getTargetApps({ routes, fragmentRoutes }: MatchedResult): IApp[][] {
