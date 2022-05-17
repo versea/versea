@@ -10,11 +10,11 @@ const presets = () => {
     inversify: 'inversify',
     '@versea/core': 'Versea.Core',
     '@versea/shared': 'Versea.Shared',
-    '@versea/sandbox': 'Versea.Sandbox',
     '@versea/tapable': 'Versea.Tapable',
     '@versea/versea': 'Versea.Versea',
     '@versea/plugin-source-entry': 'Versea.PluginSourceEntry',
     '@versea/plugin-custom-match-route': 'Versea.PluginCustomMatchRoute',
+    '@versea/plugin-sandbox': 'Versea.PluginSandbox',
   };
 
   return [

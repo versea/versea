@@ -1,11 +1,11 @@
 {
-  "name": "@versea/sandbox",
+  "name": "@versea/plugin-sandbox",
   "version": "0.1.0",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
-  "umd:main": "dist/versea.sandbox.umd.production.js",
-  "unpkg": "dist/versea.sandbox.umd.production.js",
+  "umd:main": "dist/versea.plugin-sandbox.umd.production.js",
+  "unpkg": "dist/versea.plugin-sandbox.umd.production.js",
   "types": "esm/index.d.ts",
   "repository": {
     "type": "git",
