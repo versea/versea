@@ -54,7 +54,7 @@ export interface IApp {
   bootstrap: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /**
-   * 在 Mounting 阶段再一次尝试执行 bootstrap。
+   * 在 Mounting 阶段尝试执行 bootstrap
    * @description 应用内容首次挂载到页面前调用。
    */
   bootstrapOnMounting: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
