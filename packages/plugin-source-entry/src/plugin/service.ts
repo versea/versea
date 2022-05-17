@@ -16,7 +16,6 @@ import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 import { pick } from 'ramda';
 
-import { SourceScript, SourceStyle } from '..';
 import {
   VERSEA_PLUGIN_SOURCE_ENTRY_TAP,
   VERSEA_PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP,
@@ -28,6 +27,8 @@ import {
 import { IContainerRender, IContainerRenderKey } from '../container-render/interface';
 import { ISourceController, ISourceControllerKey } from '../source-controller/interface';
 import {
+  SourceScript,
+  SourceStyle,
   LoadAppHookContext,
   MountAppHookContext,
   UnmountAppHookContext,
@@ -110,7 +111,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
       const { app, config } = context;
       if (!app.disableRenderContainer) {
-        app.container = this._containerRender.createElement(app, config);
+        app.container = this._containerRender.createContainerElement(app, config);
       }
       await this._sourceController.load(context);
     });

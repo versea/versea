@@ -18,7 +18,7 @@ export class ContainerRender implements IContainerRender {
     this._config = config;
   }
 
-  public createElement(app: IApp, config: AppConfig): HTMLElement {
+  public createContainerElement(app: IApp, config: AppConfig): HTMLElement {
     const wrapperElement = globalEnv.rawCreateElement.call(document, 'div');
     wrapperElement.innerHTML = this._getAppContent(app.name, config.documentFragment);
     return wrapperElement.firstChild as HTMLElement;
@@ -30,25 +30,26 @@ export class ContainerRender implements IContainerRender {
 
   public renderContainer(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
-    element = context.app.container,
+    container = context.app.container,
   ): boolean {
-    if (context.app.disableRenderContainer) {
+    // 没有 container 的情况不需要执行渲染容器
+    if (container === undefined) {
       return true;
     }
 
-    const containerElement = this._getContainerElement(context);
-    if (containerElement && !containerElement.contains(element as Node | null)) {
+    const parentContainerElement = this._getParentContainerElement(context);
+    if (parentContainerElement && !parentContainerElement.contains(container as Node | null)) {
       // 清空元素
-      while (containerElement.firstChild) {
-        globalEnv.rawRemoveChild.call(containerElement, containerElement.firstChild);
+      while (parentContainerElement.firstChild) {
+        globalEnv.rawRemoveChild.call(parentContainerElement, parentContainerElement.firstChild);
       }
 
-      if (element) {
-        globalEnv.rawAppendChild.call(containerElement, element);
+      if (container) {
+        globalEnv.rawAppendChild.call(parentContainerElement, container);
       }
     }
 
-    return !!containerElement;
+    return !!parentContainerElement;
   }
 
   protected _getAppContent(name: string, documentFragment?: string): string {
@@ -68,7 +69,7 @@ export class ContainerRender implements IContainerRender {
     return `<div id="${this.getWrapperId(name)}" data-name="${name}">${content}</div>`;
   }
 
-  protected _getContainerElement(
+  protected _getParentContainerElement(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
   ): HTMLElement | null {
     const { config, app, props } = context;
@@ -77,24 +78,24 @@ export class ContainerRender implements IContainerRender {
     if (props.route) {
       const meta = props.route.getMeta(app);
       if (meta.parentContainerName) {
-        return this._queryContainerElement(`#${meta.parentContainerName}`);
+        return this._queryParentContainerElement(`#${meta.parentContainerName}`);
       }
     }
 
     // 从 config 获取容器
     if (config.container) {
-      return this._queryContainerElement(config.container);
+      return this._queryParentContainerElement(config.container);
     }
 
     // 获取默认容器
     if (props.route?.apps[0] === app && this._config.defaultContainer) {
-      return this._queryContainerElement(this._config.defaultContainer);
+      return this._queryParentContainerElement(this._config.defaultContainer);
     }
 
     return null;
   }
 
-  protected _queryContainerElement(selector: string): HTMLElement | null {
+  protected _queryParentContainerElement(selector: string): HTMLElement | null {
     return globalEnv.rawQuerySelector.call(document, selector) as HTMLElement | null;
   }
 

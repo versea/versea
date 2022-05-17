@@ -30,7 +30,7 @@ export interface MountAppHookContext extends HookContext {
   /** 应用的生命周期函数 */
   lifeCycles: AppLifeCycles;
 
-  /** 修改应用已有的 LifeCycles */
+  /** 修改应用已有的生命周期函数 */
   dangerouslySetLifeCycles: (lifeCycles: AppLifeCycles) => void;
 
   /** Mount 返回的结果 */
@@ -76,7 +76,7 @@ declare module '@versea/core' {
 
     /**
      * 文档内容
-     * @example <div><h1>title</h1><div id="sub_app_name"></div></div>
+     * @example <div><h1>title</h1><div id="sub-app-name"></div></div>
      */
     documentFragment?: string;
 
