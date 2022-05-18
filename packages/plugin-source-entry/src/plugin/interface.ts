@@ -1,4 +1,4 @@
-import { AppConfig, AppLifeCycles, AppProps, createServiceSymbol, IApp, IPlugin } from '@versea/core';
+import { AppLifeCycles, AppProps, createServiceSymbol, IApp, IPlugin } from '@versea/core';
 import { AsyncSeriesHook, HookContext } from '@versea/tapable';
 
 import { ExecSourceHookContext, LoadSourceHookContext } from '../source-controller/interface';
@@ -11,7 +11,6 @@ export interface IPluginSourceEntry extends IPlugin {
 
 export interface LoadAppHookContext extends HookContext {
   app: IApp;
-  config: AppConfig;
 
   /** Load 参数 */
   props: AppProps;
@@ -22,7 +21,6 @@ export interface LoadAppHookContext extends HookContext {
 
 export interface MountAppHookContext extends HookContext {
   app: IApp;
-  config: AppConfig;
 
   /** Mount 参数 */
   props: AppProps;
@@ -39,7 +37,6 @@ export interface MountAppHookContext extends HookContext {
 
 export interface UnmountAppHookContext extends HookContext {
   app: IApp;
-  config: AppConfig;
 
   /** Unmount 参数 */
   props: AppProps;
@@ -64,6 +61,30 @@ export interface SourceScript {
   async?: boolean;
   module?: boolean;
   isGlobal?: boolean;
+}
+
+/**
+ * 内部 IApp
+ * @description 在 IApp 增加一些 protected 的属性
+ */
+export interface IInternalApp extends IApp {
+  /**
+   * 容器名称
+   * @example #app
+   */
+  _parentContainer?: string;
+
+  /** 禁用渲染容器 */
+  _disableRenderContainer?: boolean;
+
+  /**
+   * 文档内容
+   * @example <div><h1>title</h1><div id="sub-app-name"></div></div>
+   */
+  _documentFragment?: string;
+
+  /** 资源是否已经被执行 */
+  _isSourceExecuted?: boolean;
 }
 
 declare module '@versea/core' {
@@ -125,9 +146,6 @@ declare module '@versea/core' {
 
     /** 应用脚本 */
     scripts?: SourceScript[];
-
-    /** 禁用渲染容器 */
-    disableRenderContainer?: boolean;
   }
 
   export interface IConfig {

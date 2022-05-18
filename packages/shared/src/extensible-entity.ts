@@ -2,6 +2,7 @@
 import { VerseaError } from './error';
 
 export interface ExtensiblePropDescription {
+  optionKey?: string;
   required?: boolean;
   default?: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +65,8 @@ export class ExtensibleEntity {
     });
 
     Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {
-      this._setEntityProp(key, options[key], this._extensiblePropDescriptions[key], options);
+      const description = this._extensiblePropDescriptions[key];
+      this._setEntityProp(key, options[description.optionKey ?? key], description, options);
     });
   }
 

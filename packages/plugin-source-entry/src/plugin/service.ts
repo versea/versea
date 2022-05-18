@@ -14,7 +14,6 @@ import {
 import { VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
-import { pick } from 'ramda';
 
 import {
   VERSEA_PLUGIN_SOURCE_ENTRY_TAP,
@@ -27,6 +26,7 @@ import {
 import { IContainerRender, IContainerRenderKey } from '../container-render/interface';
 import { ISourceController, ISourceControllerKey } from '../source-controller/interface';
 import {
+  IInternalApp,
   SourceScript,
   SourceStyle,
   LoadAppHookContext,
@@ -38,9 +38,14 @@ import {
 
 export * from './interface';
 
+// 默认父容器配置
 provideValue({ defaultContainer: '' }, IConfigKey);
 
-App.defineProp('disableRenderContainer', { validator: (value) => value === undefined || typeof value === 'boolean' });
+App.defineProp('styles');
+App.defineProp('scripts');
+App.defineProp('_parentContainer', { optionKey: 'container' });
+App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
+App.defineProp('_disableRenderContainer', { optionKey: 'disableRenderContainer' });
 
 async function noop(): Promise<void> {
   return Promise.resolve();
@@ -82,7 +87,6 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       config.loadApp = async (props: AppProps): Promise<AppLifeCycles> => {
         const context = {
           app: props.app,
-          config,
           props,
         } as LoadAppHookContext;
         await this._hooks.loadApp.call(context);
@@ -99,20 +103,26 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   }
 
   protected _tapLoadApp(): void {
-    // 生成 app 上的资源信息
+    // 规范 App 上的资源信息
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
-      const { app, config } = context;
-      app.styles = this._normalizeSource(config.styles);
-      app.scripts = this._normalizeSource(config.scripts);
+      const { app } = context;
+
+      // 将 (SourceStyle | string)[] 处理成 SourceStyle[]
+      app.styles = this._normalizeSource(app.styles);
+
+      // 将 (SourceScript | string)[] 处理成 SourceScript[]
+      app.scripts = this._normalizeSource(app.scripts);
+
       return Promise.resolve();
     });
 
     // 创建容器和加载资源
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
-      const { app, config } = context;
-      if (!app.disableRenderContainer) {
-        app.container = this._containerRender.createContainerElement(app, config);
+      const { app } = context;
+      if (!(app as IInternalApp)._disableRenderContainer) {
+        app.container = this._containerRender.createContainerElement(app);
       }
+
       await this._sourceController.load(context);
     });
 
@@ -121,9 +131,8 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       const { app } = context;
       const isRendered = this._containerRender.renderContainer(context);
       if (isRendered) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (app as any)._isSourceExecuted = true;
         const lifeCycles = await this._sourceController.exec(context);
+        (app as IInternalApp)._isSourceExecuted = true;
         context.lifeCycles = { ...lifeCycles };
       } else {
         context.lifeCycles = { mount: noop, unmount: noop };
@@ -135,7 +144,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       const originLifeCycles = { ...context.lifeCycles };
       context.lifeCycles!.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
         const mountContext = {
-          ...pick(['app', 'config'], context),
+          app: context.app,
           lifeCycles: originLifeCycles,
           props,
           dangerouslySetLifeCycles: (lifeCycles: AppLifeCycles) => {
@@ -148,7 +157,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
       context.lifeCycles!.unmount = async (props: AppProps): Promise<unknown> => {
         const unmountContext = {
-          ...pick(['app', 'config'], context),
+          app: context.app,
           lifeCycles: originLifeCycles,
           props,
         } as UnmountAppHookContext;
@@ -170,14 +179,12 @@ export class PluginSourceEntry implements IPluginSourceEntry {
         throw new VerseaError('Can not find container element.');
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      if (!(app as any)._isSourceExecuted) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (app as any)._isSourceExecuted = true;
+      if (!(app as IInternalApp)._isSourceExecuted) {
         const lifeCycles = await this._sourceController.exec(context);
-        // 重新设置应用的生命周期函数
+        (app as IInternalApp)._isSourceExecuted = true;
+        // 重置应用的生命周期函数
         dangerouslySetLifeCycles(lifeCycles);
-        // 在 Load 阶段可能没有执行资源文件，因此 bootstrap 可能之前被忽略，这里重新执行 bootstrap 生命周期
+        // 在 Load 阶段可能没有执行资源文件，因此 bootstrap 可能之前没有赋值而被忽略，这里重新执行 bootstrap 生命周期
         if (!app.isBootstrapped) {
           await app.bootstrapOnMounting(props.context, props.route!);
         }

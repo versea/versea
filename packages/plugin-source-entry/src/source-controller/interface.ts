@@ -1,4 +1,4 @@
-import { AppConfig, AppLifeCycles, AppProps, createServiceSymbol, IApp } from '@versea/core';
+import { AppLifeCycles, AppProps, createServiceSymbol, IApp } from '@versea/core';
 import { HookContext } from '@versea/tapable';
 
 import { LoadAppHookContext, MountAppHookContext } from '../plugin/interface';
@@ -24,7 +24,6 @@ export interface ISourceController {
 
 export interface LoadSourceHookContext extends HookContext {
   app: IApp;
-  config: AppConfig;
 
   /** Load 参数 */
   props: AppProps;
@@ -32,7 +31,6 @@ export interface LoadSourceHookContext extends HookContext {
 
 export interface ExecSourceHookContext extends HookContext {
   app: IApp;
-  config: AppConfig;
 
   /** Load 或 Mount 参数 */
   props: AppProps;

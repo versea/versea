@@ -1,9 +1,9 @@
-import { AppConfig, IApp, IConfig, IConfigKey, provide } from '@versea/core';
+import { IApp, IConfig, IConfigKey, provide } from '@versea/core';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
 import { globalEnv } from '../global-env';
-import { LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
+import { IInternalApp, LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
 import { IContainerRender, IContainerRenderKey } from './interface';
 
 export * from './interface';
@@ -18,9 +18,9 @@ export class ContainerRender implements IContainerRender {
     this._config = config;
   }
 
-  public createContainerElement(app: IApp, config: AppConfig): HTMLElement {
+  public createContainerElement(app: IApp): HTMLElement {
     const wrapperElement = globalEnv.rawCreateElement.call(document, 'div');
-    wrapperElement.innerHTML = this._getAppContent(app.name, config.documentFragment);
+    wrapperElement.innerHTML = this._getAppContent(app.name, (app as IInternalApp)._documentFragment);
     return wrapperElement.firstChild as HTMLElement;
   }
 
@@ -72,7 +72,7 @@ export class ContainerRender implements IContainerRender {
   protected _getParentContainerElement(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
   ): HTMLElement | null {
-    const { config, app, props } = context;
+    const { app, props } = context;
 
     // 从 route 获取容器
     if (props.route) {
@@ -82,9 +82,9 @@ export class ContainerRender implements IContainerRender {
       }
     }
 
-    // 从 config 获取容器
-    if (config.container) {
-      return this._queryParentContainerElement(config.container);
+    if ((app as IInternalApp)._parentContainer) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this._queryParentContainerElement((app as IInternalApp)._parentContainer!);
     }
 
     // 获取默认容器
