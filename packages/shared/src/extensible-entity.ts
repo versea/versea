@@ -7,6 +7,8 @@ export interface ExtensiblePropDescription {
   default?: unknown;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator?: (value: unknown, options: Record<string, any>) => boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  format?: (value: unknown, options: Record<string, any>) => unknown;
   onMerge?: (value: unknown, otherValue: unknown) => unknown;
   onClone?: (value: unknown) => unknown;
 }
@@ -100,20 +102,20 @@ export class ExtensibleEntity {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     options: Record<string, any>,
   ): void {
+    const { default: defaultValue, required, validator, format } = description;
     if (value === undefined) {
-      const defaultValue = description.default;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       value = typeof defaultValue === 'function' ? defaultValue(options) : defaultValue;
     }
 
-    if (description.required && value === undefined) {
+    if (required && value === undefined) {
       throw new VerseaError(`Missing required prop: "${key}"`);
     }
 
-    if (description.validator && !description.validator(value, options)) {
+    if (validator && !validator(value, options)) {
       throw new VerseaError(`Invalid prop: custom validator check failed for prop "${key}"`);
     }
 
-    this[key] = value;
+    this[key] = format ? format(value, options) : value;
   }
 }

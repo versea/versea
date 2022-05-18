@@ -25,6 +25,7 @@ import {
 } from '../constants';
 import { IContainerRender, IContainerRenderKey } from '../container-render/interface';
 import { ISourceController, ISourceControllerKey } from '../source-controller/interface';
+import { addProtocol, completionPath, getEffectivePath } from '../utils';
 import {
   IInternalApp,
   SourceScript,
@@ -43,6 +44,10 @@ provideValue({ defaultContainer: '' }, IConfigKey);
 
 App.defineProp('styles');
 App.defineProp('scripts');
+App.defineProp('assetsPublicPath', {
+  validator: (value) => value === undefined || typeof value === 'string',
+  format: (value) => (value ? getEffectivePath(addProtocol(value as string)) : value),
+});
 App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
 App.defineProp('_disableRenderContainer', { optionKey: 'disableRenderContainer' });
@@ -81,14 +86,14 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   public apply(): void {
     this._hooks.beforeRegisterApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, ({ config }) => {
       if (config.loadApp) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn(`Can not set app "${config.name}" loadApp function, because it is defined.`);
+        }
         return;
       }
 
       config.loadApp = async (props: AppProps): Promise<AppLifeCycles> => {
-        const context = {
-          app: props.app,
-          props,
-        } as LoadAppHookContext;
+        const context = { app: props.app, props } as LoadAppHookContext;
         await this._hooks.loadApp.call(context);
         return context.lifeCycles!;
       };
@@ -107,11 +112,13 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
 
-      // 将 (SourceStyle | string)[] 处理成 SourceStyle[]
-      app.styles = this._normalizeSource(app.styles);
+      // 将字符串的 style 转化 SourceStyle
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      app.styles = this._normalizeSource(app.styles, app.assetsPublicPath);
 
-      // 将 (SourceScript | string)[] 处理成 SourceScript[]
-      app.scripts = this._normalizeSource(app.scripts);
+      // 将字符串的 script 转化 SourceScript
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      app.scripts = this._normalizeSource(app.scripts, app.assetsPublicPath);
 
       return Promise.resolve();
     });
@@ -145,8 +152,8 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       context.lifeCycles!.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
         const mountContext = {
           app: context.app,
-          lifeCycles: originLifeCycles,
           props,
+          lifeCycles: originLifeCycles,
           dangerouslySetLifeCycles: (lifeCycles: AppLifeCycles) => {
             Object.assign(originLifeCycles, lifeCycles);
           },
@@ -158,8 +165,8 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       context.lifeCycles!.unmount = async (props: AppProps): Promise<unknown> => {
         const unmountContext = {
           app: context.app,
-          lifeCycles: originLifeCycles,
           props,
+          lifeCycles: originLifeCycles,
         } as UnmountAppHookContext;
         await this._hooks.unmountApp.call(unmountContext);
         return unmountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
@@ -216,14 +223,20 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
   }
 
-  protected _normalizeSource<T extends SourceScript | SourceStyle>(sources?: (T | string)[]): T[] {
+  protected _normalizeSource<T extends SourceScript | SourceStyle>(
+    sources?: (T | string)[],
+    assetsPublicPath?: string,
+  ): T[] {
     return sources
       ? sources.map((source) =>
           typeof source === 'string'
             ? ({
-                src: source,
+                src: completionPath(source, assetsPublicPath),
               } as T)
-            : source,
+            : {
+                ...source,
+                src: completionPath(source.src!, assetsPublicPath),
+              },
         )
       : [];
   }

@@ -64,7 +64,7 @@ export interface SourceScript {
 }
 
 /**
- * 内部 IApp
+ * 插件内部使用的 IApp
  * @description 在 IApp 增加一些 protected 的属性
  */
 export interface IInternalApp extends IApp {
@@ -113,6 +113,9 @@ declare module '@versea/core' {
      */
     scripts?: (SourceScript | string)[];
 
+    /** 资源文件公共路径 */
+    assetsPublicPath?: string;
+
     /** 禁用渲染容器 */
     disableRenderContainer?: boolean;
   }
@@ -129,7 +132,7 @@ declare module '@versea/core' {
 
     /**
      * 根据 app 上的资源文件信息加载资源文件
-     * @description 加载资源文件，并把 css 加入容器（css 加入容器是异步的）
+     * @description 加载资源文件，并把 css 加入容器
      */
     loadSource: AsyncSeriesHook<LoadSourceHookContext>;
 
@@ -146,6 +149,9 @@ declare module '@versea/core' {
 
     /** 应用脚本 */
     scripts?: SourceScript[];
+
+    /** 资源文件公共路径 */
+    assetsPublicPath?: string;
   }
 
   export interface IConfig {
