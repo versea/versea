@@ -1,4 +1,4 @@
-import { ExtensibleEntity, VerseaError, memoizePromise } from '@versea/shared';
+import { ExtensibleEntity, logWarn, memoizePromise, VerseaError } from '@versea/shared';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
@@ -171,9 +171,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (!this._waitForChildrenContainerHooks[containerName]) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(`Can not found waiting for function, it may cause mounting child app error.`);
-      }
+      logWarn(`Can not found waiting for function, it may cause mounting child app error.`, this.name);
       return;
     }
 
@@ -192,16 +190,14 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   protected _setLifeCycles(lifeCycles: AppLifeCycles = {}): void {
-    if (process.env.NODE_ENV !== 'production') {
-      if (!lifeCycles.bootstrap) {
-        console.warn(`App "${this.name}" does not export a valid bootstrap function`);
-      }
-      if (!lifeCycles.mount) {
-        console.warn(`App "${this.name}" does not export a valid mount function`);
-      }
-      if (!lifeCycles.unmount) {
-        console.warn(`App "${this.name}" does not export a valid unmount function`);
-      }
+    if (!lifeCycles.bootstrap) {
+      logWarn(`App does not export a valid bootstrap function`, this.name);
+    }
+    if (!lifeCycles.mount) {
+      logWarn(`App does not export a valid mount function`, this.name);
+    }
+    if (!lifeCycles.unmount) {
+      logWarn(`App does not export a valid unmount function`, this.name);
     }
 
     this._lifeCycles = lifeCycles;

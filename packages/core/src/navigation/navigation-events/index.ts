@@ -1,3 +1,9 @@
+/**
+ * 重写路由事件和函数
+ * @description 特别声明这里借鉴了 single-spa 的实现
+ * @see https://github.com/single-spa/single-spa/blob/master/src/navigation/navigation-events.js
+ */
+
 /* eslint-disable @typescript-eslint/unbound-method */
 import { IRouter } from '../router/interface';
 import { HistoryFunctionName, LocationEventName, HistoryEventListenersType } from './types';

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { isBrowser } from './utils';
+import { isBrowser } from '@versea/shared';
 
 interface GlobalEnv {
   rawAppendChild: typeof Element.prototype.appendChild;

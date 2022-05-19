@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import 'reflect-metadata';
-import { VerseaError } from '@versea/shared';
+import { logWarn, VerseaError } from '@versea/shared';
 import {
   decorate,
   injectable,
@@ -83,13 +83,11 @@ function appendMetadata(metadata: ProvideSyntax, MetaDataKey: string): ProvideSy
         replace,
       };
     } else {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(
-          `Provide Warning: duplicated serviceIdentifier ${toString(
-            metadata.serviceIdentifier,
-          )}, use new value to replace old value.`,
-        );
-      }
+      logWarn(
+        `Provide Warning: duplicated serviceIdentifier ${toString(
+          metadata.serviceIdentifier,
+        )}, use new value to replace old value.`,
+      );
 
       newMetadata[index] = metadata;
     }

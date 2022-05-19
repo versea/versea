@@ -11,7 +11,7 @@ import {
   provide,
   provideValue,
 } from '@versea/core';
-import { VerseaError } from '@versea/shared';
+import { logWarn, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
@@ -86,9 +86,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   public apply(): void {
     this._hooks.beforeRegisterApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, ({ config }) => {
       if (config.loadApp) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn(`Can not set app "${config.name}" loadApp function, because it is defined.`);
-        }
+        logWarn('Can not set app loadApp function, because it is defined.', config.name);
         return;
       }
 

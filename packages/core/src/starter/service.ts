@@ -1,3 +1,5 @@
+import { logWarn } from '@versea/shared';
+
 import { IRouter, IRouterKey } from '../navigation/router/interface';
 import { lazyInject, provide } from '../provider';
 import { IStarter, IStarterKey } from './interface';
@@ -12,11 +14,10 @@ export class Starter implements IStarter {
 
   public async start(): Promise<void> {
     if (this.isStarted) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Versea has already started, it should not start again.');
-        return;
-      }
+      logWarn('Versea has already started, it should not start again.');
+      return;
     }
+
     this.isStarted = true;
     return this._router.reroute();
   }

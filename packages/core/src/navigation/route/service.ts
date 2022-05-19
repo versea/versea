@@ -1,4 +1,4 @@
-import { ExtensibleEntity, VerseaError } from '@versea/shared';
+import { ExtensibleEntity, logWarn, VerseaError } from '@versea/shared';
 import { pathToRegexp, Key } from 'path-to-regexp';
 import { mergeRight } from 'ramda';
 
@@ -84,9 +84,7 @@ export class Route extends ExtensibleEntity implements IRoute {
       return;
     }
 
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn(`Merge route with same path  "${route.path}".`);
-    }
+    logWarn(`Merge route with same path  "${route.path}".`);
 
     // 合并扩展属性
     Object.keys(this._extensiblePropDescriptions).forEach((key: string) => {

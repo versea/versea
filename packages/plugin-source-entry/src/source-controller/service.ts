@@ -1,5 +1,5 @@
 import { AppLifeCycles, IHooks, IHooksKey, provide } from '@versea/core';
-import { VerseaError } from '@versea/shared';
+import { requestIdleCallback, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 import { pick } from 'ramda';

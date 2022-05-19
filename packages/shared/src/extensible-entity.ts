@@ -88,7 +88,7 @@ export class ExtensibleEntity {
       description.default !== null
     ) {
       console.warn(
-        `Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
+        `[versea]Invalid default value for prop "${key}": Props with type Object/Array must use a factory function to return the default value.`,
       );
     }
 

@@ -160,7 +160,7 @@ export class Matcher implements IMatcher {
       const keyMap = Object.create(null) as Record<string, boolean>;
       keys.forEach((key) => {
         if (keyMap[key.name]) {
-          console.warn(`Duplicate param keys in route with path: "${route.path}"`);
+          console.warn(`[versea]Duplicate param keys in route with path: "${route.path}"`);
         }
         keyMap[key.name] = true;
       });
