@@ -17,7 +17,7 @@ const nextTick: (cb: () => void) => void =
 
 @provide(ICurrentAppKey)
 export class CurrentApp implements ICurrentApp {
-  protected _currentAppName: string | undefined = undefined;
+  protected _name: string | undefined = undefined;
 
   protected _taskPending = false;
 
@@ -25,22 +25,22 @@ export class CurrentApp implements ICurrentApp {
     bindCurrentApp(this);
   }
 
-  public getCurrentAppName(): string | undefined {
-    return this._currentAppName;
+  public getName(): string | undefined {
+    return this._name;
   }
 
-  public setCurrentAppName(name?: string): void {
-    this._currentAppName = name;
+  public setName(name?: string): void {
+    this._name = name;
   }
 
   public throttleDeferForSetAppName(name: string): void {
-    if (!this._currentAppName || this._currentAppName !== name) {
-      this.setCurrentAppName(name);
+    if (!this._name || this._name !== name) {
+      this.setName(name);
     }
     if (!this._taskPending) {
       this._taskPending = true;
       nextTick(() => {
-        this.setCurrentAppName();
+        this.setName();
         this._taskPending = false;
       });
     }

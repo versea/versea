@@ -5,12 +5,6 @@ import { isBrowser } from '@versea/shared';
 import { ICurrentApp } from './current-app/service';
 
 declare global {
-  interface Window {
-    _babelPolyfill: boolean;
-    __VERSEA_APP_ENVIRONMENT__?: boolean;
-    __VERSEA_APP_BASE_APPLICATION__?: boolean;
-  }
-
   interface Element {
     __VERSEA_APP_NAME__?: string | undefined;
   }
@@ -42,7 +36,7 @@ interface GlobalEnv {
   rawGetElementsByName: typeof Document.prototype.getElementsByName;
   ImageProxy: typeof Image;
 
-  rawWindow: Window & typeof globalThis;
+  rawWindow: Window;
   rawDocument: Document;
   supportModuleScript: boolean;
 
@@ -98,7 +92,7 @@ if (isBrowser) {
       construct(Target, args: [number | undefined, number | undefined]): HTMLImageElement {
         const elementImage = new Target(...args);
         if (_currentApp) {
-          elementImage.__VERSEA_APP_NAME__ = _currentApp.getCurrentAppName();
+          elementImage.__VERSEA_APP_NAME__ = _currentApp.getName();
         }
         return elementImage;
       },
