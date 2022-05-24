@@ -1,4 +1,5 @@
-export * from './container-render/service';
+export * from './container-renderer/service';
+export * from './fetcher/service';
 export * from './plugin/service';
 export * from './source-controller/service';
 

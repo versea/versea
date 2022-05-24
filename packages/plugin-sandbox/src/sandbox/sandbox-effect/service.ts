@@ -116,7 +116,7 @@ export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
     this._currentApp.setName();
   }
 
-  public restoreEffect(): void {
+  public releaseEffect(): void {
     const appName = this._proxyWindow.__MICRO_APP_NAME__;
     const { eventListenerMap, intervalIdMap, timeoutIdMap } = this._windowEffect;
     const { eventListenerMap: documentEventListenerMap, clickHandlerMap: documentClickHandlerMap } =

@@ -1,15 +1,18 @@
-import { IApp, IConfig, IConfigKey, provide } from '@versea/core';
+import { IApp, IConfig, IConfigKey, provide, provideValue } from '@versea/core';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
 import { globalEnv } from '../global-env';
 import { IInternalApp, LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
-import { IContainerRender, IContainerRenderKey } from './interface';
+import { IContainerRenderer, IContainerRendererKey } from './interface';
 
 export * from './interface';
 
-@provide(IContainerRenderKey)
-export class ContainerRender implements IContainerRender {
+// 默认父容器配置
+provideValue({ defaultContainer: '' }, IConfigKey);
+
+@provide(IContainerRendererKey)
+export class ContainerRender implements IContainerRenderer {
   protected _config: IConfig;
 
   protected _hasInjectVerseaAppStyle = false;
@@ -30,6 +33,7 @@ export class ContainerRender implements IContainerRender {
 
   public renderContainer(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     container = context.app.container,
   ): boolean {
     // 没有 container 的情况不需要执行渲染容器
@@ -45,6 +49,7 @@ export class ContainerRender implements IContainerRender {
       }
 
       if (container) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         globalEnv.rawAppendChild.call(parentContainerElement, container);
       }
     }
@@ -89,6 +94,7 @@ export class ContainerRender implements IContainerRender {
 
     // 获取默认容器
     if (props.route?.apps[0] === app && this._config.defaultContainer) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return this._queryParentContainerElement(this._config.defaultContainer);
     }
 

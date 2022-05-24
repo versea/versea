@@ -88,7 +88,14 @@ export interface IInternalApp extends IApp {
 }
 
 declare module '@versea/core' {
-  export interface AppConfig {
+  interface IConfig {
+    defaultContainer?: string;
+
+    /** 获取资源文件 */
+    fetch?: (url: string, options?: RequestInit, app?: IApp) => Promise<string>;
+  }
+
+  interface AppConfig {
     /**
      * 容器名称
      * @example #app
@@ -118,9 +125,29 @@ declare module '@versea/core' {
 
     /** 禁用渲染容器 */
     disableRenderContainer?: boolean;
+
+    /** 获取资源文件 */
+    fetch?: (url: string, options?: RequestInit) => Promise<string>;
   }
 
-  export interface IHooks {
+  interface IApp {
+    /** 容器节点 */
+    container?: HTMLElement | null;
+
+    /** 应用样式 */
+    styles?: SourceStyle[];
+
+    /** 应用脚本 */
+    scripts?: SourceScript[];
+
+    /** 资源文件公共路径 */
+    assetsPublicPath?: string;
+
+    /** 获取资源文件 */
+    fetch?: (url: string, options?: RequestInit) => Promise<string>;
+  }
+
+  interface IHooks {
     /** 加载应用 */
     loadApp: AsyncSeriesHook<LoadAppHookContext>;
 
@@ -138,23 +165,5 @@ declare module '@versea/core' {
 
     /** 根据 app 上的 scripts 信息执行 scripts */
     execSource: AsyncSeriesHook<ExecSourceHookContext>;
-  }
-
-  export interface IApp {
-    /** 容器节点 */
-    container?: HTMLElement | null;
-
-    /** 应用样式 */
-    styles?: SourceStyle[];
-
-    /** 应用脚本 */
-    scripts?: SourceScript[];
-
-    /** 资源文件公共路径 */
-    assetsPublicPath?: string;
-  }
-
-  export interface IConfig {
-    defaultContainer?: string;
   }
 }

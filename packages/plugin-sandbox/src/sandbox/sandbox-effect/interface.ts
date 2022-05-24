@@ -16,7 +16,7 @@ export interface ISandboxEffect {
   rebuildEffect: () => void;
 
   /** 应用 unmount 时撤销副作用 */
-  restoreEffect: () => void;
+  releaseEffect: () => void;
 }
 
 export interface SandboxEffectOptions {

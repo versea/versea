@@ -9,7 +9,6 @@ import {
   IHooks,
   IHooksKey,
   provide,
-  provideValue,
 } from '@versea/core';
 import { logWarn, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
@@ -23,7 +22,7 @@ import {
   VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
   VERSEA_PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
 } from '../constants';
-import { IContainerRender, IContainerRenderKey } from '../container-render/interface';
+import { IContainerRenderer, IContainerRendererKey } from '../container-renderer/interface';
 import { ISourceController, ISourceControllerKey } from '../source-controller/interface';
 import { addProtocol, completionPath, getEffectivePath } from '../utils';
 import {
@@ -39,15 +38,13 @@ import {
 
 export * from './interface';
 
-// 默认父容器配置
-provideValue({ defaultContainer: '' }, IConfigKey);
-
 App.defineProp('styles');
 App.defineProp('scripts');
 App.defineProp('assetsPublicPath', {
   validator: (value) => value === undefined || typeof value === 'string',
   format: (value) => (value ? getEffectivePath(addProtocol(value as string)) : value),
 });
+App.defineProp('fetch');
 App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
 App.defineProp('_disableRenderContainer', { optionKey: 'disableRenderContainer' });
@@ -64,19 +61,19 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
   protected _hooks: IHooks;
 
-  protected _containerRender: IContainerRender;
+  protected _containerRenderer: IContainerRenderer;
 
   protected _sourceController: ISourceController;
 
   constructor(
     @inject(IConfigKey) config: IConfig,
     @inject(IHooksKey) hooks: IHooks,
-    @inject(IContainerRenderKey) containerRender: IContainerRender,
+    @inject(IContainerRendererKey) containerRenderer: IContainerRenderer,
     @inject(ISourceControllerKey) sourceController: ISourceController,
   ) {
     this._config = config;
     this._hooks = hooks;
-    this._containerRender = containerRender;
+    this._containerRenderer = containerRenderer;
     this._sourceController = sourceController;
     this._hooks.addHook('loadApp', new AsyncSeriesHook());
     this._hooks.addHook('mountApp', new AsyncSeriesHook());
@@ -125,7 +122,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
       const { app } = context;
       if (!(app as IInternalApp)._disableRenderContainer) {
-        app.container = this._containerRender.createContainerElement(app);
+        app.container = this._containerRenderer.createContainerElement(app);
       }
 
       await this._sourceController.load(context);
@@ -134,7 +131,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     // Load 阶段尝试运行资源文件
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
-      const isRendered = this._containerRender.renderContainer(context);
+      const isRendered = this._containerRenderer.renderContainer(context);
       if (isRendered) {
         const lifeCycles = await this._sourceController.exec(context);
         (app as IInternalApp)._isSourceExecuted = true;
@@ -179,7 +176,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.mountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
       const { app, dangerouslySetLifeCycles, props } = context;
 
-      const isRendered = this._containerRender.renderContainer(context);
+      const isRendered = this._containerRenderer.renderContainer(context);
       if (!isRendered) {
         throw new VerseaError('Can not find container element.');
       }
@@ -216,7 +213,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
     // 销毁容器
     this._hooks.unmountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
-      this._containerRender.renderContainer(context, null);
+      this._containerRenderer.renderContainer(context, null);
       return Promise.resolve();
     });
   }
