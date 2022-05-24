@@ -15,12 +15,10 @@ export class Fetcher implements IFetcher {
 
   public async fetch(url: string, app?: IApp, options?: RequestInit): Promise<string> {
     if (app?.fetch) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
       return app.fetch(url, options);
     }
 
     if (this._config.fetch) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return
       return this._config.fetch(url, options, app);
     }
 

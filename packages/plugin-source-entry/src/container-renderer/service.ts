@@ -33,7 +33,6 @@ export class ContainerRender implements IContainerRenderer {
 
   public renderContainer(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     container = context.app.container,
   ): boolean {
     // 没有 container 的情况不需要执行渲染容器
@@ -49,7 +48,6 @@ export class ContainerRender implements IContainerRenderer {
       }
 
       if (container) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         globalEnv.rawAppendChild.call(parentContainerElement, container);
       }
     }
@@ -94,7 +92,6 @@ export class ContainerRender implements IContainerRenderer {
 
     // 获取默认容器
     if (props.route?.apps[0] === app && this._config.defaultContainer) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return this._queryParentContainerElement(this._config.defaultContainer);
     }
 

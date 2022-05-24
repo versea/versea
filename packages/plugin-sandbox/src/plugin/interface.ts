@@ -16,11 +16,6 @@ declare module '@versea/core' {
     /** 开启沙箱 */
     sandbox?: boolean;
   }
-
-  interface IApp {
-    /** 开启沙箱 */
-    sandbox?: boolean;
-  }
 }
 
 declare module '@versea/plugin-source-entry' {
