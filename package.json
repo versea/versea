@@ -23,7 +23,7 @@
     "test:tapable": "jest packages/tapable/ --maxWorkers=8",
     "test:versea": "jest packages/versea/ --maxWorkers=8",
     "test:prod": "jest --coverage --maxWorkers=8 --silent",
-    "type:check": "lerna run build:esm",
+    "type:check": "lerna run type:check",
     "version:alpha": "lerna version prerelease --preid alpha",
     "version:beta": "lerna version prerelease --preid beta",
     "version:rc": "lerna version prerelease --preid rc",

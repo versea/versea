@@ -1,7 +1,7 @@
 import { createServiceSymbol, IApp } from '@versea/core';
 
-export const IFetcherKey = createServiceSymbol('IFetcher');
+export const IRequestKey = createServiceSymbol('IRequest');
 
-export interface IFetcher {
+export interface IRequest {
   fetch: (url: string, app?: IApp, options?: RequestInit) => Promise<string>;
 }

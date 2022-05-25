@@ -1,5 +1,5 @@
 export * from './container-renderer/service';
-export * from './fetcher/service';
+export * from './request/service';
 export * from './plugin/service';
 export * from './source-controller/service';
 
