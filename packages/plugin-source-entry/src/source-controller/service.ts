@@ -1,5 +1,5 @@
-import { AppLifeCycles, IHooks, IHooksKey, provide } from '@versea/core';
-import { requestIdleCallback, VerseaError } from '@versea/shared';
+import { AppLifeCycles, IApp, IHooks, IHooksKey, provide } from '@versea/core';
+import { logError, requestIdleCallback, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 import { pick } from 'ramda';
@@ -30,7 +30,7 @@ export class SourceController implements ISourceController {
             if (!style.src || style.code) {
               throw new VerseaError('@versea/plugin-source-entry is not support inline style.');
             }
-            return this._loadStyle(style.src);
+            return this._loadStyle(style.src, app);
           }),
         );
       }
@@ -41,9 +41,9 @@ export class SourceController implements ISourceController {
             throw new VerseaError('@versea/plugin-source-entry is not support inline script.');
           }
           if (script.async) {
-            requestIdleCallback(() => void this._loadScript(script));
+            requestIdleCallback(() => void this._loadScript(script, app));
           }
-          await this._loadScript(script);
+          await this._loadScript(script, app);
         }
       }
 
@@ -63,28 +63,34 @@ export class SourceController implements ISourceController {
     return execHookContext.result!;
   }
 
-  public async _loadScript(sourceScript: SourceScript): Promise<Event> {
-    return new Promise((resolve, reject) => {
+  public async _loadScript(sourceScript: SourceScript, app: IApp): Promise<Event | string> {
+    return new Promise((resolve) => {
       const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
       const script = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
       script.type = sourceScript.module ? 'module' : 'text/javascript';
       script.onload = resolve;
-      script.onerror = reject;
+      script.onerror = (error): void => {
+        logError(error, app.name);
+        resolve(error);
+      };
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script.src = sourceScript.src!;
       globalEnv.rawAppendChild.call(head, script);
     });
   }
 
-  public async _loadStyle(url: string): Promise<Event> {
-    return new Promise((resolve, reject) => {
+  public async _loadStyle(url: string, app: IApp): Promise<Event | string> {
+    return new Promise((resolve) => {
       const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
       const link = globalEnv.rawCreateElement.call(document, 'link') as HTMLLinkElement;
       link.type = 'text/css';
       link.rel = 'stylesheet';
       link.href = url;
       link.onload = resolve;
-      link.onerror = reject;
+      link.onerror = (error): void => {
+        logError(error, app.name);
+        resolve(error);
+      };
       globalEnv.rawAppendChild.call(head, link);
     });
   }
