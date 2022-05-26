@@ -50,7 +50,7 @@ export interface UnmountAppHookContext extends HookContext {
 
 export interface SourceStyle {
   src?: string;
-  code?: Promise<string> | string;
+  code?: string;
   placeholder?: Node;
   isGlobal?: boolean;
 }
