@@ -1,6 +1,7 @@
-import { IApp, provide } from '@versea/core';
+import { IApp, IHooks, IHooksKey, provide } from '@versea/core';
 import { IRequest, IRequestKey, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
 import { Deferred, logError, VerseaError } from '@versea/shared';
+import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { globalEnv } from '../../global-env';
@@ -16,10 +17,14 @@ export class StyleLoader implements IStyleLoader {
   /** 应用名称和 style 加载渲染完成的 Promise 的 Map */
   protected _styleDeferred = new WeakMap<IApp, Deferred<void>>();
 
+  protected _hooks: IHooks;
+
   protected _request: IRequest;
 
-  constructor(@inject(IRequestKey) request: IRequest) {
+  constructor(@inject(IHooksKey) hooks: IHooks, @inject(IRequestKey) request: IRequest) {
+    this._hooks = hooks;
     this._request = request;
+    this._hooks.addHook('loadStyle', new AsyncSeriesHook());
   }
 
   public async load({ app }: LoadSourceHookContext): Promise<void> {
@@ -90,26 +95,27 @@ export class StyleLoader implements IStyleLoader {
   }
 
   protected _appendStyleElement(style: SourceStyle, app: IApp): void {
-    if (!app.container) {
-      return;
-    }
-
     const { src, code, placeholder } = style;
+    const { rawCreateElement, rawGetElementsByTagName } = globalEnv;
 
-    const styleLink = globalEnv.rawCreateElement.call(document, 'style') as HTMLStyleElement;
+    const styleLink = rawCreateElement.call(document, 'style') as HTMLStyleElement;
     styleLink.textContent = code ?? '';
     styleLink.__VERSEA_APP_LINK_PATH__ = src;
     styleLink.setAttribute('data-origin-href', src ?? '');
 
     if (placeholder?.parentNode) {
-      // placeholder.parentNode.replaceChild(scopedCSS(styleLink, app), placeholder);
+      // rawReplaceChild.call(placeholder.parentNode, scopedCSS(styleLink, app), placeholder);
       return;
     }
 
-    const head = globalEnv.rawQuerySelector.call(app.container, 'versea-app-head');
-    if (!head) {
-      throw new VerseaError('Can not find "versea-app-head" element');
+    let head: Element | null = rawGetElementsByTagName.call(document, 'head')[0];
+    if (app.container) {
+      head = globalEnv.rawQuerySelector.call(app.container, 'versea-app-head');
+      if (!head) {
+        throw new VerseaError('Can not find "versea-app-head" element');
+      }
     }
-    // head.appendChild(scopedCSS(styleLink, app));
+
+    // rawAppendChild.call(head, scopedCSS(styleLink, app));
   }
 }

@@ -23,7 +23,7 @@ export class ContainerRender implements IContainerRenderer {
 
   public createContainerElement(app: IApp): HTMLElement {
     const wrapperElement = globalEnv.rawCreateElement.call(document, 'div');
-    wrapperElement.innerHTML = this._getAppContent(app.name, (app as IInternalApp)._documentFragment);
+    wrapperElement.innerHTML = this._getAppContent(app);
     return wrapperElement.firstChild as HTMLElement;
   }
 
@@ -55,8 +55,9 @@ export class ContainerRender implements IContainerRenderer {
     return !!parentContainerElement;
   }
 
-  protected _getAppContent(name: string, documentFragment?: string): string {
+  protected _getAppContent(app: IApp): string {
     this._injectVerseaAppStyle();
+    const { name, _documentFragment: documentFragment, documentFragmentWrapperClass } = app as IInternalApp;
 
     let content = '';
     if (!documentFragment) {
@@ -69,7 +70,9 @@ export class ContainerRender implements IContainerRenderer {
       content = headContent + bodyContent;
     }
 
-    return `<div id="${this.getWrapperId(name)}" data-name="${name}">${content}</div>`;
+    return `<div id="${this.getWrapperId(name)}"${
+      documentFragmentWrapperClass ? ` class="${documentFragmentWrapperClass}"` : ''
+    } data-name="${name}">${content}</div>`;
   }
 
   protected _getParentContainerElement(
