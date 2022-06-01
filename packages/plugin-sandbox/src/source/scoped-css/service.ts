@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { IApp, provide } from '@versea/core';
+import { IContainerRenderer, IContainerRendererKey } from '@versea/plugin-source-entry';
+import { inject } from 'inversify';
 
 import { globalEnv } from '../../global-env';
 import { IScopedCSS, IScopedCSSKey } from './interface';
@@ -31,7 +33,11 @@ export class ScopedCSS implements IScopedCSS {
 
   protected _swapNode: HTMLStyleElement;
 
-  constructor() {
+  protected _containerRenderer: IContainerRenderer;
+
+  constructor(@inject(IContainerRendererKey) containerRenderer: IContainerRenderer) {
+    this._containerRenderer = containerRenderer;
+
     // 在 document.body 上创建一个空的 style 标签，设置样式表为禁用
     const { rawCreateElement, rawAppendChild } = globalEnv;
     const styleNode = rawCreateElement.call(document, 'style') as HTMLStyleElement;
@@ -109,7 +115,7 @@ export class ScopedCSS implements IScopedCSS {
   }
 
   protected _ruleStyle(rule: CSSStyleRule, app: IApp): string {
-    const prefix = `__${app.name}__`;
+    const prefix = this._containerRenderer.getWrapperId(app.name);
 
     const rootSelectorRE = /((?:[^\w\-.#]|^)(body|html|:root))/gm;
     const rootCombinationRE = /(html[^\w{[]+)/gm;

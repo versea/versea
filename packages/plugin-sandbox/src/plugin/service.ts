@@ -9,8 +9,8 @@ import { IPluginSandbox, IPluginSandboxKey } from './interface';
 
 export * from './interface';
 
-// 声明所有应用默认开启沙箱
-provideValue({ sandbox: true }, IConfigKey);
+// 声明所有应用默认开启沙箱和样式作用域
+provideValue({ sandbox: true, scopedCSS: true }, IConfigKey);
 
 App.defineProp('_useSandbox', { optionKey: 'sandbox' });
 

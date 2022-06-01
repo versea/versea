@@ -1,4 +1,4 @@
-import { IApp, IConfig, IConfigKey, provide, provideValue } from '@versea/core';
+import { IApp, IConfig, IConfigKey, provide } from '@versea/core';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
@@ -7,9 +7,6 @@ import { IInternalApp, LoadAppHookContext, MountAppHookContext, UnmountAppHookCo
 import { IContainerRenderer, IContainerRendererKey } from './interface';
 
 export * from './interface';
-
-// 默认父容器配置
-provideValue({ defaultContainer: '' }, IConfigKey);
 
 @provide(IContainerRendererKey)
 export class ContainerRender implements IContainerRenderer {
