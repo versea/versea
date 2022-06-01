@@ -6,7 +6,7 @@ import { LoadAppHookContext, MountAppHookContext } from '../plugin/interface';
 export const ISourceControllerKey = createServiceSymbol('ISourceController');
 
 export interface ISourceController {
-  /** 增加监听 */
+  /** 增加监听函数 */
   apply: () => void;
 
   /**

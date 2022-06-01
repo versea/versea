@@ -13,6 +13,9 @@ declare module '@versea/core' {
   interface IConfig {
     /** 默认开启沙箱 */
     sandbox?: boolean;
+
+    /** 开启样式作用域 */
+    scopedCSS?: boolean;
   }
 
   interface IHooks {
@@ -22,10 +25,9 @@ declare module '@versea/core' {
   interface AppConfig {
     /** 开启沙箱 */
     sandbox?: boolean;
-  }
 
-  interface IApp {
-    a?: string;
+    /** 开启样式作用域 */
+    scopedCSS?: boolean;
   }
 }
 
@@ -33,5 +35,8 @@ declare module '@versea/plugin-source-entry' {
   interface IInternalApp {
     /** 开启沙箱 */
     _useSandbox?: boolean;
+
+    /** 开启样式作用域 */
+    _scopedCSS?: boolean;
   }
 }

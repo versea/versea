@@ -4,7 +4,9 @@ import { Deferred, logError, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
+import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
+import { IScopedCSS, IScopedCSSKey } from '../scoped-css/interface';
 import { IStyleLoader, IStyleLoaderKey } from './interface';
 
 export * from './interface';
@@ -21,10 +23,24 @@ export class StyleLoader implements IStyleLoader {
 
   protected _request: IRequest;
 
-  constructor(@inject(IHooksKey) hooks: IHooks, @inject(IRequestKey) request: IRequest) {
+  protected _scopedCSS: IScopedCSS;
+
+  constructor(
+    @inject(IHooksKey) hooks: IHooks,
+    @inject(IRequestKey) request: IRequest,
+    @inject(IScopedCSSKey) scopedCSS: IScopedCSS,
+  ) {
     this._hooks = hooks;
     this._request = request;
+    this._scopedCSS = scopedCSS;
     this._hooks.addHook('loadStyle', new AsyncSeriesHook());
+  }
+
+  public apply(): void {
+    this._hooks.loadStyle.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, style }) => {
+      await this._ensureStyleCode(style, app);
+      this._appendStyleElement(style, app);
+    });
   }
 
   public async load({ app }: LoadSourceHookContext): Promise<void> {
@@ -32,12 +48,7 @@ export class StyleLoader implements IStyleLoader {
     this._styleDeferred.set(app, deferred);
 
     if (app.styles) {
-      void Promise.all(
-        app.styles.map(async (style) => {
-          await this._ensureStyleCode(style, app);
-          this._appendStyleElement(style, app);
-        }),
-      )
+      void Promise.all(app.styles.map(async (style) => this._hooks.loadStyle.call({ app, style })))
         .then(() => {
           deferred.resolve();
         })
@@ -96,15 +107,18 @@ export class StyleLoader implements IStyleLoader {
 
   protected _appendStyleElement(style: SourceStyle, app: IApp): void {
     const { src, code, placeholder } = style;
-    const { rawCreateElement, rawGetElementsByTagName } = globalEnv;
+    const { rawCreateElement, rawGetElementsByTagName, rawAppendChild, rawReplaceChild } = globalEnv;
 
     const styleLink = rawCreateElement.call(document, 'style') as HTMLStyleElement;
     styleLink.textContent = code ?? '';
     styleLink.__VERSEA_APP_LINK_PATH__ = src;
     styleLink.setAttribute('data-origin-href', src ?? '');
 
+    // 给样式表增加前缀
+    this._scopedCSS.process(styleLink, app);
+
     if (placeholder?.parentNode) {
-      // rawReplaceChild.call(placeholder.parentNode, scopedCSS(styleLink, app), placeholder);
+      rawReplaceChild.call(placeholder.parentNode, styleLink, placeholder);
       return;
     }
 
@@ -116,6 +130,6 @@ export class StyleLoader implements IStyleLoader {
       }
     }
 
-    // rawAppendChild.call(head, scopedCSS(styleLink, app));
+    rawAppendChild.call(head, styleLink);
   }
 }

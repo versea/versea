@@ -5,6 +5,9 @@ import { HookContext } from '@versea/tapable';
 export const IStyleLoaderKey = createServiceSymbol('IStyleLoader');
 
 export interface IStyleLoader {
+  /** 增加监听函数 */
+  apply: () => void;
+
   /** 加载资源文件 */
   load: (context: LoadSourceHookContext) => Promise<void>;
 
