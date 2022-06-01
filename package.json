@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "rimraf -rf packages/*/{lib,dist,esm} && lerna run build",
+    "build:esm": "rimraf -rf packages/*/esm && lerna run build:esm",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "lint": "eslint .",

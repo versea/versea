@@ -95,6 +95,26 @@ declare module '@versea/core' {
     fetch?: (url: string, options?: RequestInit, app?: IApp) => Promise<string>;
   }
 
+  interface IHooks {
+    /** 加载应用 */
+    loadApp: AsyncSeriesHook<LoadAppHookContext>;
+
+    /** 渲染应用 */
+    mountApp: AsyncSeriesHook<MountAppHookContext>;
+
+    /** 卸载应用 */
+    unmountApp: AsyncSeriesHook<UnmountAppHookContext>;
+
+    /**
+     * 根据 app 上的资源文件信息加载资源文件
+     * @description 加载资源文件，并把 css 加入容器
+     */
+    loadSource: AsyncSeriesHook<LoadSourceHookContext>;
+
+    /** 根据 app 上的 scripts 信息执行 scripts */
+    execSource: AsyncSeriesHook<ExecSourceHookContext>;
+  }
+
   interface AppConfig {
     /**
      * 容器名称
@@ -107,6 +127,9 @@ declare module '@versea/core' {
      * @example <div><h1>title</h1><div id="sub-app-name"></div></div>
      */
     documentFragment?: string;
+
+    /** 文档内容外层 div className */
+    documentFragmentWrapperClass?: string;
 
     /**
      * 应用样式
@@ -134,6 +157,9 @@ declare module '@versea/core' {
     /** 容器节点 */
     container?: HTMLElement | null;
 
+    /** 文档内容外层 div className */
+    documentFragmentWrapperClass?: string;
+
     /** 应用样式 */
     styles?: SourceStyle[];
 
@@ -145,25 +171,5 @@ declare module '@versea/core' {
 
     /** 获取资源文件 */
     fetch?: (url: string, options?: RequestInit) => Promise<string>;
-  }
-
-  interface IHooks {
-    /** 加载应用 */
-    loadApp: AsyncSeriesHook<LoadAppHookContext>;
-
-    /** 渲染应用 */
-    mountApp: AsyncSeriesHook<MountAppHookContext>;
-
-    /** 卸载应用 */
-    unmountApp: AsyncSeriesHook<UnmountAppHookContext>;
-
-    /**
-     * 根据 app 上的资源文件信息加载资源文件
-     * @description 加载资源文件，并把 css 加入容器
-     */
-    loadSource: AsyncSeriesHook<LoadSourceHookContext>;
-
-    /** 根据 app 上的 scripts 信息执行 scripts */
-    execSource: AsyncSeriesHook<ExecSourceHookContext>;
   }
 }

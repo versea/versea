@@ -1,5 +1,7 @@
 import { createServiceSymbol, IPlugin } from '@versea/core';
-import {} from '@versea/plugin-source-entry';
+import { AsyncSeriesHook } from '@versea/tapable';
+
+import { LoadStyleHookContext } from '../source/style-loader/interface';
 
 export const IPluginSandboxKey = createServiceSymbol('IPluginSandbox');
 
@@ -13,9 +15,17 @@ declare module '@versea/core' {
     sandbox?: boolean;
   }
 
+  interface IHooks {
+    loadStyle: AsyncSeriesHook<LoadStyleHookContext>;
+  }
+
   interface AppConfig {
     /** 开启沙箱 */
     sandbox?: boolean;
+  }
+
+  interface IApp {
+    a?: string;
   }
 }
 
