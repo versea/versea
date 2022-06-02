@@ -1,5 +1,5 @@
-import { IApp, IHooks, IHooksKey, provide } from '@versea/core';
-import { IRequest, IRequestKey, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
+import { IApp, IConfig, IConfigKey, IHooks, IHooksKey, provide } from '@versea/core';
+import { IInternalApp, IRequest, IRequestKey, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
 import { Deferred, logError, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
@@ -21,22 +21,27 @@ export class StyleLoader implements IStyleLoader {
 
   protected _hooks: IHooks;
 
+  protected _config: IConfig;
+
   protected _request: IRequest;
 
   protected _scopedCSS: IScopedCSS;
 
   constructor(
     @inject(IHooksKey) hooks: IHooks,
+    @inject(IConfigKey) config: IConfig,
     @inject(IRequestKey) request: IRequest,
     @inject(IScopedCSSKey) scopedCSS: IScopedCSS,
   ) {
     this._hooks = hooks;
+    this._config = config;
     this._request = request;
     this._scopedCSS = scopedCSS;
     this._hooks.addHook('loadStyle', new AsyncSeriesHook());
   }
 
   public apply(): void {
+    this._scopedCSS.apply();
     this._hooks.loadStyle.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, style }) => {
       await this._ensureStyleCode(style, app);
       this._appendStyleElement(style, app);
@@ -114,8 +119,7 @@ export class StyleLoader implements IStyleLoader {
     styleLink.__VERSEA_APP_LINK_PATH__ = src;
     styleLink.setAttribute('data-origin-href', src ?? '');
 
-    // 给样式表增加前缀
-    this._scopedCSS.process(styleLink, app);
+    this._scopeCSS(styleLink, style, app);
 
     if (placeholder?.parentNode) {
       rawReplaceChild.call(placeholder.parentNode, styleLink, placeholder);
@@ -131,5 +135,13 @@ export class StyleLoader implements IStyleLoader {
     }
 
     rawAppendChild.call(head, styleLink);
+  }
+
+  /** 给样式表增加前缀 */
+  protected _scopeCSS(styleLink: HTMLStyleElement, style: SourceStyle, app: IApp): void {
+    const scopedCSS = (app as IInternalApp)._scopedCSS ?? this._config.scopedCSS;
+    if (scopedCSS) {
+      this._scopedCSS.process(styleLink, style, app);
+    }
   }
 }

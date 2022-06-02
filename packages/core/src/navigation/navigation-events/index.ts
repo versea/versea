@@ -89,10 +89,8 @@ window.removeEventListener = function (
 /** 创建 popstate 事件 */
 function createPopStateEvent(state: PopStateEventInit, methodName: HistoryFunctionName): Event {
   const evt = new PopStateEvent('popstate', { state });
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-  (evt as any).versea = true;
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-  (evt as any).verseaTrigger = methodName;
+  (evt as PopStateEvent & { versea: boolean }).versea = true;
+  (evt as PopStateEvent & { verseaTrigger: HistoryFunctionName }).verseaTrigger = methodName;
   return evt;
 }
 

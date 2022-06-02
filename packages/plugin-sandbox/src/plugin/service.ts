@@ -13,6 +13,8 @@ export * from './interface';
 provideValue({ sandbox: true, scopedCSS: true }, IConfigKey);
 
 App.defineProp('_useSandbox', { optionKey: 'sandbox' });
+App.defineProp('_scopedCSS', { optionKey: 'scopedCSS' });
+App.defineProp('_selectorPrefix', { optionKey: 'selectorPrefix' });
 
 @provide(IPluginSandboxKey)
 export class PluginSandbox implements IPluginSandbox {

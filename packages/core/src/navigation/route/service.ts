@@ -146,7 +146,7 @@ export class Route extends ExtensibleEntity implements IRoute {
     const extensibleObject: Record<string, unknown> = {};
     Object.keys(this._extensiblePropDescriptions).forEach((key) => {
       if (this._extensiblePropDescriptions[key].onClone) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         extensibleObject[key] = this._extensiblePropDescriptions[key].onClone!(this[key]);
       } else {
         extensibleObject[key] = this[key];
