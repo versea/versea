@@ -1,7 +1,7 @@
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
-export const IRendererKey = createServiceSymbol('IRenderer');
+export const IRenderer = createServiceSymbol('IRenderer');
 
 export interface IRenderer {
   /**

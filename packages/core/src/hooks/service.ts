@@ -7,11 +7,11 @@ import { RegisterAppHookContext } from '../application/app-service/interface';
 import { MatchRouteHookContext, MatchRoutesHookContext } from '../navigation/matcher/interface';
 import { RerouteHookContext } from '../navigation/router/interface';
 import { provide } from '../provider';
-import { IHooks, IHooksKey } from './interface';
+import { IHooks } from './interface';
 
 export * from './interface';
 
-@provide(IHooksKey)
+@provide(IHooks)
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
 // @ts-ignore 动态增加的 Hook 会使这里类型报错
 export class Hooks implements IHooks {

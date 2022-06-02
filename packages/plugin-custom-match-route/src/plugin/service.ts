@@ -1,15 +1,15 @@
-import { Route, IHooks, IHooksKey, provide, VERSEA_INTERNAL_TAP } from '@versea/core';
+import { Route, IHooks, provide, VERSEA_INTERNAL_TAP } from '@versea/core';
 import { inject } from 'inversify';
 
-import { IPluginCustomMatchRoute, IPluginCustomMatchRouteKey } from './interface';
+import { IPluginCustomMatchRoute } from './interface';
 
 export * from './interface';
 
-@provide(IPluginCustomMatchRouteKey)
+@provide(IPluginCustomMatchRoute)
 export class PluginCustomMatchRoute implements IPluginCustomMatchRoute {
   protected _hooks: IHooks;
 
-  constructor(@inject(IHooksKey) hooks: IHooks) {
+  constructor(@inject(IHooks) hooks: IHooks) {
     this._hooks = hooks;
   }
 

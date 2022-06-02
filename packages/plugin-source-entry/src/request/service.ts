@@ -1,15 +1,15 @@
-import { IApp, IConfig, IConfigKey, provide } from '@versea/core';
+import { IApp, IConfig, provide } from '@versea/core';
 import { inject } from 'inversify';
 
-import { IRequest, IRequestKey } from './interface';
+import { IRequest } from './interface';
 
 export * from './interface';
 
-@provide(IRequestKey)
+@provide(IRequest)
 export class Request implements IRequest {
   protected _config: IConfig;
 
-  constructor(@inject(IConfigKey) config: IConfig) {
+  constructor(@inject(IConfig) config: IConfig) {
     this._config = config;
   }
 

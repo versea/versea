@@ -1,17 +1,17 @@
-import { IApp, IConfig, IConfigKey, IHooks, IHooksKey, provide } from '@versea/core';
-import { IInternalApp, IRequest, IRequestKey, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
+import { IApp, IConfig, IHooks, provide } from '@versea/core';
+import { IInternalApp, IRequest, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
 import { Deferred, logError, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
-import { IScopedCSS, IScopedCSSKey } from '../scoped-css/interface';
-import { IStyleLoader, IStyleLoaderKey } from './interface';
+import { IScopedCSS } from '../scoped-css/interface';
+import { IStyleLoader } from './interface';
 
 export * from './interface';
 
-@provide(IStyleLoaderKey)
+@provide(IStyleLoader)
 export class StyleLoader implements IStyleLoader {
   /** 资源文件链接和资源文件内容的 Map */
   protected _globalStyles = new Map<string, string>();
@@ -28,10 +28,10 @@ export class StyleLoader implements IStyleLoader {
   protected _scopedCSS: IScopedCSS;
 
   constructor(
-    @inject(IHooksKey) hooks: IHooks,
-    @inject(IConfigKey) config: IConfig,
-    @inject(IRequestKey) request: IRequest,
-    @inject(IScopedCSSKey) scopedCSS: IScopedCSS,
+    @inject(IHooks) hooks: IHooks,
+    @inject(IConfig) config: IConfig,
+    @inject(IRequest) request: IRequest,
+    @inject(IScopedCSS) scopedCSS: IScopedCSS,
   ) {
     this._hooks = hooks;
     this._config = config;

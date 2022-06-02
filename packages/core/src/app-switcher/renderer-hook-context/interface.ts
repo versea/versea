@@ -8,7 +8,7 @@ import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 import { IRouteState } from '../route-state/interface';
 
-export const IRendererHookContextKey = createServiceSymbol('IRendererHookContext');
+export const IRendererHookContext = createServiceSymbol('IRendererHookContext');
 
 /**
  * Renderer 的 Hook 上下文

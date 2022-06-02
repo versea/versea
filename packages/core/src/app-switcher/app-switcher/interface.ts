@@ -2,12 +2,7 @@ import { MatchedResult } from '../../navigation/matcher/interface';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
-export const IAppSwitcherKey = createServiceSymbol('IAppSwitcher');
-
-export interface SwitcherOptions {
-  navigationEvent?: Event;
-  matchedResult: MatchedResult;
-}
+export const IAppSwitcher = createServiceSymbol('IAppSwitcher');
 
 export interface IAppSwitcher {
   /**
@@ -26,4 +21,9 @@ export interface IAppSwitcher {
 
   /** 使用匹配的路由切换应用 */
   switch: (options: SwitcherOptions) => Promise<void>;
+}
+
+export interface SwitcherOptions {
+  navigationEvent?: Event;
+  matchedResult: MatchedResult;
 }

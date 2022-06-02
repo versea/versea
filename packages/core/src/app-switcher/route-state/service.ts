@@ -1,11 +1,11 @@
 import { IApp } from '../../application/app/interface';
 import { MatchedRoute, RouteMeta } from '../../navigation/route/interface';
 import { provide } from '../../provider';
-import { IRouteState, IRouteStateKey } from './interface';
+import { IRouteState } from './interface';
 
 export * from './interface';
 
-@provide(IRouteStateKey)
+@provide(IRouteState)
 export class RouteState implements IRouteState {
   public readonly current: MatchedRoute[] = [];
 

@@ -12,10 +12,10 @@ npm install --save @versea/versea @versea/plugin-source-entry
 
 ```ts
 import { Versea } from '@versea/versea';
-import { IPluginSourceEntryKey } from '@versea/plugin-source-entry';
+import { IPluginSourceEntry } from '@versea/plugin-source-entry';
 
 const versea = new Versea({ defaultContainer: '#microApp' });
-versea.use(IPluginSourceEntryKey);
+versea.use(IPluginSourceEntry);
 
 // 注册子应用
 versea.registerApps([

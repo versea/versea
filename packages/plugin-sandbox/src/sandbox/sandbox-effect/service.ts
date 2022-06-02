@@ -7,11 +7,11 @@ import { IDocumentEffect } from '../document-effect/interface';
 import { VerseaAppWindow } from '../sandbox/interface';
 import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
 import { IWindowEffect } from '../window-effect/interface';
-import { ISandboxEffect, ISandboxEffectKey, SandboxEffectDependencies, SandboxEffectOptions } from './interface';
+import { ISandboxEffect, SandboxEffectDependencies, SandboxEffectOptions } from './interface';
 
 export * from './interface';
 
-@provide(ISandboxEffectKey, 'Constructor')
+@provide(ISandboxEffect, 'Constructor')
 export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
   protected _windowListenerMap = new Map<string, Set<VerseaAppEventListener>>();
 

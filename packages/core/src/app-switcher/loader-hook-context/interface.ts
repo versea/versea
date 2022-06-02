@@ -6,7 +6,7 @@ import { MatchedRoute } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 
-export const ILoaderHookContextKey = createServiceSymbol('ILoaderHookContext');
+export const ILoaderHookContext = createServiceSymbol('ILoaderHookContext');
 
 /**
  * Loader 的 Hook 上下文

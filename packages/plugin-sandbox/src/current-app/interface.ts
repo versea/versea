@@ -1,6 +1,6 @@
 import { createServiceSymbol } from '@versea/core';
 
-export const ICurrentAppKey = createServiceSymbol('ICurrentApp');
+export const ICurrentApp = createServiceSymbol('ICurrentApp');
 
 /** 记录正在执行的同步代码属于哪个应用 */
 export interface ICurrentApp {

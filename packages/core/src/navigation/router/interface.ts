@@ -5,7 +5,7 @@ import { createServiceSymbol } from '../../utils';
 import { MatchedResult } from '../matcher/interface';
 import { RouteConfig } from '../route/interface';
 
-export const IRouterKey = createServiceSymbol('IRouter');
+export const IRouter = createServiceSymbol('IRouter');
 
 export interface IRouter {
   /**

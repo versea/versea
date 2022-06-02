@@ -1,25 +1,25 @@
 import { inject } from 'inversify';
 import queryString, { parse, parseUrl } from 'query-string';
 
-import { IAppSwitcher, IAppSwitcherKey } from '../../app-switcher/app-switcher/interface';
+import { IAppSwitcher } from '../../app-switcher/app-switcher/interface';
 import { IApp } from '../../application/app/interface';
-import { IConfigKey, IConfig } from '../../config';
+import { IConfig } from '../../config';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
-import { IHooks, IHooksKey } from '../../hooks/interface';
+import { IHooks } from '../../hooks/interface';
 import { lazyInject, provide } from '../../provider';
-import { IStarter, IStarterKey } from '../../starter/interface';
-import { IMatcher, IMatcherKey, MatchedResult } from '../matcher/interface';
+import { IStarter } from '../../starter/interface';
+import { IMatcher, MatchedResult } from '../matcher/interface';
 import { bindRouter, callCapturedEventListeners } from '../navigation-events';
 import { RouteConfig } from '../route/interface';
-import { IRouter, IRouterKey } from './interface';
+import { IRouter } from './interface';
 
 export * from './interface';
 
-@provide(IRouterKey)
+@provide(IRouter)
 export class Router implements IRouter {
-  @lazyInject(IStarterKey) protected readonly _starter!: IStarter;
+  @lazyInject(IStarter) protected readonly _starter!: IStarter;
 
-  @lazyInject(IAppSwitcherKey) protected readonly _appSwitcher!: IAppSwitcher;
+  @lazyInject(IAppSwitcher) protected readonly _appSwitcher!: IAppSwitcher;
 
   protected readonly _matcher: IMatcher;
 
@@ -30,11 +30,7 @@ export class Router implements IRouter {
   /** 标识是否已经把 router 传给 navigation */
   protected _hasBindRouter = false;
 
-  constructor(
-    @inject(IMatcherKey) matcher: IMatcher,
-    @inject(IHooksKey) hooks: IHooks,
-    @inject(IConfigKey) config: IConfig,
-  ) {
+  constructor(@inject(IMatcher) matcher: IMatcher, @inject(IHooks) hooks: IHooks, @inject(IConfig) config: IConfig) {
     this._matcher = matcher;
     this._hooks = hooks;
     this._config = config;

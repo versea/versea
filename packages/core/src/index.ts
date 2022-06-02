@@ -1,28 +1,19 @@
-export type { IAppSwitcher, SwitcherOptions } from './app-switcher/app-switcher/service';
-export { IAppSwitcherKey, AppSwitcher } from './app-switcher/app-switcher/service';
+export type { SwitcherOptions } from './app-switcher/app-switcher/service';
+export { IAppSwitcher, AppSwitcher } from './app-switcher/app-switcher/service';
+export type { RunOptions, AppSwitcherContextDependencies } from './app-switcher/app-switcher-context/service';
+export { IAppSwitcherContext, AppSwitcherContext } from './app-switcher/app-switcher-context/service';
+export { ILoader, Loader } from './app-switcher/loader/service';
+export type { LoaderHookContextOptions } from './app-switcher/loader-hook-context/service';
+export { ILoaderHookContext, LoaderHookContext } from './app-switcher/loader-hook-context/service';
+export { IRenderer, Renderer } from './app-switcher/renderer/service';
 export type {
-  IAppSwitcherContext,
-  RunOptions,
-  AppSwitcherContextDependencies,
-} from './app-switcher/app-switcher-context/service';
-export { IAppSwitcherContextKey, AppSwitcherContext } from './app-switcher/app-switcher-context/service';
-export type { ILoader } from './app-switcher/loader/service';
-export { ILoaderKey, Loader } from './app-switcher/loader/service';
-export type { ILoaderHookContext, LoaderHookContextOptions } from './app-switcher/loader-hook-context/service';
-export { ILoaderHookContextKey, LoaderHookContext } from './app-switcher/loader-hook-context/service';
-export type { IRenderer } from './app-switcher/renderer/service';
-export { IRendererKey, Renderer } from './app-switcher/renderer/service';
-export type {
-  IRendererHookContext,
   RendererHookContextOptions,
   RendererHookContextDependencies,
 } from './app-switcher/renderer-hook-context/service';
-export { IRendererHookContextKey, RendererHookContext } from './app-switcher/renderer-hook-context/service';
-export type { IRouteState } from './app-switcher/route-state/service';
-export { IRouteStateKey, RouteState } from './app-switcher/route-state/service';
+export { IRendererHookContext, RendererHookContext } from './app-switcher/renderer-hook-context/service';
+export { IRouteState, RouteState } from './app-switcher/route-state/service';
 
 export type {
-  IApp,
   AppConfig,
   AppConfigProps,
   AppLifeCycleFunction,
@@ -30,42 +21,32 @@ export type {
   AppProps,
   AppDependencies,
 } from './application/app/service';
-export { IAppKey, App } from './application/app/service';
-export type { IAppService, RegisterAppHookContext } from './application/app-service/service';
-export { IAppServiceKey, AppService } from './application/app-service/service';
+export { IApp, App } from './application/app/service';
+export type { RegisterAppHookContext } from './application/app-service/service';
+export { IAppService, AppService } from './application/app-service/service';
 
-export type { IStatus, ISwitcherStatus } from './enum/status';
-export { IStatusKey, ISwitcherStatusKey } from './enum/status';
+export { IStatus, ISwitcherStatus } from './enum/status';
 
-export type { IHooks } from './hooks/service';
-export { IHooksKey, Hooks } from './hooks/service';
+export { IHooks, Hooks } from './hooks/service';
 
+export type { MatchRouteHookContext, MatchRoutesHookContext, MatchedResult } from './navigation/matcher/service';
+export { IMatcher, Matcher } from './navigation/matcher/service';
 export type {
-  IMatcher,
-  MatchRouteHookContext,
-  MatchRoutesHookContext,
-  MatchedResult,
-} from './navigation/matcher/service';
-export { IMatcherKey, Matcher } from './navigation/matcher/service';
-export type {
-  IRoute,
   RouteConfig,
   RouteMeta,
   ToMatchedRouteOptions,
   PathToRegexpOptions,
   MatchedRoute,
 } from './navigation/route/service';
-export { IRouteKey, Route } from './navigation/route/service';
-export type { IRouter, RerouteHookContext } from './navigation/router/service';
-export { IRouterKey, Router } from './navigation/router/service';
+export { IRoute, Route } from './navigation/route/service';
+export type { RerouteHookContext } from './navigation/router/service';
+export { IRouter, Router } from './navigation/router/service';
 
 export * from './provider';
 
-export type { IStarter } from './starter/service';
-export { IStarterKey, Starter } from './starter/service';
+export { IStarter, Starter } from './starter/service';
 
-export type { IConfig } from './config';
-export { IConfigKey } from './config';
+export { IConfig } from './config';
 export * from './constants';
 export type { IPlugin } from './plugin';
 export { createServiceSymbol } from './utils';

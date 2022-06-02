@@ -11,7 +11,7 @@ npm install --save @versea/core
 ### 使用
 
 ```ts
-import { buildProviderModule, IAppService, IAppServiceKey, IStarter, IStarterKey, AppLifeCycles } from '@versea/core';
+import { buildProviderModule, IAppService, IStarter, AppLifeCycles } from '@versea/core';
 import { Container } from 'inversify';
 
 async function loadScript(url): Promise<void> {
@@ -27,7 +27,7 @@ const container = new Container({ defaultScope: 'Singleton' });
 container.load(buildProviderModule(container));
 
 // 注册子应用
-container.get<IAppService>(IAppServiceKey).registerApps([
+container.get<IAppService>(IAppService).registerApps([
   {
     name: 'subApp',
     routes: [
@@ -43,5 +43,5 @@ container.get<IAppService>(IAppServiceKey).registerApps([
 ]);
 
 // 在合适的时机启动 versea
-void container.get<IStarter>(IStarterKey).start();
+void container.get<IStarter>(IStarter).start();
 ```

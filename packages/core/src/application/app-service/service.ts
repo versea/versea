@@ -2,18 +2,18 @@
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
-import { IStatus, IStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/interface';
-import { IRouter, IRouterKey } from '../../navigation/router/interface';
+import { IStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/interface';
+import { IRouter } from '../../navigation/router/interface';
 import { provide, lazyInject } from '../../provider';
-import { IApp, IAppKey, AppConfig } from '../app/interface';
-import { IAppService, IAppServiceKey, RegisterAppHookContext } from './interface';
+import { IApp, AppConfig } from '../app/interface';
+import { IAppService, RegisterAppHookContext } from './interface';
 
 export * from './interface';
 
-@provide(IAppServiceKey)
+@provide(IAppService)
 export class AppService implements IAppService {
-  @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+  @lazyInject(IRouter) protected readonly _router!: IRouter;
 
   /** App 实例的 Map */
   protected readonly _appMap: Map<string, IApp> = new Map();
@@ -25,9 +25,9 @@ export class AppService implements IAppService {
   protected readonly _hooks: IHooks;
 
   constructor(
-    @inject(IAppKey) App: interfaces.Newable<IApp>,
-    @inject(IStatusKey) Status: IStatus,
-    @inject(IHooksKey) hooks: IHooks,
+    @inject(IApp) App: interfaces.Newable<IApp>,
+    @inject(IStatus) Status: IStatus,
+    @inject(IHooks) hooks: IHooks,
   ) {
     this._AppConstructor = App;
     this._Status = Status;

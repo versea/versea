@@ -3,18 +3,12 @@ import {
   buildProviderModule,
   IApp,
   IAppService,
-  IAppServiceKey,
   IConfig,
-  IConfigKey,
   IHooks,
-  IHooksKey,
   IPlugin,
   IRouter,
-  IRouterKey,
   IRouteState,
-  IRouteStateKey,
   IStarter,
-  IStarterKey,
   provideValue,
 } from '@versea/core';
 import { Container } from 'inversify';
@@ -29,29 +23,29 @@ export class Versea {
   public container: Container;
 
   constructor(config: Partial<IConfig> = {}) {
-    provideValue(config, IConfigKey);
+    provideValue(config, IConfig);
     this.container = new Container({ defaultScope: 'Singleton' });
     this.container.load(buildProviderModule(this.container));
   }
 
   public get appService(): IAppService {
-    return this.container.get<IAppService>(IAppServiceKey);
+    return this.container.get<IAppService>(IAppService);
   }
 
   public get hooks(): IHooks {
-    return this.container.get<IHooks>(IHooksKey);
+    return this.container.get<IHooks>(IHooks);
   }
 
   public get router(): IRouter {
-    return this.container.get<IRouter>(IRouterKey);
+    return this.container.get<IRouter>(IRouter);
   }
 
   public get routeState(): IRouteState {
-    return this.container.get<IRouteState>(IRouteStateKey);
+    return this.container.get<IRouteState>(IRouteState);
   }
 
   public get starter(): IStarter {
-    return this.container.get<IStarter>(IStarterKey);
+    return this.container.get<IStarter>(IStarter);
   }
 
   public registerApp(config: AppConfig): IApp {

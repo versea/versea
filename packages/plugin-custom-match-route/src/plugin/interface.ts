@@ -1,6 +1,6 @@
 import { createServiceSymbol, IPlugin } from '@versea/core';
 
-export const IPluginCustomMatchRouteKey = createServiceSymbol('IPluginCustomMatchRoute');
+export const IPluginCustomMatchRoute = createServiceSymbol('IPluginCustomMatchRoute');
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IPluginCustomMatchRoute extends IPlugin {}

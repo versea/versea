@@ -1,22 +1,22 @@
-import { App, IConfigKey, IHooks, IHooksKey, provide, provideValue } from '@versea/core';
-import { IPluginSourceEntry, IPluginSourceEntryKey } from '@versea/plugin-source-entry';
+import { App, IConfig, IHooks, provide, provideValue } from '@versea/core';
+import { IPluginSourceEntry } from '@versea/plugin-source-entry';
 import { VerseaError } from '@versea/shared';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../constants';
-import { IStyleLoader, IStyleLoaderKey } from '../source/style-loader/interface';
-import { IPluginSandbox, IPluginSandboxKey } from './interface';
+import { IStyleLoader } from '../source/style-loader/interface';
+import { IPluginSandbox } from './interface';
 
 export * from './interface';
 
 // 声明所有应用默认开启沙箱和样式作用域
-provideValue({ sandbox: true, scopedCSS: true }, IConfigKey);
+provideValue({ sandbox: true, scopedCSS: true }, IConfig);
 
 App.defineProp('_useSandbox', { optionKey: 'sandbox' });
 App.defineProp('_scopedCSS', { optionKey: 'scopedCSS' });
 App.defineProp('_selectorPrefix', { optionKey: 'selectorPrefix' });
 
-@provide(IPluginSandboxKey)
+@provide(IPluginSandbox)
 export class PluginSandbox implements IPluginSandbox {
   public isApplied = false;
 
@@ -27,9 +27,9 @@ export class PluginSandbox implements IPluginSandbox {
   protected _pluginSourceEntry: IPluginSourceEntry;
 
   constructor(
-    @inject(IHooksKey) hooks: IHooks,
-    @inject(IStyleLoaderKey) styleLoader: IStyleLoader,
-    @inject(IPluginSourceEntryKey) pluginSourceEntry: IPluginSourceEntry,
+    @inject(IHooks) hooks: IHooks,
+    @inject(IStyleLoader) styleLoader: IStyleLoader,
+    @inject(IPluginSourceEntry) pluginSourceEntry: IPluginSourceEntry,
   ) {
     this._hooks = hooks;
     this._styleLoader = styleLoader;

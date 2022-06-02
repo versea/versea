@@ -1,7 +1,7 @@
 import { provideValue } from '../provider';
 import { createServiceSymbol } from '../utils';
 
-export const IStatusKey = createServiceSymbol('IStatus');
+export const IStatus = createServiceSymbol('IStatus');
 const Status = {
   NotLoaded: 'NotLoaded',
   LoadingSourceCode: 'LoadingSourceCode',
@@ -15,7 +15,7 @@ const Status = {
   LoadError: 'LoadError',
   Broken: 'Broken',
 } as const;
-provideValue(Status, IStatusKey);
+provideValue(Status, IStatus);
 
 type IStatusTyped = typeof Status;
 // 将 IStatus 转换成 interface 导出，方便外部合并类型
@@ -23,7 +23,7 @@ type IStatusTyped = typeof Status;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IStatus extends IStatusTyped {}
 
-export const ISwitcherStatusKey = createServiceSymbol('ISwitcherStatus');
+export const ISwitcherStatus = createServiceSymbol('ISwitcherStatus');
 const SwitcherStatus = {
   NotStart: 'NotStart',
   Loading: 'Loading',
@@ -39,7 +39,7 @@ const SwitcherStatus = {
   Canceled: 'Canceled',
   Broken: 'Broken',
 } as const;
-provideValue(SwitcherStatus, ISwitcherStatusKey);
+provideValue(SwitcherStatus, ISwitcherStatus);
 
 type ISwitcherStatusTyped = typeof SwitcherStatus;
 // 将 ISwitcherStatus 转换成 interface 导出，方便外部合并类型

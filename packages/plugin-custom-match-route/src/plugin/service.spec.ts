@@ -1,20 +1,20 @@
-import { buildProviderModule, IApp, IAppKey, IMatcher, IMatcherKey, IStatusKey } from '@versea/core';
+import { buildProviderModule, IApp, IMatcher, IStatus } from '@versea/core';
 import { Container, interfaces } from 'inversify';
 
-import { IPluginCustomMatchRoute, IPluginCustomMatchRouteKey } from './service';
+import { IPluginCustomMatchRoute } from '../index';
 
 function createContainerWithPlugin(): Container {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule(container));
-  const plugin = container.get<IPluginCustomMatchRoute>(IPluginCustomMatchRouteKey);
+  const plugin = container.get<IPluginCustomMatchRoute>(IPluginCustomMatchRoute);
   plugin.apply();
   return container;
 }
 
 function getAppInstance(container: Container, appName: string): IApp {
-  const App = container.get<interfaces.Newable<IApp>>(IAppKey);
+  const App = container.get<interfaces.Newable<IApp>>(IApp);
   // @ts-expect-error 这里需要向 App 传入构造函数参数
-  return new App({ name: appName }, { Status: container.get(IStatusKey) });
+  return new App({ name: appName }, { Status: container.get(IStatus) });
 }
 
 /**
@@ -24,7 +24,7 @@ function getAppInstance(container: Container, appName: string): IApp {
 describe('PluginCustomMatchRoute', () => {
   test('rootFragmentRoute 类型传入 customMatchRoute, 匹配时应该是用 customMatchRoute 进行匹配', () => {
     const container = createContainerWithPlugin();
-    const matcher = container.get<IMatcher>(IMatcherKey);
+    const matcher = container.get<IMatcher>(IMatcher);
     matcher.addRoutes(
       [
         {
@@ -52,7 +52,7 @@ describe('PluginCustomMatchRoute', () => {
 
   test('rootFragmentRoute 类型不传入 customMatchRoute, 匹配时应该是用原来的 matchRoute 方法', () => {
     const container = createContainerWithPlugin();
-    const matcher = container.get<IMatcher>(IMatcherKey);
+    const matcher = container.get<IMatcher>(IMatcher);
     matcher.addRoutes(
       [
         {
@@ -68,7 +68,7 @@ describe('PluginCustomMatchRoute', () => {
 
   test('普通 route 类型传入 customMatchRoute, 应该报错', () => {
     const container = createContainerWithPlugin();
-    const matcher = container.get<IMatcher>(IMatcherKey);
+    const matcher = container.get<IMatcher>(IMatcher);
     expect(() => {
       matcher.addRoutes(
         [

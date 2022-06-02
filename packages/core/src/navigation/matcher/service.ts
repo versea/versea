@@ -6,14 +6,14 @@ import queryString from 'query-string';
 
 import { IApp } from '../../application/app/interface';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
-import { IHooks, IHooksKey } from '../../hooks/interface';
+import { IHooks } from '../../hooks/interface';
 import { provide } from '../../provider';
-import { IRoute, IRouteKey, RouteConfig, MatchedRoute } from '../route/interface';
-import { IMatcher, IMatcherKey, MatchedResult, MatchRoutesHookContext } from './interface';
+import { IRoute, RouteConfig, MatchedRoute } from '../route/interface';
+import { IMatcher, MatchedResult, MatchRoutesHookContext } from './interface';
 
 export * from './interface';
 
-@provide(IMatcherKey)
+@provide(IMatcher)
 export class Matcher implements IMatcher {
   /**
    * 普通路由
@@ -33,7 +33,7 @@ export class Matcher implements IMatcher {
   protected readonly _hooks: IHooks;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  constructor(@inject(IRouteKey) Route: interfaces.Newable<IRoute>, @inject(IHooksKey) hooks: IHooks) {
+  constructor(@inject(IRoute) Route: interfaces.Newable<IRoute>, @inject(IHooks) hooks: IHooks) {
     this._RouteConstructor = Route;
     this._hooks = hooks;
 

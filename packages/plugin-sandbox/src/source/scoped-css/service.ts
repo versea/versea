@@ -1,18 +1,12 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { IApp, IHooks, IHooksKey, provide } from '@versea/core';
-import {
-  completionPath,
-  IContainerRenderer,
-  IContainerRendererKey,
-  IInternalApp,
-  SourceStyle,
-} from '@versea/plugin-source-entry';
+import { IApp, IHooks, provide } from '@versea/core';
+import { completionPath, IContainerRenderer, IInternalApp, SourceStyle } from '@versea/plugin-source-entry';
 import { SyncHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
-import { IScopedCSS, IScopedCSSKey, RewriteCSSRuleHookContext } from './interface';
+import { IScopedCSS, RewriteCSSRuleHookContext } from './interface';
 
 export * from './interface';
 
@@ -35,7 +29,7 @@ enum RuleType {
   KEYFRAME = 8,
 }
 
-@provide(IScopedCSSKey)
+@provide(IScopedCSS)
 export class ScopedCSS implements IScopedCSS {
   protected _sheet: StyleSheet;
 
@@ -45,7 +39,7 @@ export class ScopedCSS implements IScopedCSS {
 
   protected _containerRenderer: IContainerRenderer;
 
-  constructor(@inject(IHooksKey) hooks: IHooks, @inject(IContainerRendererKey) containerRenderer: IContainerRenderer) {
+  constructor(@inject(IHooks) hooks: IHooks, @inject(IContainerRenderer) containerRenderer: IContainerRenderer) {
     this._hooks = hooks;
     this._containerRenderer = containerRenderer;
     this._hooks.addHook('rewriteCSSRule', new SyncHook());

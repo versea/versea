@@ -1,20 +1,20 @@
-import { IApp, IConfig, IConfigKey, provide } from '@versea/core';
+import { IApp, IConfig, provide } from '@versea/core';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
 import { globalEnv } from '../global-env';
 import { IInternalApp, LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
-import { IContainerRenderer, IContainerRendererKey } from './interface';
+import { IContainerRenderer } from './interface';
 
 export * from './interface';
 
-@provide(IContainerRendererKey)
+@provide(IContainerRenderer)
 export class ContainerRender implements IContainerRenderer {
   protected _config: IConfig;
 
   protected _hasInjectVerseaAppStyle = false;
 
-  constructor(@inject(IConfigKey) config: IConfig) {
+  constructor(@inject(IConfig) config: IConfig) {
     this._config = config;
   }
 

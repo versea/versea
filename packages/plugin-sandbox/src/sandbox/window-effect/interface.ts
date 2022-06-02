@@ -3,7 +3,7 @@ import { createServiceSymbol } from '@versea/core';
 import { VerseaAppWindow } from '../sandbox/interface';
 import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
 
-export const IWindowEffectKey = createServiceSymbol('IWindowEffect');
+export const IWindowEffect = createServiceSymbol('IWindowEffect');
 
 export interface IWindowEffect {
   /** 事件名和监听函数的 Map */

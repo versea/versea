@@ -3,7 +3,7 @@ import { AsyncSeriesHook, HookContext } from '@versea/tapable';
 
 import { ExecSourceHookContext, LoadSourceHookContext } from '../source-controller/interface';
 
-export const IPluginSourceEntryKey = createServiceSymbol('IPluginSourceEntry');
+export const IPluginSourceEntry = createServiceSymbol('IPluginSourceEntry');
 
 export interface IPluginSourceEntry extends IPlugin {
   isApplied: boolean;

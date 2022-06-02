@@ -20,6 +20,7 @@
     "test:core": "jest packages/core/ --maxWorkers=8",
     "test:plugin-custom-match-route": "jest packages/plugin-custom-match-route/ --maxWorkers=8",
     "test:sandbox": "jest packages/sandbox/ --maxWorkers=8",
+    "test:plugin-source-entry": "jest packages/plugin-source-entry/ --maxWorkers=8",
     "test:shared": "jest packages/shared/ --maxWorkers=8",
     "test:tapable": "jest packages/tapable/ --maxWorkers=8",
     "test:versea": "jest packages/versea/ --maxWorkers=8",

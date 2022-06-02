@@ -11,7 +11,7 @@ import { ILoader } from '../loader/interface';
 import { IRenderer } from '../renderer/interface';
 import { IRouteState } from '../route-state/interface';
 
-export const IAppSwitcherContextKey = createServiceSymbol('IAppSwitcherContext');
+export const IAppSwitcherContext = createServiceSymbol('IAppSwitcherContext');
 
 /**
  * 应用切换上下文

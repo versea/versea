@@ -7,10 +7,8 @@ import {
   AppLifeCycles,
   IApp,
   IAppService,
-  IAppServiceKey,
   IAppSwitcherContext,
   IStatus,
-  IStatusKey,
   MatchedRoute,
 } from '../../';
 
@@ -25,8 +23,8 @@ let Status: IStatus = undefined as unknown as IStatus;
 function getAppInstance(config: AppConfig): IApp {
   const container = new Container({ defaultScope: 'Singleton' });
   container.load(buildProviderModule(container));
-  Status = container.get(IStatusKey);
-  const appService = container.get<IAppService>(IAppServiceKey);
+  Status = container.get(IStatus);
+  const appService = container.get<IAppService>(IAppService);
   return appService.registerApp(config);
 }
 

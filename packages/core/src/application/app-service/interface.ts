@@ -3,7 +3,7 @@ import { HookContext } from '@versea/tapable';
 import { createServiceSymbol } from '../../utils';
 import { AppConfig, IApp } from '../app/interface';
 
-export const IAppServiceKey = createServiceSymbol('IAppService');
+export const IAppService = createServiceSymbol('IAppService');
 
 export interface IAppService {
   /** 注册应用 */

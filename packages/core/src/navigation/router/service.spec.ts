@@ -1,7 +1,7 @@
 import { LocationMock } from '@jedmao/location';
 import { Container } from 'inversify';
 
-import { buildProviderModule, IRouterKey, IRouter, IMatcher, IMatcherKey, provideValue, IConfigKey } from '../../';
+import { buildProviderModule, IRouter, IMatcher, provideValue, IConfig } from '../../';
 
 const defaultLocation = window.location;
 afterEach(() => {
@@ -28,10 +28,10 @@ function createContainer(): Container {
 describe('Router.match', () => {
   describe('Hash mode', () => {
     test('调用 match 时匹配使用的路径应该是 window.location.hash 部分的路径', () => {
-      provideValue({ routerMode: 'hash' }, IConfigKey);
+      provideValue({ routerMode: 'hash' }, IConfig);
       const container = createContainer();
-      const router = container.get<IRouter>(IRouterKey);
-      const matcher = container.get<IMatcher>(IMatcherKey);
+      const router = container.get<IRouter>(IRouter);
+      const matcher = container.get<IMatcher>(IMatcher);
       window.location = new LocationMock('https://www.xxx.com#/test');
       const spy = jest.spyOn(matcher, 'match');
 
@@ -41,10 +41,10 @@ describe('Router.match', () => {
     });
 
     test('调用 match 时匹配使用的 query 应该是 window.location.hash 部分的 query', () => {
-      provideValue({ routerMode: 'hash' }, IConfigKey);
+      provideValue({ routerMode: 'hash' }, IConfig);
       const container = createContainer();
-      const router = container.get<IRouter>(IRouterKey);
-      const matcher = container.get<IMatcher>(IMatcherKey);
+      const router = container.get<IRouter>(IRouter);
+      const matcher = container.get<IMatcher>(IMatcher);
       const spy = jest.spyOn(matcher, 'match');
       window.location = new LocationMock('https://www.xxx.com/#/test?mode=hash');
 
@@ -56,10 +56,10 @@ describe('Router.match', () => {
 
   describe('History mode', () => {
     test('调用 match 时匹配使用的路径应该是 window.location.pathname', () => {
-      provideValue({ routerMode: 'history' }, IConfigKey);
+      provideValue({ routerMode: 'history' }, IConfig);
       const container = createContainer();
-      const router = container.get<IRouter>(IRouterKey);
-      const matcher = container.get<IMatcher>(IMatcherKey);
+      const router = container.get<IRouter>(IRouter);
+      const matcher = container.get<IMatcher>(IMatcher);
       const spy = jest.spyOn(matcher, 'match');
       window.location = new LocationMock('https://www.xxx.com/test');
 
@@ -69,10 +69,10 @@ describe('Router.match', () => {
     });
 
     test('调用 match 时匹配使用的 query 应该是 window.location.search 的解析结果', () => {
-      provideValue({ routerMode: 'history' }, IConfigKey);
+      provideValue({ routerMode: 'history' }, IConfig);
       const container = createContainer();
-      const router = container.get<IRouter>(IRouterKey);
-      const matcher = container.get<IMatcher>(IMatcherKey);
+      const router = container.get<IRouter>(IRouter);
+      const matcher = container.get<IMatcher>(IMatcher);
       const spy = jest.spyOn(matcher, 'match');
       window.location = new LocationMock('https://www.xxx.com/test?mode=history');
 

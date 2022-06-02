@@ -5,19 +5,11 @@ import { mergeRight } from 'ramda';
 import { IApp } from '../../application/app/interface';
 import { provide } from '../../provider';
 import { cloneObjectWith, traverse } from '../../utils';
-import {
-  IRoute,
-  IRouteKey,
-  MatchedRoute,
-  RouteConfig,
-  PathToRegexpOptions,
-  ToMatchedRouteOptions,
-  RouteMeta,
-} from './interface';
+import { IRoute, MatchedRoute, RouteConfig, PathToRegexpOptions, ToMatchedRouteOptions, RouteMeta } from './interface';
 
 export * from './interface';
 
-@provide(IRouteKey, 'Constructor')
+@provide(IRoute, 'Constructor')
 export class Route extends ExtensibleEntity implements IRoute {
   public path: string;
 

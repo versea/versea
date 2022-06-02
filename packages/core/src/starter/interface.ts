@@ -1,6 +1,6 @@
 import { createServiceSymbol } from '../utils';
 
-export const IStarterKey = createServiceSymbol('IStarter');
+export const IStarter = createServiceSymbol('IStarter');
 
 export interface IStarter {
   /** 是否已经执行 start */
