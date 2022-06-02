@@ -4,11 +4,11 @@ import { ExtensibleEntity } from '@versea/shared';
 import { globalEnv } from '../../global-env';
 import { VerseaAppWindow } from '../sandbox/interface';
 import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
-import { IWindowEffect, IWindowEffectKey, WindowEffectOptions } from './interface';
+import { IWindowEffect, WindowEffectOptions } from './interface';
 
 export * from './interface';
 
-@provide(IWindowEffectKey, 'Constructor')
+@provide(IWindowEffect, 'Constructor')
 export class WindowEffect extends ExtensibleEntity implements IWindowEffect {
   public readonly eventListenerMap = new Map<string, Set<VerseaAppEventListener>>();
 

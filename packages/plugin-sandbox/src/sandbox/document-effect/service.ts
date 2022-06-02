@@ -2,15 +2,15 @@ import { provide } from '@versea/core';
 import { logWarn } from '@versea/shared';
 import { inject } from 'inversify';
 
-import { ICurrentApp, ICurrentAppKey } from '../../current-app/interface';
+import { ICurrentApp } from '../../current-app/interface';
 import { globalEnv } from '../../global-env';
 import { isBoundFunction } from '../../utils';
 import { VerseaAppEventListener } from '../sandbox/types';
-import { IDocumentEffect, IDocumentEffectKey } from './interface';
+import { IDocumentEffect } from './interface';
 
 export * from './interface';
 
-@provide(IDocumentEffectKey)
+@provide(IDocumentEffect)
 export class DocumentEffect implements IDocumentEffect {
   public readonly clickHandlerMap = new Map<string, ((this: GlobalEventHandlers, ev: MouseEvent) => unknown) | null>();
 
@@ -20,7 +20,7 @@ export class DocumentEffect implements IDocumentEffect {
 
   protected _hasOverwriteDocumentOnClick = false;
 
-  constructor(@inject(ICurrentAppKey) currentApp: ICurrentApp) {
+  constructor(@inject(ICurrentApp) currentApp: ICurrentApp) {
     this._currentApp = currentApp;
   }
 

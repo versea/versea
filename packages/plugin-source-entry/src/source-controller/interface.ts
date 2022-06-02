@@ -3,7 +3,7 @@ import { HookContext } from '@versea/tapable';
 
 import { LoadAppHookContext, MountAppHookContext } from '../plugin/interface';
 
-export const ISourceControllerKey = createServiceSymbol('ISourceController');
+export const ISourceController = createServiceSymbol('ISourceController');
 
 export interface ISourceController {
   /** 增加监听函数 */

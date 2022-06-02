@@ -1,6 +1,6 @@
 import { createServiceSymbol, IApp } from '@versea/core';
 
-export const IRequestKey = createServiceSymbol('IRequest');
+export const IRequest = createServiceSymbol('IRequest');
 
 export interface IRequest {
   /** 获取资源内容 */

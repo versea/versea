@@ -2,7 +2,7 @@ import { createServiceSymbol, IApp } from '@versea/core';
 import { LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
 import { HookContext } from '@versea/tapable';
 
-export const IStyleLoaderKey = createServiceSymbol('IStyleLoader');
+export const IStyleLoader = createServiceSymbol('IStyleLoader');
 
 export interface IStyleLoader {
   /** 增加监听函数 */

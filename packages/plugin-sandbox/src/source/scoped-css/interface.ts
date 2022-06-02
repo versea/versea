@@ -2,7 +2,7 @@ import { createServiceSymbol, IApp } from '@versea/core';
 import { SourceStyle } from '@versea/plugin-source-entry';
 import { HookContext } from '@versea/tapable';
 
-export const IScopedCSSKey = createServiceSymbol('IScopedCSS');
+export const IScopedCSS = createServiceSymbol('IScopedCSS');
 
 export interface IScopedCSS {
   /** 增加监听函数 */

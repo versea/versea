@@ -6,11 +6,11 @@ import { MatchedResult } from '../../navigation/matcher/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
-import { ILoaderHookContext, ILoaderHookContextKey, LoaderHookContextOptions } from './interface';
+import { ILoaderHookContext, LoaderHookContextOptions } from './interface';
 
 export * from './interface';
 
-@provide(ILoaderHookContextKey, 'Constructor')
+@provide(ILoaderHookContext, 'Constructor')
 export class LoaderHookContext extends ExtensibleEntity implements ILoaderHookContext {
   public readonly matchedResult: MatchedResult;
 

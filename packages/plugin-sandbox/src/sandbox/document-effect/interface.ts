@@ -2,7 +2,7 @@ import { createServiceSymbol } from '@versea/core';
 
 import { VerseaAppEventListener } from '../sandbox/types';
 
-export const IDocumentEffectKey = createServiceSymbol('IDocumentEffect');
+export const IDocumentEffect = createServiceSymbol('IDocumentEffect');
 
 export interface IDocumentEffect {
   /** 应用名与 `document.onclick` 函数的 Map */

@@ -1,15 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import {
-  App,
-  AppLifeCycleFunction,
-  AppLifeCycles,
-  AppProps,
-  IConfig,
-  IConfigKey,
-  IHooks,
-  IHooksKey,
-  provide,
-} from '@versea/core';
+import { App, AppLifeCycleFunction, AppLifeCycles, AppProps, IConfig, IHooks, provide } from '@versea/core';
 import { logWarn, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
@@ -22,8 +12,8 @@ import {
   VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
   VERSEA_PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
 } from '../constants';
-import { IContainerRenderer, IContainerRendererKey } from '../container-renderer/interface';
-import { ISourceController, ISourceControllerKey } from '../source-controller/interface';
+import { IContainerRenderer } from '../container-renderer/interface';
+import { ISourceController } from '../source-controller/interface';
 import { addProtocol, completionPath, getEffectivePath } from '../utils';
 import {
   IInternalApp,
@@ -33,7 +23,6 @@ import {
   MountAppHookContext,
   UnmountAppHookContext,
   IPluginSourceEntry,
-  IPluginSourceEntryKey,
 } from './interface';
 
 export * from './interface';
@@ -53,7 +42,7 @@ async function noop(): Promise<void> {
   return Promise.resolve();
 }
 
-@provide(IPluginSourceEntryKey)
+@provide(IPluginSourceEntry)
 export class PluginSourceEntry implements IPluginSourceEntry {
   public isApplied = false;
 
@@ -66,10 +55,10 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   protected _sourceController: ISourceController;
 
   constructor(
-    @inject(IConfigKey) config: IConfig,
-    @inject(IHooksKey) hooks: IHooks,
-    @inject(IContainerRendererKey) containerRenderer: IContainerRenderer,
-    @inject(ISourceControllerKey) sourceController: ISourceController,
+    @inject(IConfig) config: IConfig,
+    @inject(IHooks) hooks: IHooks,
+    @inject(IContainerRenderer) containerRenderer: IContainerRenderer,
+    @inject(ISourceController) sourceController: ISourceController,
   ) {
     this._config = config;
     this._hooks = hooks;

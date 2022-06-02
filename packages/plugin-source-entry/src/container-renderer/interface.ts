@@ -2,7 +2,7 @@ import { createServiceSymbol, IApp } from '@versea/core';
 
 import { LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
 
-export const IContainerRendererKey = createServiceSymbol('IContainerRenderer');
+export const IContainerRenderer = createServiceSymbol('IContainerRenderer');
 
 export interface IContainerRenderer {
   /** 生成容器元素 */

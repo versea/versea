@@ -6,16 +6,11 @@ import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
 import { IRouteState } from '../route-state/interface';
-import {
-  IRendererHookContext,
-  IRendererHookContextKey,
-  RendererHookContextOptions,
-  RendererHookContextDependencies,
-} from './interface';
+import { IRendererHookContext, RendererHookContextOptions, RendererHookContextDependencies } from './interface';
 
 export * from './interface';
 
-@provide(IRendererHookContextKey, 'Constructor')
+@provide(IRendererHookContext, 'Constructor')
 export class RendererHookContext extends ExtensibleEntity implements IRendererHookContext {
   public readonly switcherContext: IAppSwitcherContext;
 

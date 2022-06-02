@@ -6,7 +6,7 @@ import { IDocumentEffect } from '../document-effect/interface';
 import { VerseaAppWindow } from '../sandbox/interface';
 import { IWindowEffect } from '../window-effect/interface';
 
-export const ISandboxEffectKey = createServiceSymbol('ISandboxEffect');
+export const ISandboxEffect = createServiceSymbol('ISandboxEffect');
 
 export interface ISandboxEffect {
   /** 生成副作用函数的记录 */

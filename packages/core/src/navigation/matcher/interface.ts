@@ -5,7 +5,7 @@ import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
 import { IRoute, MatchedRoute, RouteConfig } from '../route/interface';
 
-export const IMatcherKey = createServiceSymbol('IMatcher');
+export const IMatcher = createServiceSymbol('IMatcher');
 
 export interface IMatcher {
   /** 增加路由 */

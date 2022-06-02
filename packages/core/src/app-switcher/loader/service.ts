@@ -1,16 +1,16 @@
 import { inject, interfaces } from 'inversify';
 
 import { VERSEA_INTERNAL_TAP } from '../../constants';
-import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/interface';
+import { ISwitcherStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/interface';
 import { provide } from '../../provider';
 import { IAppSwitcherContext } from '../app-switcher-context/interface';
-import { ILoaderHookContext, ILoaderHookContextKey } from '../loader-hook-context/interface';
-import { ILoader, ILoaderKey } from './interface';
+import { ILoaderHookContext } from '../loader-hook-context/interface';
+import { ILoader } from './interface';
 
 export * from './interface';
 
-@provide(ILoaderKey)
+@provide(ILoader)
 export class Loader implements ILoader {
   protected _hooks: IHooks;
 
@@ -19,11 +19,11 @@ export class Loader implements ILoader {
   protected _HookContext: interfaces.Newable<ILoaderHookContext>;
 
   constructor(
-    @inject(IHooksKey) hooks: IHooks,
+    @inject(IHooks) hooks: IHooks,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
+    @inject(ISwitcherStatus) SwitcherStatus: ISwitcherStatus,
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    @inject(ILoaderHookContextKey) HookContext: interfaces.Newable<ILoaderHookContext>,
+    @inject(ILoaderHookContext) HookContext: interfaces.Newable<ILoaderHookContext>,
   ) {
     this._hooks = hooks;
     this._SwitcherStatus = SwitcherStatus;

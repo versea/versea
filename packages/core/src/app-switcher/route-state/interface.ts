@@ -2,7 +2,7 @@ import { IApp } from '../../application/app/interface';
 import { MatchedRoute, RouteMeta } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
-export const IRouteStateKey = createServiceSymbol('IRouteState');
+export const IRouteState = createServiceSymbol('IRouteState');
 
 /**
  * 路由状态（当前页面路由和应用状态存储器）

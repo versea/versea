@@ -6,7 +6,6 @@ import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import {
   IApp,
-  IAppKey,
   AppConfig,
   AppDependencies,
   AppProps,
@@ -17,7 +16,7 @@ import {
 
 export * from './interface';
 
-@provide(IAppKey, 'Constructor')
+@provide(IApp, 'Constructor')
 export class App extends ExtensibleEntity implements IApp {
   public readonly name: string;
 

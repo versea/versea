@@ -1,4 +1,4 @@
-import { AppLifeCycles, IApp, IHooks, IHooksKey, provide } from '@versea/core';
+import { AppLifeCycles, IApp, IHooks, provide } from '@versea/core';
 import { logError, requestIdleCallback, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
@@ -7,15 +7,15 @@ import { pick } from 'ramda';
 import { VERSEA_PLUGIN_SOURCE_ENTRY_TAP } from '../constants';
 import { globalEnv } from '../global-env';
 import { LoadAppHookContext, MountAppHookContext, SourceScript } from '../plugin/interface';
-import { ExecSourceHookContext, ISourceController, ISourceControllerKey } from './interface';
+import { ExecSourceHookContext, ISourceController } from './interface';
 
 export * from './interface';
 
-@provide(ISourceControllerKey)
+@provide(ISourceController)
 export class SourceController implements ISourceController {
   protected _hooks: IHooks;
 
-  constructor(@inject(IHooksKey) hooks: IHooks) {
+  constructor(@inject(IHooks) hooks: IHooks) {
     this._hooks = hooks;
     this._hooks.addHook('loadSource', new AsyncSeriesHook());
     this._hooks.addHook('execSource', new AsyncSeriesHook());

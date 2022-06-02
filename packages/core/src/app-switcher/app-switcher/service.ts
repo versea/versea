@@ -1,23 +1,23 @@
 import { inject, interfaces } from 'inversify';
 
-import { ISwitcherStatus, ISwitcherStatusKey } from '../../enum/status';
-import { IHooks, IHooksKey } from '../../hooks/interface';
-import { IRouter, IRouterKey } from '../../navigation/router/interface';
+import { ISwitcherStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/interface';
+import { IRouter } from '../../navigation/router/interface';
 import { lazyInject, provide } from '../../provider';
-import { IStarter, IStarterKey } from '../../starter/interface';
-import { IAppSwitcherContext, IAppSwitcherContextKey } from '../app-switcher-context/interface';
-import { ILoaderKey, ILoader } from '../loader/interface';
-import { IRendererKey, IRenderer } from '../renderer/interface';
-import { IRouteStateKey, IRouteState } from '../route-state/interface';
-import { IAppSwitcher, IAppSwitcherKey, SwitcherOptions } from './interface';
+import { IStarter } from '../../starter/interface';
+import { IAppSwitcherContext } from '../app-switcher-context/interface';
+import { ILoader } from '../loader/interface';
+import { IRenderer } from '../renderer/interface';
+import { IRouteState } from '../route-state/interface';
+import { IAppSwitcher, SwitcherOptions } from './interface';
 
 export * from './interface';
 
-@provide(IAppSwitcherKey)
+@provide(IAppSwitcher)
 export class AppSwitcher implements IAppSwitcher {
-  @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+  @lazyInject(IRouter) protected readonly _router!: IRouter;
 
-  @lazyInject(IStarterKey) protected readonly _starter!: IStarter;
+  @lazyInject(IStarter) protected readonly _starter!: IStarter;
 
   public context: IAppSwitcherContext | null = null;
 
@@ -37,13 +37,13 @@ export class AppSwitcher implements IAppSwitcher {
 
   constructor(
     /* eslint-disable @typescript-eslint/naming-convention */
-    @inject(IAppSwitcherContextKey) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
-    @inject(ISwitcherStatusKey) SwitcherStatus: ISwitcherStatus,
+    @inject(IAppSwitcherContext) AppSwitcherContext: interfaces.Newable<IAppSwitcherContext>,
+    @inject(ISwitcherStatus) SwitcherStatus: ISwitcherStatus,
     /* eslint-enable @typescript-eslint/naming-convention */
-    @inject(ILoaderKey) loader: ILoader,
-    @inject(IRendererKey) renderer: IRenderer,
-    @inject(IRouteStateKey) routeState: IRouteState,
-    @inject(IHooksKey) hooks: IHooks,
+    @inject(ILoader) loader: ILoader,
+    @inject(IRenderer) renderer: IRenderer,
+    @inject(IRouteState) routeState: IRouteState,
+    @inject(IHooks) hooks: IHooks,
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;

@@ -5,7 +5,7 @@ import { object } from 'typescript-lodash';
 import { IApp } from '../../application/app/interface';
 import { createServiceSymbol } from '../../utils';
 
-export const IRouteKey = createServiceSymbol('IRoute');
+export const IRoute = createServiceSymbol('IRoute');
 
 export type PathToRegexpOptions = ParseOptions & TokensToRegexpOptions;
 

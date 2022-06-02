@@ -3,7 +3,7 @@ import { IStatus } from '../../enum/status';
 import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 
-export const IAppKey = createServiceSymbol('IApp');
+export const IApp = createServiceSymbol('IApp');
 
 export type AppConfigProps = Record<string, unknown> | ((name: string) => Record<string, unknown>);
 

@@ -1,10 +1,10 @@
 import { provide } from '@versea/core';
 
-import { ILoadEvent, ILoadEventKey } from './interface';
+import { ILoadEvent } from './interface';
 
 export * from './interface';
 
-@provide(ILoadEventKey)
+@provide(ILoadEvent)
 export class LoadEvent implements ILoadEvent {
   public dispatchOnLoadEvent(element: HTMLLinkElement | HTMLScriptElement): void {
     const event = new CustomEvent('load');

@@ -4,7 +4,7 @@ import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 import { RewriteCSSRuleHookContext } from '../source/scoped-css/interface';
 import { LoadStyleHookContext } from '../source/style-loader/interface';
 
-export const IPluginSandboxKey = createServiceSymbol('IPluginSandbox');
+export const IPluginSandbox = createServiceSymbol('IPluginSandbox');
 
 export interface IPluginSandbox extends IPlugin {
   isApplied: boolean;

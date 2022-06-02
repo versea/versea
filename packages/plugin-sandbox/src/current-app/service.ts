@@ -1,7 +1,7 @@
 import { provide } from '@versea/core';
 
 import { bindCurrentApp } from '../global-env';
-import { ICurrentApp, ICurrentAppKey } from './interface';
+import { ICurrentApp } from './interface';
 
 export * from './interface';
 
@@ -15,7 +15,7 @@ const nextTick: (cb: () => void) => void =
     ? setTimeout
     : async (cb): Promise<void> => Promise.resolve().then(cb);
 
-@provide(ICurrentAppKey)
+@provide(ICurrentApp)
 export class CurrentApp implements ICurrentApp {
   protected _name: string | undefined = undefined;
 

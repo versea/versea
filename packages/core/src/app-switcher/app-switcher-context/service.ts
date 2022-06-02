@@ -9,11 +9,11 @@ import { provide } from '../../provider';
 import { IStarter } from '../../starter/interface';
 import { SwitcherOptions } from '../app-switcher/interface';
 import { IRouteState } from '../route-state/interface';
-import { IAppSwitcherContext, IAppSwitcherContextKey, AppSwitcherContextDependencies, RunOptions } from './interface';
+import { IAppSwitcherContext, AppSwitcherContextDependencies, RunOptions } from './interface';
 
 export * from './interface';
 
-@provide(IAppSwitcherContextKey, 'Constructor')
+@provide(IAppSwitcherContext, 'Constructor')
 export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcherContext {
   public status: ISwitcherStatus[keyof ISwitcherStatus];
 

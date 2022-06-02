@@ -8,7 +8,7 @@ import { MatchRoutesHookContext, MatchRouteHookContext } from '../navigation/mat
 import { RerouteHookContext } from '../navigation/router/interface';
 import { createServiceSymbol } from '../utils';
 
-export const IHooksKey = createServiceSymbol('IHooks');
+export const IHooks = createServiceSymbol('IHooks');
 
 export interface IHooks {
   /** 注册应用之前 */

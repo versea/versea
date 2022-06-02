@@ -12,7 +12,7 @@ npm install --save @versea/versea @versea/plugin-custom-match-route
 
 ```ts
 import { Versea, AppLifeCycles } from '@versea/versea';
-import { IPluginCustomMatchRouteKey } from '@versea/versea';
+import { IPluginCustomMatchRoute } from '@versea/versea';
 
 async function loadScript(url): Promise<void> {
   console.log(url);
@@ -21,7 +21,7 @@ async function loadScript(url): Promise<void> {
 }
 
 const versea = new Versea();
-versea.use(IPluginCustomMatchRouteKey);
+versea.use(IPluginCustomMatchRoute);
 
 // 注册子应用
 versea.registerApps([

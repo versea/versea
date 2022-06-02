@@ -1,14 +1,14 @@
 import { logWarn } from '@versea/shared';
 
-import { IRouter, IRouterKey } from '../navigation/router/interface';
+import { IRouter } from '../navigation/router/interface';
 import { lazyInject, provide } from '../provider';
-import { IStarter, IStarterKey } from './interface';
+import { IStarter } from './interface';
 
 export * from './interface';
 
-@provide(IStarterKey)
+@provide(IStarter)
 export class Starter implements IStarter {
-  @lazyInject(IRouterKey) protected readonly _router!: IRouter;
+  @lazyInject(IRouter) protected readonly _router!: IRouter;
 
   public isStarted = false;
 
