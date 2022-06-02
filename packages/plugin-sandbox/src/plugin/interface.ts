@@ -1,6 +1,7 @@
 import { createServiceSymbol, IPlugin } from '@versea/core';
-import { AsyncSeriesHook } from '@versea/tapable';
+import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 
+import { RewriteCSSRuleHookContext } from '../source/scoped-css/interface';
 import { LoadStyleHookContext } from '../source/style-loader/interface';
 
 export const IPluginSandboxKey = createServiceSymbol('IPluginSandbox');
@@ -20,6 +21,8 @@ declare module '@versea/core' {
 
   interface IHooks {
     loadStyle: AsyncSeriesHook<LoadStyleHookContext>;
+
+    rewriteCSSRule: SyncHook<RewriteCSSRuleHookContext>;
   }
 
   interface AppConfig {
@@ -28,6 +31,9 @@ declare module '@versea/core' {
 
     /** 开启样式作用域 */
     scopedCSS?: boolean;
+
+    /** 样式选择器前缀 */
+    selectorPrefix?: string;
   }
 }
 
@@ -38,5 +44,8 @@ declare module '@versea/plugin-source-entry' {
 
     /** 开启样式作用域 */
     _scopedCSS?: boolean;
+
+    /** 样式选择器前缀 */
+    _selectorPrefix?: string;
   }
 }
