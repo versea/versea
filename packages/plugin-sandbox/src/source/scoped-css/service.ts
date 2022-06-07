@@ -106,6 +106,7 @@ export class ScopedCSS implements IScopedCSS {
     return this._rewrite(rules, this._getPrefix(app), style, app);
   }
 
+  /** 获取 ScopedCSS 的前缀 */
   protected _getPrefix(app: IApp): string {
     const selectorPrefix = (app as IInternalApp)._selectorPrefix;
     if (selectorPrefix) {
@@ -151,6 +152,7 @@ export class ScopedCSS implements IScopedCSS {
     return context.result;
   }
 
+  /** 重写 CSSStyleRule 的选择器 */
   protected _rewriteStyleRuleSelector(cssText: string, prefix: string): string {
     const rootSelectorRE = /((?:[^\w\-.#]|^)(body|html|:root))/gm;
     const rootCombinationRE = /(html[^\w{[\-.#]+)/gm;
@@ -196,6 +198,7 @@ export class ScopedCSS implements IScopedCSS {
     );
   }
 
+  /** 重写 CSSRule 的 url */
   protected _rewriteCSSRuleUrl(cssText: string, style: SourceStyle, app: IApp): string {
     if (!style.src || !app.assetsPublicPath) {
       return cssText;

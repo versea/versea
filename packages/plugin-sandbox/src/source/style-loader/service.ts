@@ -6,6 +6,7 @@ import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
+import { isPromise } from '../../utils';
 import { IScopedCSS } from '../scoped-css/interface';
 import { IStyleLoader } from './interface';
 
@@ -14,9 +15,9 @@ export * from './interface';
 @provide(IStyleLoader)
 export class StyleLoader implements IStyleLoader {
   /** 资源文件链接和资源文件内容的 Map */
-  protected _globalStyles = new Map<string, string>();
+  protected _globalStyles = new Map<string, Promise<string>>();
 
-  /** 应用名称和 style 加载渲染完成的 Promise 的 Map */
+  /** 应用名称和 style 加载完成的 Promise 的 Map */
   protected _styleDeferred = new WeakMap<IApp, Deferred<void>>();
 
   protected _hooks: IHooks;
@@ -43,7 +44,7 @@ export class StyleLoader implements IStyleLoader {
   public apply(): void {
     this._scopedCSS.apply();
     this._hooks.loadStyle.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, style }) => {
-      await this._ensureStyleCode(style, app);
+      await this.ensureStyleCode(style, app);
       this._appendStyleElement(style, app);
     });
   }
@@ -72,23 +73,30 @@ export class StyleLoader implements IStyleLoader {
     app.styles = undefined;
   }
 
-  /** 设置 style.code */
-  protected async _ensureStyleCode(style: SourceStyle, app: IApp): Promise<void> {
-    const { src } = style;
+  public async ensureStyleCode(style: SourceStyle, app: IApp): Promise<void> {
+    const { src, code, isGlobal } = style;
 
-    // 没有资源文件链接，直接返回
-    if (!src) {
+    if (isPromise(code)) {
+      style.code = await style.code;
+    }
+
+    // 没有资源文件链接或具有 code 忽略
+    if (!src || code) {
       return;
     }
 
     // 全局资源文件链接
     if (this._globalStyles.has(src)) {
-      style.code = this._globalStyles.get(src);
+      style.code = await this._globalStyles.get(src);
       return;
     }
 
     // 拉取资源
-    style.code = await this._fetchStyleCode(style, app);
+    const fetchStylePromise = this._fetchStyleCode(style, app);
+    if (isGlobal) {
+      this._globalStyles.set(src, fetchStylePromise);
+    }
+    style.code = await fetchStylePromise;
   }
 
   /** 获取 style 资源内容 */
@@ -97,25 +105,26 @@ export class StyleLoader implements IStyleLoader {
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const code = await this._request.fetch(src!, app);
+      return await this._request.fetch(src!, app);
+    } catch (error) {
       if (isGlobal) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        this._globalStyles.set(src!, code);
+        this._globalStyles.delete(src!);
       }
-      return code;
-    } catch (error) {
+
       // CSS 文件获取失败，不影响主流程执行
       logError(error, app.name);
       return '';
     }
   }
 
+  /** 添加 style 标签 */
   protected _appendStyleElement(style: SourceStyle, app: IApp): void {
     const { src, code, placeholder } = style;
     const { rawCreateElement, rawGetElementsByTagName, rawAppendChild, rawReplaceChild } = globalEnv;
 
     const styleLink = rawCreateElement.call(document, 'style') as HTMLStyleElement;
-    styleLink.textContent = code ?? '';
+    styleLink.textContent = (code as string) ?? '';
     styleLink.__VERSEA_APP_LINK_PATH__ = src;
     styleLink.setAttribute('data-origin-href', src ?? '');
 

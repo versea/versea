@@ -38,7 +38,7 @@ export class PluginSandbox implements IPluginSandbox {
 
   public apply(): void {
     if (!this._pluginSourceEntry.isApplied) {
-      throw new VerseaError('Please use plugin @versea/plugin-source-entry first.');
+      throw new VerseaError('Please use plugin "@versea/plugin-source-entry" before "@versea/plugin-sandbox".');
     }
     this._tapLoadSource();
 

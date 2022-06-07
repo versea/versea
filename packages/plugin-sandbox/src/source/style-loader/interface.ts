@@ -13,6 +13,9 @@ export interface IStyleLoader {
 
   /** 释放 app 加载的资源文件内容 */
   dispose: (app: IApp) => void;
+
+  /** 尝试设置 style.code */
+  ensureStyleCode: (style: SourceStyle, app: IApp) => Promise<void>;
 }
 
 export interface LoadStyleHookContext extends HookContext {

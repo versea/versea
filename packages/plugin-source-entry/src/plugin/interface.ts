@@ -48,18 +48,36 @@ export interface UnmountAppHookContext extends HookContext {
   result?: unknown;
 }
 
+/** 样式资源描述 */
 export interface SourceStyle {
+  /** 样式链接 */
   src?: string;
-  code?: string;
+
+  /** 样式代码 */
+  code?: Promise<string> | string;
+
+  /** 被替换的资源的 placeholder */
   placeholder?: Node;
+
+  /** 是否是全局样式 */
   isGlobal?: boolean;
 }
 
+/** 脚本资源描述 */
 export interface SourceScript {
+  /** 脚本链接 */
   src?: string;
+
+  /** 脚本代码 */
   code?: Promise<string> | string;
+
+  /** 异步脚本 */
   async?: boolean;
+
+  /** 是否是 module */
   module?: boolean;
+
+  /** 是否是全局脚本 */
   isGlobal?: boolean;
 }
 
