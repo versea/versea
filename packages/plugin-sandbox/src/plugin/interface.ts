@@ -2,6 +2,7 @@ import { createServiceSymbol, IPlugin } from '@versea/core';
 import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 
 import { RewriteCSSRuleHookContext } from '../source/scoped-css/interface';
+import { LoadScriptHookContext, RunScriptHookContext } from '../source/script-loader/interface';
 import { LoadStyleHookContext } from '../source/style-loader/interface';
 
 export const IPluginSandbox = createServiceSymbol('IPluginSandbox');
@@ -20,9 +21,17 @@ declare module '@versea/core' {
   }
 
   interface IHooks {
+    /** 沙箱环境加载 style */
     loadStyle: AsyncSeriesHook<LoadStyleHookContext>;
 
+    /** 重写 CSSRule */
     rewriteCSSRule: SyncHook<RewriteCSSRuleHookContext>;
+
+    /** 沙箱环境加载 script */
+    loadScript: AsyncSeriesHook<LoadScriptHookContext>;
+
+    /** 沙箱环境执行 script */
+    runScript: AsyncSeriesHook<RunScriptHookContext>;
   }
 
   interface AppConfig {
