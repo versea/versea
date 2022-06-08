@@ -15,6 +15,7 @@ provideValue({ sandbox: true, scopedCSS: true }, IConfig);
 App.defineProp('_useSandbox', { optionKey: 'sandbox' });
 App.defineProp('_scopedCSS', { optionKey: 'scopedCSS' });
 App.defineProp('_selectorPrefix', { optionKey: 'selectorPrefix' });
+App.defineProp('_inlineScript', { optionKey: 'inlineScript' });
 
 @provide(IPluginSandbox)
 export class PluginSandbox implements IPluginSandbox {

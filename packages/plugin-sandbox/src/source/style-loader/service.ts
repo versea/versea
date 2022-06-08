@@ -1,12 +1,11 @@
 import { IApp, IConfig, IHooks, provide } from '@versea/core';
 import { IInternalApp, IRequest, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
-import { Deferred, logError, VerseaError } from '@versea/shared';
+import { Deferred, logError, VerseaError, isPromise } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
-import { isPromise } from '../../utils';
 import { IScopedCSS } from '../scoped-css/interface';
 import { IStyleLoader } from './interface';
 

@@ -1,9 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-export function isPromise(target: unknown): target is Promise<unknown> {
-  return toString.call(target) === '[object Promise]';
-}
-
 export class Deferred<T> {
   public promise: Promise<T>;
 

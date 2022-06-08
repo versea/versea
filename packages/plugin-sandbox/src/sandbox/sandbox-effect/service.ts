@@ -46,7 +46,7 @@ export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
   }
 
   public recordEffect(): void {
-    const appName = this._proxyWindow.__MICRO_APP_NAME__;
+    const appName = this._proxyWindow.__VERSEA_APP_NAME__;
     const { eventListenerMap, intervalIdMap, timeoutIdMap } = this._windowEffect;
     const { eventListenerMap: documentEventListenerMap, clickHandlerMap: documentClickHandlerMap } =
       this._documentEffect;
@@ -77,7 +77,7 @@ export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
   }
 
   public rebuildEffect(): void {
-    const appName = this._proxyWindow.__MICRO_APP_NAME__;
+    const appName = this._proxyWindow.__VERSEA_APP_NAME__;
     const {
       _windowListenerMap: windowListenerMap,
       _intervalIdMap: intervalIdMap,
@@ -117,7 +117,7 @@ export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
   }
 
   public releaseEffect(): void {
-    const appName = this._proxyWindow.__MICRO_APP_NAME__;
+    const appName = this._proxyWindow.__VERSEA_APP_NAME__;
     const { eventListenerMap, intervalIdMap, timeoutIdMap } = this._windowEffect;
     const { eventListenerMap: documentEventListenerMap, clickHandlerMap: documentClickHandlerMap } =
       this._documentEffect;

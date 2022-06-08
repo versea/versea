@@ -19,6 +19,9 @@ export interface IScriptLoader {
 
   /** 执行资源文件 */
   execScripts: (app: IApp) => Promise<void>;
+
+  /** 执行单个资源文件 */
+  runScript: (code: string, script: SourceScript, app: IApp) => Promise<void>;
 }
 
 export interface LoadScriptHookContext extends HookContext {
@@ -36,4 +39,16 @@ export interface RunScriptHookContext extends HookContext {
 
   /** script 文件描述 */
   script: SourceScript;
+}
+
+export interface ProcessScripCodeHookContext extends HookContext {
+  app: IApp;
+
+  /** 待执行代码 */
+  code: string;
+
+  /** script 文件描述 */
+  script: SourceScript;
+
+  result: string;
 }

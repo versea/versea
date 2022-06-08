@@ -9,7 +9,12 @@ export class BaseError extends Error {
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, new.target);
     }
-    Object.setPrototypeOf(this, new.target.prototype);
+    if (typeof Object.setPrototypeOf === 'function') {
+      Object.setPrototypeOf(this, new.target.prototype);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      (this as BaseError & { __proto__?: BaseError }).__proto__ = new.target.prototype;
+    }
   }
 }
 

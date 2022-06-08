@@ -3,8 +3,14 @@
 import { isBrowser } from '@versea/shared';
 
 import { ICurrentApp } from './current-app/service';
+import { VerseaAppWindow } from './sandbox/sandbox/interface';
 
 declare global {
+  interface Window {
+    _babelPolyfill?: boolean;
+    __VERSEA_APP_PROXY_WINDOW__?: VerseaAppWindow;
+  }
+
   interface Element {
     __VERSEA_APP_NAME__?: string | undefined;
   }
