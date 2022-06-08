@@ -200,7 +200,7 @@ export class ScopedCSS implements IScopedCSS {
 
   /** 重写 CSSRule 的 url */
   protected _rewriteCSSRuleUrl(cssText: string, style: SourceStyle, app: IApp): string {
-    if (!style.src || !app.assetsPublicPath) {
+    if (!app.assetsPublicPath) {
       return cssText;
     }
 
@@ -209,7 +209,7 @@ export class ScopedCSS implements IScopedCSS {
         return declaration;
       }
 
-      return `url("${completionPath(url, style.src)}")`;
+      return `url("${completionPath(url, style.src ?? app.assetsPublicPath)}")`;
     });
   }
 }

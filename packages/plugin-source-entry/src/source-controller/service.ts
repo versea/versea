@@ -11,6 +11,11 @@ import { ExecSourceHookContext, ISourceController } from './interface';
 
 export * from './interface';
 
+function removeEvent(target: HTMLLinkElement | HTMLScriptElement): void {
+  target.onerror = null;
+  target.onload = null;
+}
+
 @provide(ISourceController)
 export class SourceController implements ISourceController {
   protected _hooks: IHooks;
@@ -63,14 +68,18 @@ export class SourceController implements ISourceController {
     return execHookContext.result!;
   }
 
-  public async _loadScript(sourceScript: SourceScript, app: IApp): Promise<Event | string> {
+  protected async _loadScript(sourceScript: SourceScript, app: IApp): Promise<Event | string> {
     return new Promise((resolve) => {
       const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
       const script = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
       script.type = sourceScript.module ? 'module' : 'text/javascript';
-      script.onload = resolve;
+      script.onload = (event): void => {
+        removeEvent(script);
+        resolve(event);
+      };
       script.onerror = (error): void => {
         logError(error, app.name);
+        removeEvent(script);
         resolve(error);
       };
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -79,16 +88,20 @@ export class SourceController implements ISourceController {
     });
   }
 
-  public async _loadStyle(url: string, app: IApp): Promise<Event | string> {
+  protected async _loadStyle(url: string, app: IApp): Promise<Event | string> {
     return new Promise((resolve) => {
       const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
       const link = globalEnv.rawCreateElement.call(document, 'link') as HTMLLinkElement;
       link.type = 'text/css';
       link.rel = 'stylesheet';
       link.href = url;
-      link.onload = resolve;
+      link.onload = (event): void => {
+        removeEvent(link);
+        resolve(event);
+      };
       link.onerror = (error): void => {
         logError(error, app.name);
+        removeEvent(link);
         resolve(error);
       };
       globalEnv.rawAppendChild.call(head, link);
