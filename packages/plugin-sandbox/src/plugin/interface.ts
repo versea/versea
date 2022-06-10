@@ -4,11 +4,12 @@ import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 import { ISandbox } from '../sandbox/sandbox/interface';
 import { RewriteCSSRuleHookContext } from '../source/scoped-css/interface';
 import {
+  LoadDynamicScriptHookContext,
   LoadScriptHookContext,
   ProcessScripCodeHookContext,
   RunScriptHookContext,
 } from '../source/script-loader/interface';
-import { LoadStyleHookContext } from '../source/style-loader/interface';
+import { LoadDynamicStyleHookContext, LoadStyleHookContext } from '../source/style-loader/interface';
 
 export const IPluginSandbox = createServiceSymbol('IPluginSandbox');
 
@@ -23,17 +24,29 @@ declare module '@versea/core' {
 
     /** 开启样式作用域 */
     scopedCSS?: boolean;
+
+    /**
+     * 是否永久缓存资源代码
+     * @description 不永久缓存资源文件则执行完成资源文件后回删除缓存，并且动态增加的资源不会进入缓存
+     */
+    isPersistentSourceCode?: boolean;
   }
 
   interface IHooks {
     /** 沙箱环境加载 style */
     loadStyle: AsyncSeriesHook<LoadStyleHookContext>;
 
+    /** 沙箱环境加载动态样式（仅仅包含 link 元素，不包含动态添加 style 元素） */
+    loadDynamicStyle: AsyncSeriesHook<LoadDynamicStyleHookContext>;
+
     /** 重写 CSSRule */
     rewriteCSSRule: SyncHook<RewriteCSSRuleHookContext>;
 
     /** 沙箱环境加载 script */
     loadScript: AsyncSeriesHook<LoadScriptHookContext>;
+
+    /** 沙箱环境加载动态脚本（不包含行内脚本） */
+    loadDynamicScript: AsyncSeriesHook<LoadDynamicScriptHookContext>;
 
     /** 沙箱环境执行 script */
     runScript: AsyncSeriesHook<RunScriptHookContext>;
@@ -54,6 +67,12 @@ declare module '@versea/core' {
 
     /** 使用 inlineScript 执行代码 */
     inlineScript?: boolean;
+
+    /**
+     * 是否永久缓存资源代码
+     * @description 不永久缓存资源文件则执行完成资源文件后回删除缓存，并且动态增加的资源不会进入缓存
+     */
+    isPersistentSourceCode?: boolean;
   }
 
   interface IApp {
@@ -74,5 +93,11 @@ declare module '@versea/plugin-source-entry' {
 
     /** 使用 inlineScript 执行代码 */
     _inlineScript?: boolean;
+
+    /**
+     * 是否永久缓存资源代码
+     * @description 不永久缓存资源文件则执行完成资源文件后回删除缓存，并且动态增加的资源不会进入缓存
+     */
+    _isPersistentSourceCode?: boolean;
   }
 }

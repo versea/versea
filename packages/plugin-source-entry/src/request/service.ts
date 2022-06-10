@@ -1,6 +1,7 @@
 import { IApp, IConfig, provide } from '@versea/core';
 import { inject } from 'inversify';
 
+import { IInternalApp } from '../plugin/interface';
 import { IRequest } from './interface';
 
 export * from './interface';
@@ -14,8 +15,9 @@ export class Request implements IRequest {
   }
 
   public async fetch(url: string, app?: IApp, options?: RequestInit): Promise<string> {
-    if (app?.fetch) {
-      return app.fetch(url, options);
+    if ((app as IInternalApp)?._fetch) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return (app as IInternalApp)._fetch!(url, options);
     }
 
     if (this._config.fetch) {

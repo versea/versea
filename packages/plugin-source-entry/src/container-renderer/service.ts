@@ -32,8 +32,14 @@ export class ContainerRender implements IContainerRenderer {
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
     container = context.app.container,
   ): boolean {
-    // 没有 container 的情况不需要执行渲染容器
-    if (container === undefined) {
+    if ((context.app as IInternalApp)._disableRenderContent) {
+      if (!document.body.contains(container as Node | null)) {
+        if (container) {
+          globalEnv.rawAppendChild.call(document.body, container);
+        } else if (context.app.container && document.body.contains(context.app.container)) {
+          globalEnv.rawRemoveChild.call(document.body, context.app.container);
+        }
+      }
       return true;
     }
 
@@ -54,11 +60,18 @@ export class ContainerRender implements IContainerRenderer {
 
   protected _getAppContent(app: IApp): string {
     this._injectVerseaAppStyle();
-    const { name, _documentFragment: documentFragment, documentFragmentWrapperClass } = app as IInternalApp;
+    const {
+      name,
+      _documentFragment: documentFragment,
+      documentFragmentWrapperClass,
+      _disableRenderContent: disableRenderContent,
+    } = app as IInternalApp;
 
     let content = '';
-    if (!documentFragment) {
-      content = `<versea-app-head></versea-app-head><versea-app-body><div id="${name}"></div></versea-app-body>`;
+    if (!documentFragment || disableRenderContent) {
+      content = `<versea-app-head></versea-app-head><versea-app-body${
+        disableRenderContent ? ' style="display: none;"' : ''
+      }><div id="${name}"></div></versea-app-body>`;
     } else {
       const headRegExpArray = /<head[^>]*>([\s\S]*?)<\/head>/i.exec(documentFragment);
       const headContent = `<versea-app-head>${headRegExpArray ? headRegExpArray[1] : ''}</versea-app-head>`;

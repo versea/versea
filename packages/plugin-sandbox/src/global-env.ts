@@ -11,6 +11,10 @@ declare global {
     __VERSEA_APP_PROXY_WINDOW__?: VerseaAppWindow;
   }
 
+  interface Node {
+    __VERSEA_APP_NAME__?: string | undefined;
+  }
+
   interface Element {
     __VERSEA_APP_NAME__?: string | undefined;
   }

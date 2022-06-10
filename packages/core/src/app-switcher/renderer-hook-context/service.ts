@@ -60,7 +60,9 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
     const meta = route.getMeta(app);
     if (meta.parentAppName && meta.parentContainerName) {
       const parentApp = this._appService.getApp(meta.parentAppName);
-      await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);
+      if (parentApp) {
+        await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);
+      }
     }
     return app.mount(switcherContext, route);
   }

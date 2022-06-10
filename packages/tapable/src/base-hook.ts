@@ -72,10 +72,10 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
     this._taps.splice(appendIndex, 0, tap);
   }
 
-  protected _removeOnce(index: number = this._taps.length - 1): void {
+  protected _removeOnce(index: number = this._taps.length - 1, exclude: string[] = []): void {
     for (let i = index; i >= 0; i--) {
       const tap = this._taps[i];
-      if (tap.once) {
+      if (tap.once && !exclude.includes(tap.name)) {
         this._taps.splice(i, 1);
       }
     }

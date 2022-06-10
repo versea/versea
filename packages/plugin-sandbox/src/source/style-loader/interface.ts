@@ -16,6 +16,21 @@ export interface IStyleLoader {
 
   /** 尝试设置 style.code */
   ensureStyleCode: (style: SourceStyle, app: IApp) => Promise<void>;
+
+  /** 给样式表增加前缀 */
+  scopeCSS: (styleLink: HTMLStyleElement, style: SourceStyle, app: IApp) => void;
+
+  /**
+   * 动态添加样式
+   * @param originElement 原始 Link 元素
+   * @param styleElement 替换的 Style 元素
+   */
+  addDynamicStyle: (
+    style: SourceStyle,
+    app: IApp,
+    originElement: HTMLLinkElement,
+    styleElement: HTMLStyleElement,
+  ) => void;
 }
 
 export interface LoadStyleHookContext extends HookContext {
@@ -23,4 +38,20 @@ export interface LoadStyleHookContext extends HookContext {
 
   /** 样式文件描述 */
   style: SourceStyle;
+}
+
+export interface LoadDynamicStyleHookContext extends HookContext {
+  app: IApp;
+
+  /** 样式文件描述 */
+  style: SourceStyle;
+
+  /** 缓存样式文件描述 */
+  cachedStyle?: SourceStyle;
+
+  /** 原始 Link 元素  */
+  originElement: HTMLLinkElement;
+
+  /** 替换的 Style 元素 */
+  styleElement: HTMLStyleElement;
 }

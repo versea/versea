@@ -35,7 +35,13 @@ export interface TapOptions {
 export interface HookContext {
   /**
    * 熔断
-   * @description 设置为 true 则会取消后续 Tap 执行。
+   * @description 设置为 true 则会取消后续所有 Tap 执行。
    */
   bail?: boolean;
+
+  /**
+   * 忽略监听者
+   * @description 根据设置的监听者名称忽略某些监听者本次事件不执行
+   */
+  ignoreTap?: string[];
 }

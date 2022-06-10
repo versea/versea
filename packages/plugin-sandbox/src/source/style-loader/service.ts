@@ -1,11 +1,18 @@
 import { IApp, IConfig, IHooks, provide } from '@versea/core';
-import { IInternalApp, IRequest, LoadSourceHookContext, SourceStyle } from '@versea/plugin-source-entry';
+import {
+  IInternalApp,
+  IRequest,
+  ISourceController,
+  LoadSourceHookContext,
+  SourceStyle,
+} from '@versea/plugin-source-entry';
 import { Deferred, logError, VerseaError, isPromise } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
+import { ILoadEvent } from '../load-event/interface';
 import { IScopedCSS } from '../scoped-css/interface';
 import { IStyleLoader } from './interface';
 
@@ -25,19 +32,28 @@ export class StyleLoader implements IStyleLoader {
 
   protected _request: IRequest;
 
+  protected _sourceController: ISourceController;
+
+  protected _loadEvent: ILoadEvent;
+
   protected _scopedCSS: IScopedCSS;
 
   constructor(
     @inject(IHooks) hooks: IHooks,
     @inject(IConfig) config: IConfig,
     @inject(IRequest) request: IRequest,
+    @inject(ISourceController) sourceController: ISourceController,
+    @inject(ILoadEvent) loadEvent: ILoadEvent,
     @inject(IScopedCSS) scopedCSS: IScopedCSS,
   ) {
     this._hooks = hooks;
     this._config = config;
     this._request = request;
+    this._sourceController = sourceController;
+    this._loadEvent = loadEvent;
     this._scopedCSS = scopedCSS;
     this._hooks.addHook('loadStyle', new AsyncSeriesHook());
+    this._hooks.addHook('loadDynamicStyle', new AsyncSeriesHook());
   }
 
   public apply(): void {
@@ -46,6 +62,26 @@ export class StyleLoader implements IStyleLoader {
       await this.ensureStyleCode(style, app);
       this._appendStyleElement(style, app);
     });
+
+    this._hooks.loadDynamicStyle.tap(
+      VERSEA_PLUGIN_SANDBOX_TAP,
+      async ({ app, style, cachedStyle, originElement, styleElement }) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const _style = cachedStyle ?? style;
+        if (!cachedStyle) {
+          this._sourceController.insertStyle(style, app);
+        }
+        try {
+          await this.ensureStyleCode(_style, app);
+          styleElement.textContent = _style.code as string;
+          this.scopeCSS(styleElement, _style, app);
+          this._loadEvent.dispatchOnLoadEvent(originElement);
+        } catch (error) {
+          logError(error, app.name);
+          this._loadEvent.dispatchOnErrorEvent(originElement);
+        }
+      },
+    );
   }
 
   public async load({ app }: LoadSourceHookContext): Promise<void> {
@@ -53,7 +89,16 @@ export class StyleLoader implements IStyleLoader {
     this._styleDeferred.set(app, deferred);
 
     if (app.styles) {
-      void Promise.all(app.styles.map(async (style) => this._hooks.loadStyle.call({ app, style })))
+      void Promise.all(
+        app.styles.map(async (style) => {
+          try {
+            await this._hooks.loadStyle.call({ app, style });
+          } catch (error) {
+            // CSS 样式加载失败，不影响主逻辑运行
+            logError(error, app.name);
+          }
+        }),
+      )
         .then(() => {
           deferred.resolve();
         })
@@ -69,7 +114,9 @@ export class StyleLoader implements IStyleLoader {
 
   public dispose(app: IApp): void {
     this._styleDeferred.delete(app);
-    app.styles = undefined;
+    if (!this._getPersistentSourceCode(app)) {
+      this._sourceController.removeStyles(app);
+    }
   }
 
   public async ensureStyleCode(style: SourceStyle, app: IApp): Promise<void> {
@@ -98,6 +145,29 @@ export class StyleLoader implements IStyleLoader {
     style.code = await fetchStylePromise;
   }
 
+  public addDynamicStyle(
+    style: SourceStyle,
+    app: IApp,
+    originElement: HTMLLinkElement,
+    styleElement: HTMLStyleElement,
+  ): void {
+    const cachedStyle = this._sourceController.findStyle(style.src, app);
+    void this._hooks.loadDynamicStyle.call({
+      style,
+      cachedStyle,
+      app,
+      originElement,
+      styleElement,
+    });
+  }
+
+  public scopeCSS(styleElement: HTMLStyleElement, style: SourceStyle, app: IApp): void {
+    const scopedCSS = (app as IInternalApp)._scopedCSS ?? this._config.scopedCSS;
+    if (scopedCSS) {
+      this._scopedCSS.process(styleElement, style, app);
+    }
+  }
+
   /** 获取 style 资源内容 */
   protected async _fetchStyleCode(style: SourceStyle, app: IApp): Promise<string> {
     const { src, isGlobal } = style;
@@ -111,9 +181,7 @@ export class StyleLoader implements IStyleLoader {
         this._globalStyles.delete(src!);
       }
 
-      // CSS 文件获取失败，不影响主流程执行
-      logError(error, app.name);
-      return '';
+      throw error;
     }
   }
 
@@ -122,15 +190,15 @@ export class StyleLoader implements IStyleLoader {
     const { src, code, placeholder } = style;
     const { rawCreateElement, rawGetElementsByTagName, rawAppendChild, rawReplaceChild } = globalEnv;
 
-    const styleLink = rawCreateElement.call(document, 'style') as HTMLStyleElement;
-    styleLink.textContent = (code as string) ?? '';
-    styleLink.__VERSEA_APP_LINK_PATH__ = src;
-    styleLink.setAttribute('data-origin-href', src ?? '');
+    const styleElement = rawCreateElement.call(document, 'style') as HTMLStyleElement;
+    styleElement.textContent = (code as string) ?? '';
+    styleElement.__VERSEA_APP_LINK_PATH__ = src;
+    styleElement.setAttribute('data-origin-href', src ?? '');
 
-    this._scopeCSS(styleLink, style, app);
+    this.scopeCSS(styleElement, style, app);
 
     if (placeholder?.parentNode) {
-      rawReplaceChild.call(placeholder.parentNode, styleLink, placeholder);
+      rawReplaceChild.call(placeholder.parentNode, styleElement, placeholder);
       return;
     }
 
@@ -142,14 +210,10 @@ export class StyleLoader implements IStyleLoader {
       }
     }
 
-    rawAppendChild.call(head, styleLink);
+    rawAppendChild.call(head, styleElement);
   }
 
-  /** 给样式表增加前缀 */
-  protected _scopeCSS(styleLink: HTMLStyleElement, style: SourceStyle, app: IApp): void {
-    const scopedCSS = (app as IInternalApp)._scopedCSS ?? this._config.scopedCSS;
-    if (scopedCSS) {
-      this._scopedCSS.process(styleLink, style, app);
-    }
+  protected _getPersistentSourceCode(app: IApp): boolean | undefined {
+    return (app as IInternalApp)._isPersistentSourceCode ?? this._config.isPersistentSourceCode;
   }
 }

@@ -20,8 +20,11 @@ export interface IScriptLoader {
   /** 执行资源文件 */
   execScripts: (app: IApp) => Promise<void>;
 
-  /** 执行单个资源文件 */
-  runScript: (code: string, script: SourceScript, app: IApp) => Promise<void>;
+  /** 创建执行 RunScript 的元素 */
+  createElementForRunScript: (script: SourceScript, app: IApp) => Comment | HTMLScriptElement;
+
+  /** 动态添加脚本 */
+  addDynamicScript: (script: SourceScript, app: IApp, originElement: HTMLScriptElement) => Comment | HTMLScriptElement;
 }
 
 export interface LoadScriptHookContext extends HookContext {
@@ -39,6 +42,9 @@ export interface RunScriptHookContext extends HookContext {
 
   /** script 文件描述 */
   script: SourceScript;
+
+  /** 执行元素 */
+  element: Comment | HTMLScriptElement;
 }
 
 export interface ProcessScripCodeHookContext extends HookContext {
@@ -51,4 +57,20 @@ export interface ProcessScripCodeHookContext extends HookContext {
   script: SourceScript;
 
   result: string;
+}
+
+export interface LoadDynamicScriptHookContext extends HookContext {
+  app: IApp;
+
+  /** 脚本文件描述 */
+  script: SourceScript;
+
+  /** 缓存的脚本文件描述 */
+  cachedScript?: SourceScript;
+
+  /** 原始 script 元素  */
+  originElement: HTMLScriptElement;
+
+  /** 替换的元素 */
+  scriptElement: Comment | HTMLScriptElement;
 }

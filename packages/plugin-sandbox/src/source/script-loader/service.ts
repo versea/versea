@@ -1,11 +1,18 @@
 import { IApp, IConfig, IHooks, provide } from '@versea/core';
-import { IInternalApp, IRequest, LoadSourceHookContext, SourceScript } from '@versea/plugin-source-entry';
+import {
+  IInternalApp,
+  IRequest,
+  ISourceController,
+  LoadSourceHookContext,
+  SourceScript,
+} from '@versea/plugin-source-entry';
 import { Deferred, isPromise, logError, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
+import { ILoadEvent } from '../load-event/interface';
 import { IScriptLoader, ProcessScripCodeHookContext } from './interface';
 
 export * from './interface';
@@ -66,11 +73,24 @@ export class ScriptLoader implements IScriptLoader {
 
   protected _request: IRequest;
 
-  constructor(@inject(IHooks) hooks: IHooks, @inject(IConfig) config: IConfig, @inject(IRequest) request: IRequest) {
+  protected _sourceController: ISourceController;
+
+  protected _loadEvent: ILoadEvent;
+
+  constructor(
+    @inject(IHooks) hooks: IHooks,
+    @inject(IConfig) config: IConfig,
+    @inject(IRequest) request: IRequest,
+    @inject(ISourceController) sourceController: ISourceController,
+    @inject(ILoadEvent) loadEvent: ILoadEvent,
+  ) {
     this._hooks = hooks;
     this._config = config;
     this._request = request;
+    this._sourceController = sourceController;
+    this._loadEvent = loadEvent;
     this._hooks.addHook('loadScript', new AsyncSeriesHook());
+    this._hooks.addHook('loadDynamicScript', new AsyncSeriesHook());
     this._hooks.addHook('runScript', new AsyncSeriesHook());
     this._hooks.addHook('processScriptCode', new SyncHook());
   }
@@ -80,13 +100,37 @@ export class ScriptLoader implements IScriptLoader {
       await this.ensureScriptCode(script, app);
     });
 
-    this._hooks.runScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, code, script }) => {
-      await this.runScript(code, script, app);
+    this._hooks.runScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, code, script, element }) => {
+      await this._runScript(code, script, app, element);
     });
 
     this._hooks.processScriptCode.tap(VERSEA_PLUGIN_SANDBOX_TAP, (context) => {
       context.result = this._processCode(context.code, context.script, context.app);
     });
+
+    this._hooks.loadDynamicScript.tap(
+      VERSEA_PLUGIN_SANDBOX_TAP,
+      async ({ app, script, scriptElement, originElement, cachedScript }) => {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const _script = cachedScript ?? script;
+        if (!cachedScript) {
+          this._sourceController.insertScript(script, app);
+        }
+        try {
+          await this.ensureScriptCode(_script, app);
+          await this._hooks.runScript.call({
+            script: _script,
+            app,
+            code: _script.code as string,
+            element: scriptElement,
+          });
+          this._loadEvent.dispatchOnLoadEvent(originElement);
+        } catch (error) {
+          logError(error, app.name);
+          this._loadEvent.dispatchOnErrorEvent(originElement);
+        }
+      },
+    );
   }
 
   public async load({ app }: LoadSourceHookContext): Promise<void> {
@@ -94,7 +138,16 @@ export class ScriptLoader implements IScriptLoader {
     this._scriptDeferred.set(app, deferred);
 
     if (app.scripts) {
-      void Promise.all(app.scripts.map(async (script) => this._hooks.loadScript.call({ app, script })))
+      void Promise.all(
+        app.scripts.map(async (script) => {
+          try {
+            await this._hooks.loadScript.call({ app, script });
+          } catch (error) {
+            // JS 加载失败，不影响主逻辑运行
+            logError(error, app.name);
+          }
+        }),
+      )
         .then(() => {
           deferred.resolve();
         })
@@ -110,7 +163,9 @@ export class ScriptLoader implements IScriptLoader {
 
   public dispose(app: IApp): void {
     this._scriptDeferred.delete(app);
-    app.scripts = undefined;
+    if (!this._getPersistentSourceCode(app)) {
+      app.scripts = undefined;
+    }
   }
 
   public async ensureScriptCode(script: SourceScript, app: IApp): Promise<void> {
@@ -151,27 +206,61 @@ export class ScriptLoader implements IScriptLoader {
     await Promise.all(
       app.scripts.map(async (script) => {
         const { code } = script;
+        const element = this.createElementForRunScript(script, app);
         if (isPromise(code)) {
           const res = await code;
-          return this._hooks.runScript.call({ app, script, code: res });
+
+          return this._hooks.runScript.call({ app, script, code: res, element });
         }
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return this._hooks.runScript.call({ app, script, code: code! });
+        return this._hooks.runScript.call({ app, script, code: code!, element });
       }),
     );
   }
 
-  public async runScript(code: string, script: SourceScript, app: IApp): Promise<void> {
+  public addDynamicScript(
+    script: SourceScript,
+    app: IApp,
+    originElement: HTMLScriptElement,
+  ): Comment | HTMLScriptElement {
+    const cachedScript = this._sourceController.findScript(script.src, app);
+    const scriptElement = this.createElementForRunScript(script, app);
+    void this._hooks.loadDynamicScript.call({
+      script,
+      cachedScript,
+      app,
+      originElement,
+      scriptElement,
+    });
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return scriptElement;
+  }
+
+  public createElementForRunScript(script: SourceScript, app: IApp): Comment | HTMLScriptElement {
+    if ((app as IInternalApp)._inlineScript || script.module) {
+      return globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
+    }
+
+    return document.createComment(
+      `${script.src ? `script with src='${script.src}'` : 'inline script'} extract by versea-app`,
+    );
+  }
+
+  protected async _runScript(
+    code: string,
+    script: SourceScript,
+    app: IApp,
+    element: Comment | HTMLScriptElement,
+  ): Promise<void> {
     const context = { code, script, app } as ProcessScripCodeHookContext;
     this._hooks.processScriptCode.call(context);
     const resultCode = context.result;
 
     if ((app as IInternalApp)._inlineScript || script.module) {
-      const scriptElement = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
       const body = this._getDocumentBody(app);
-      const promise = this._runCodeInline(resultCode, scriptElement, script, app);
-      body.appendChild(scriptElement);
+      const promise = this._runCodeInline(resultCode, element as HTMLScriptElement, script, app);
+      body.appendChild(element);
       return promise;
     }
 
@@ -196,9 +285,7 @@ export class ScriptLoader implements IScriptLoader {
         this._globalScripts.delete(src!);
       }
 
-      // script 获取失败，不影响主流程执行
-      logError(error, app.name);
-      return `console.error('[versea-app] ${app.name} load "${src!}" error & exec script.')`;
+      throw error;
     }
     /* eslint-enable @typescript-eslint/no-non-null-assertion */
   }
@@ -253,5 +340,9 @@ export class ScriptLoader implements IScriptLoader {
         resolve();
       };
     });
+  }
+
+  protected _getPersistentSourceCode(app: IApp): boolean | undefined {
+    return (app as IInternalApp)._isPersistentSourceCode ?? this._config.isPersistentSourceCode;
   }
 }
