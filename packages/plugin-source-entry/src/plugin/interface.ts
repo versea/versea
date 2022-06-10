@@ -92,8 +92,8 @@ export interface IInternalApp extends IApp {
    */
   _parentContainer?: string;
 
-  /** 禁用渲染容器 */
-  _disableRenderContainer?: boolean;
+  /** 禁用渲染内容 */
+  _disableRenderContent?: boolean;
 
   /**
    * 文档内容
@@ -103,6 +103,9 @@ export interface IInternalApp extends IApp {
 
   /** 资源是否已经被执行 */
   _isSourceExecuted?: boolean;
+
+  /** 获取资源文件 */
+  _fetch?: (url: string, options?: RequestInit) => Promise<string>;
 }
 
 declare module '@versea/core' {
@@ -164,8 +167,8 @@ declare module '@versea/core' {
     /** 资源文件公共路径 */
     assetsPublicPath?: string;
 
-    /** 禁用渲染容器 */
-    disableRenderContainer?: boolean;
+    /** 禁用渲染内容 */
+    disableRenderContent?: boolean;
 
     /** 获取资源文件 */
     fetch?: (url: string, options?: RequestInit) => Promise<string>;
@@ -186,8 +189,5 @@ declare module '@versea/core' {
 
     /** 资源文件公共路径 */
     assetsPublicPath?: string;
-
-    /** 获取资源文件 */
-    fetch?: (url: string, options?: RequestInit) => Promise<string>;
   }
 }

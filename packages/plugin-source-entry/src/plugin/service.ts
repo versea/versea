@@ -14,11 +14,9 @@ import {
 } from '../constants';
 import { IContainerRenderer } from '../container-renderer/interface';
 import { ISourceController } from '../source-controller/interface';
-import { addProtocol, completionPath, getEffectivePath } from '../utils';
+import { addProtocol, getEffectivePath } from '../utils';
 import {
   IInternalApp,
-  SourceScript,
-  SourceStyle,
   LoadAppHookContext,
   MountAppHookContext,
   UnmountAppHookContext,
@@ -33,10 +31,10 @@ App.defineProp('assetsPublicPath', {
   validator: (value) => value === undefined || typeof value === 'string',
   format: (value) => (value ? getEffectivePath(addProtocol(value as string)) : value),
 });
-App.defineProp('fetch');
+App.defineProp('_fetch', { optionKey: 'fetch' });
 App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
-App.defineProp('_disableRenderContainer', { optionKey: 'disableRenderContainer' });
+App.defineProp('_disableRenderContent', { optionKey: 'disableRenderContent' });
 
 async function noop(): Promise<void> {
   return Promise.resolve();
@@ -97,12 +95,10 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       const { app } = context;
 
       // 将字符串的 style 转化 SourceStyle
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      app.styles = this._normalizeSource(app.styles, app.assetsPublicPath);
+      app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
 
       // 将字符串的 script 转化 SourceScript
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      app.scripts = this._normalizeSource(app.scripts, app.assetsPublicPath);
+      app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
 
       return Promise.resolve();
     });
@@ -110,10 +106,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     // 创建容器和加载资源
     this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
       const { app } = context;
-      if (!(app as IInternalApp)._disableRenderContainer) {
-        app.container = this._containerRenderer.createContainerElement(app);
-      }
-
+      app.container = this._containerRenderer.createContainerElement(app);
       await this._sourceController.load(context);
     });
 
@@ -205,23 +198,5 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       this._containerRenderer.renderContainer(context, null);
       return Promise.resolve();
     });
-  }
-
-  protected _normalizeSource<T extends SourceScript | SourceStyle>(
-    sources?: (T | string)[],
-    assetsPublicPath?: string,
-  ): T[] {
-    return sources
-      ? sources.map((source) =>
-          typeof source === 'string'
-            ? ({
-                src: completionPath(source, assetsPublicPath),
-              } as T)
-            : {
-                ...source,
-                src: completionPath(source.src!, assetsPublicPath),
-              },
-        )
-      : [];
   }
 }

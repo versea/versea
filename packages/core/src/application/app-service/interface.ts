@@ -13,7 +13,10 @@ export interface IAppService {
   registerApps: (configList: AppConfig[]) => IApp[];
 
   /** 根据应用名称获取应用实例 */
-  getApp: (name: string) => IApp;
+  getApp: (name: string) => IApp | undefined;
+
+  /** 判断是否具有该应用实例 */
+  hasApp: (name: string) => boolean;
 }
 
 export interface RegisterAppHookContext extends HookContext {

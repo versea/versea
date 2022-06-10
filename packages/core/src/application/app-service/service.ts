@@ -66,11 +66,11 @@ export class AppService implements IAppService {
     return apps;
   }
 
-  public getApp(name: string): IApp {
-    const app = this._appMap.get(name);
-    if (!app) {
-      throw new VerseaError(`Can not find app by name "${name}".`);
-    }
-    return app;
+  public hasApp(name: string): boolean {
+    return this._appMap.has(name);
+  }
+
+  public getApp(name: string): IApp | undefined {
+    return this._appMap.get(name);
   }
 }

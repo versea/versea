@@ -1,7 +1,7 @@
 import { AppLifeCycles, AppProps, createServiceSymbol, IApp } from '@versea/core';
 import { HookContext } from '@versea/tapable';
 
-import { LoadAppHookContext, MountAppHookContext } from '../plugin/interface';
+import { LoadAppHookContext, MountAppHookContext, SourceScript, SourceStyle } from '../plugin/interface';
 
 export const ISourceController = createServiceSymbol('ISourceController');
 
@@ -20,6 +20,27 @@ export interface ISourceController {
    * @description 执行存储的文件内容
    */
   exec: (context: LoadAppHookContext | MountAppHookContext) => Promise<AppLifeCycles>;
+
+  /** 将字符串的数组转化成标准 Source */
+  normalizeSource: <T extends SourceScript | SourceStyle>(sources?: (T | string)[], assetsPublicPath?: string) => T[];
+
+  /** 查找 SourceScript */
+  findScript: (src: string | undefined, app: IApp) => SourceScript | undefined;
+
+  /** 查找 SourceStyle */
+  findStyle: (src: string | undefined, app: IApp) => SourceStyle | undefined;
+
+  /** 插入 SourceScript */
+  insertScript: (script: SourceScript, app: IApp) => void;
+
+  /** 插入 SourceStyle */
+  insertStyle: (style: SourceStyle, app: IApp) => void;
+
+  /** 删除 scripts 缓存 */
+  removeScripts: (app: IApp) => void;
+
+  /** 删除 styles 缓存 */
+  removeStyles: (app: IApp) => void;
 }
 
 export interface LoadSourceHookContext extends HookContext {

@@ -4,13 +4,23 @@ import { HookContext } from './types';
 export class AsyncSeriesHook<T extends HookContext> extends BaseHook<T, Promise<void>> {
   public async call(context: T): Promise<void> {
     let breakIndex = this._taps.length - 1;
+    const excludedOnceTapNames = [];
 
     for (let i = 0; i < this._taps.length; i++) {
+      const tap = this._taps[i];
+      if (context.ignoreTap?.length) {
+        if (context.ignoreTap.includes(tap.name)) {
+          excludedOnceTapNames.push(tap.name);
+          continue;
+        }
+      }
+
       try {
-        await this._taps[i].fn(context);
+        await tap.fn(context);
       } catch (error) {
         context.bail = false;
-        this._removeOnce(i);
+        context.ignoreTap = undefined;
+        this._removeOnce(i, excludedOnceTapNames);
         throw error;
       }
 
@@ -21,6 +31,7 @@ export class AsyncSeriesHook<T extends HookContext> extends BaseHook<T, Promise<
     }
 
     context.bail = false;
-    this._removeOnce(breakIndex);
+    context.ignoreTap = undefined;
+    this._removeOnce(breakIndex, excludedOnceTapNames);
   }
 }

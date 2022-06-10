@@ -1,4 +1,16 @@
-import { IApp } from '@versea/core';
+import { createServiceSymbol, IApp } from '@versea/core';
+
+export const ISandbox = createServiceSymbol('ISandbox');
+
+export interface ISandbox {
+  verseaAppWindow: VerseaAppWindow;
+
+  proxyWindow: VerseaAppWindow;
+
+  start: () => void;
+
+  stop: () => void;
+}
 
 export interface VerseaAppWindow extends Window {
   /* eslint-disable @typescript-eslint/naming-convention */
@@ -16,14 +28,4 @@ export interface VerseaAppWindow extends Window {
 
   /** 删除元素和事件的应用隔离 */
   removeScope: () => void;
-}
-
-export interface ISandbox {
-  verseaAppWindow: VerseaAppWindow;
-
-  proxyWindow: VerseaAppWindow;
-
-  start: () => void;
-
-  stop: () => void;
 }
