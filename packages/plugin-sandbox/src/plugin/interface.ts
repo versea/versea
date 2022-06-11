@@ -48,8 +48,14 @@ declare module '@versea/core' {
     /** 沙箱环境加载动态脚本（不包含行内脚本） */
     loadDynamicScript: AsyncSeriesHook<LoadDynamicScriptHookContext>;
 
-    /** 沙箱环境执行 script */
+    /**
+     * 沙箱环境执行 script
+     * @description 执行动态 InlineScript 时，会忽略 VERSEA_PLUGIN_SANDBOX_TAP 之前的监听，如果希望在动态 InlineScript 之前增加监听，可以使用 beforeRunDynamicInlineScript
+     */
     runScript: AsyncSeriesHook<RunScriptHookContext>;
+
+    /** 执行动态 InlineScript 之前 */
+    beforeRunDynamicInlineScript: SyncHook<RunScriptHookContext>;
 
     /** 沙箱环境下生成代码 */
     processScriptCode: SyncHook<ProcessScripCodeHookContext>;

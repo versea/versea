@@ -45,6 +45,9 @@ export interface RunScriptHookContext extends HookContext {
 
   /** 执行元素 */
   element: Comment | HTMLScriptElement;
+
+  /** 将 element 添加到 body */
+  appendToBody?: boolean;
 }
 
 export interface ProcessScripCodeHookContext extends HookContext {

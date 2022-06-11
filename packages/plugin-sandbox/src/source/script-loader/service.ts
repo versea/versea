@@ -93,6 +93,7 @@ export class ScriptLoader implements IScriptLoader {
     this._hooks.addHook('loadDynamicScript', new AsyncSeriesHook());
     this._hooks.addHook('runScript', new AsyncSeriesHook());
     this._hooks.addHook('processScriptCode', new SyncHook());
+    this._hooks.addHook('beforeRunDynamicInlineScript', new SyncHook());
   }
 
   public apply(): void {
@@ -100,8 +101,8 @@ export class ScriptLoader implements IScriptLoader {
       await this.ensureScriptCode(script, app);
     });
 
-    this._hooks.runScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, code, script, element }) => {
-      await this._runScript(code, script, app, element);
+    this._hooks.runScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, code, script, element, appendToBody }) => {
+      await this._runScript(code, script, app, element, appendToBody);
     });
 
     this._hooks.processScriptCode.tap(VERSEA_PLUGIN_SANDBOX_TAP, (context) => {
@@ -206,15 +207,10 @@ export class ScriptLoader implements IScriptLoader {
     await Promise.all(
       app.scripts.map(async (script) => {
         const { code } = script;
+        const stringCode = isPromise(code) ? await code : code;
         const element = this.createElementForRunScript(script, app);
-        if (isPromise(code)) {
-          const res = await code;
-
-          return this._hooks.runScript.call({ app, script, code: res, element });
-        }
-
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return this._hooks.runScript.call({ app, script, code: code!, element });
+        return this._hooks.runScript.call({ app, script, code: stringCode!, element, appendToBody: true });
       }),
     );
   }
@@ -252,15 +248,18 @@ export class ScriptLoader implements IScriptLoader {
     script: SourceScript,
     app: IApp,
     element: Comment | HTMLScriptElement,
+    appendToBody?: boolean,
   ): Promise<void> {
     const context = { code, script, app } as ProcessScripCodeHookContext;
     this._hooks.processScriptCode.call(context);
     const resultCode = context.result;
 
     if ((app as IInternalApp)._inlineScript || script.module) {
-      const body = this._getDocumentBody(app);
       const promise = this._runCodeInline(resultCode, element as HTMLScriptElement, script, app);
-      body.appendChild(element);
+      if (appendToBody) {
+        const body = this._getDocumentBody(app);
+        body.appendChild(element);
+      }
       return promise;
     }
 

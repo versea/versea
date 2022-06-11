@@ -14,17 +14,15 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
         throw new VerseaError(`Duplicate tap name "${name}".`);
       }
 
-      sameNameTap.fn = fn;
-      sameNameTap.once = options.once;
+      sameNameTap.fn = this._wrapperCallback(fn, options);
       return;
     }
 
     const priority = options.priority ?? DefaultHookPriority;
     const tap = {
       name,
-      fn,
+      fn: this._wrapperCallback(fn, options),
       priority,
-      once: options.once,
     };
 
     if (this._taps.length == 0) {
@@ -62,6 +60,10 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
     }
   }
 
+  protected _getTaps(): Tap<T, K>[] {
+    return [...this._taps];
+  }
+
   protected _insert(tap: Tap<T, K>, name: string, type: 'after' | 'before'): void {
     const index = this._taps.findIndex((item) => item.name === name);
     if (index < 0) {
@@ -72,12 +74,24 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
     this._taps.splice(appendIndex, 0, tap);
   }
 
-  protected _removeOnce(index: number = this._taps.length - 1, exclude: string[] = []): void {
-    for (let i = index; i >= 0; i--) {
-      const tap = this._taps[i];
-      if (tap.once && !exclude.includes(tap.name)) {
-        this._taps.splice(i, 1);
-      }
+  protected _wrapperCallback(fn: (context: T) => K, options: TapOptions): (context: T) => K {
+    if (!options.once) {
+      return fn;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const wrapperOnceFunction = function wrapperOnceFunction(context: T): K {
+      try {
+        return fn(context);
+      } finally {
+        const index = self._taps.findIndex((tap) => tap.fn === wrapperOnceFunction);
+        if (index >= 0) {
+          self._taps.splice(index, 1);
+        }
+      }
+    };
+
+    return wrapperOnceFunction;
   }
 }

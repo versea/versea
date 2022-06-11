@@ -1,10 +1,12 @@
 import { IApp, IAppService, IHooks, provide } from '@versea/core';
 import { completionPath, IInternalApp, SourceScript, SourceStyle } from '@versea/plugin-source-entry';
+import { AsyncSeriesHook, Tap } from '@versea/tapable';
 import { inject } from 'inversify';
 
+import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
 import { ICurrentApp } from '../../current-app/interface';
 import { globalEnv } from '../../global-env';
-import { IScriptLoader } from '../../source/script-loader/interface';
+import { IScriptLoader, RunScriptHookContext } from '../../source/script-loader/interface';
 import { IStyleLoader } from '../../source/style-loader/interface';
 import { IElementPatch } from './interface';
 
@@ -459,12 +461,32 @@ export class ElementPatch implements IElementPatch {
       // inline script
       script.code = element.textContent;
       const replaceElement = this._scriptLoader.createElementForRunScript(script, app);
-      void this._hooks.runScript.call({ script, app, code: script.code, element: replaceElement });
+      const context = { script, app, code: script.code, element: replaceElement };
+      this._hooks.beforeRunDynamicInlineScript.call(context);
+      this._runDynamicInlineScript({ ...context });
       this._dynamicElement.set(element, replaceElement);
       return replaceElement;
     }
 
     return element;
+  }
+
+  protected _runDynamicInlineScript(context: RunScriptHookContext): void {
+    // InlineScript 必须保证默认监听同步执行，因此需要忽略 runScript 默认监听 VERSEA_PLUGIN_SANDBOX_TAP 之前的监听
+    const runScriptHook = this._hooks.runScript;
+    const taps = (
+      runScriptHook as AsyncSeriesHook<RunScriptHookContext> & { _taps: Tap<RunScriptHookContext, Promise<void>>[] }
+    )._taps;
+    const ignoreTap: string[] = [];
+    for (const tap of taps) {
+      if (tap.name !== VERSEA_PLUGIN_SANDBOX_TAP) {
+        ignoreTap.push(tap.name);
+      } else {
+        break;
+      }
+    }
+    context.ignoreTap = ignoreTap;
+    void runScriptHook.call(context);
   }
 
   protected _getMappingNode(node: Node): Node {
