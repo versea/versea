@@ -7,9 +7,6 @@ export interface Tap<T extends object, K extends Promise<void> | void> {
 
   /** 优先级，越小越优先 */
   priority: number;
-
-  /** 是否仅仅执行一次 */
-  once?: boolean;
 }
 
 export interface TapOptions {
