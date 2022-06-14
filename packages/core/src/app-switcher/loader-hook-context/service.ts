@@ -20,8 +20,6 @@ export class LoaderHookContext extends ExtensibleEntity implements ILoaderHookCo
 
   public currentLoadApps: IApp[] = [];
 
-  public bail = false;
-
   constructor(options: LoaderHookContextOptions) {
     super(options);
     this.matchedResult = options.matchedResult;

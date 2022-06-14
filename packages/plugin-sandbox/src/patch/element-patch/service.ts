@@ -3,7 +3,7 @@ import { completionPath, IInternalApp, SourceScript, SourceStyle } from '@versea
 import { AsyncSeriesHook, Tap } from '@versea/tapable';
 import { inject } from 'inversify';
 
-import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
+import { PLUGIN_SANDBOX_TAP } from '../../constants';
 import { ICurrentApp } from '../../current-app/interface';
 import { globalEnv } from '../../global-env';
 import { IScriptLoader, RunScriptHookContext } from '../../source/script-loader/interface';
@@ -472,14 +472,14 @@ export class ElementPatch implements IElementPatch {
   }
 
   protected _runDynamicInlineScript(context: RunScriptHookContext): void {
-    // InlineScript 必须保证默认监听同步执行，因此需要忽略 runScript 默认监听 VERSEA_PLUGIN_SANDBOX_TAP 之前的监听
+    // InlineScript 必须保证默认监听同步执行，因此需要忽略 runScript 默认监听 PLUGIN_SANDBOX_TAP 之前的监听
     const runScriptHook = this._hooks.runScript;
     const taps = (
       runScriptHook as AsyncSeriesHook<RunScriptHookContext> & { _taps: Tap<RunScriptHookContext, Promise<void>>[] }
     )._taps;
     const ignoreTap: string[] = [];
     for (const tap of taps) {
-      if (tap.name !== VERSEA_PLUGIN_SANDBOX_TAP) {
+      if (tap.name !== PLUGIN_SANDBOX_TAP) {
         ignoreTap.push(tap.name);
       } else {
         break;

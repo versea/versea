@@ -21,21 +21,26 @@ export class Router implements IRouter {
 
   @lazyInject(IAppSwitcher) protected readonly _appSwitcher!: IAppSwitcher;
 
-  protected readonly _matcher: IMatcher;
+  protected readonly _config: IConfig;
 
   protected readonly _hooks: IHooks;
 
-  protected readonly _config: IConfig;
+  protected readonly _matcher: IMatcher;
 
   /** 标识是否已经把 router 传给 navigation */
   protected _hasBindRouter = false;
 
   constructor(@inject(IMatcher) matcher: IMatcher, @inject(IHooks) hooks: IHooks, @inject(IConfig) config: IConfig) {
-    this._matcher = matcher;
-    this._hooks = hooks;
     this._config = config;
+    this._hooks = hooks;
+    this._matcher = matcher;
 
-    this._initHooks();
+    this._hooks.reroute.tap(VERSEA_INTERNAL_TAP, async (context) => {
+      await this._appSwitcher.switch({
+        navigationEvent: context.navigationEvent,
+        matchedResult: context.matchedResult,
+      });
+    });
   }
 
   public get isStarted(): boolean {
@@ -82,14 +87,5 @@ export class Router implements IRouter {
       path: window.location.pathname,
       query: parse(window.location.search),
     };
-  }
-
-  protected _initHooks(): void {
-    this._hooks.reroute.tap(VERSEA_INTERNAL_TAP, async (context) => {
-      await this._appSwitcher.switch({
-        navigationEvent: context.navigationEvent,
-        matchedResult: context.matchedResult,
-      });
-    });
   }
 }

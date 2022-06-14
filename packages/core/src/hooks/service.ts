@@ -13,7 +13,7 @@ export * from './interface';
 
 @provide(IHooks)
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment, @typescript-eslint/prefer-ts-expect-error
-// @ts-ignore 动态增加的 Hook 会使这里类型报错
+// @ts-ignore 动态增加的 Hook 会使 Hooks 类型报错
 export class Hooks implements IHooks {
   public beforeRegisterApp = new SyncHook<RegisterAppHookContext>();
 
@@ -51,7 +51,7 @@ export class Hooks implements IHooks {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public addHook(key: string, hook: BaseHook<any, any>): void {
-    // @ts-expect-error 外部可以直接增加 hook
+    // @ts-expect-error 外部可以增加 hook
     this[key] = hook;
   }
 }

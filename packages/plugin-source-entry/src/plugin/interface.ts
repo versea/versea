@@ -126,6 +126,9 @@ declare module '@versea/core' {
     /** 卸载应用 */
     unmountApp: AsyncSeriesHook<UnmountAppHookContext>;
 
+    /** 渲染容器之后 */
+    afterRenderContainer: AsyncSeriesHook<LoadAppHookContext | MountAppHookContext>;
+
     /**
      * 根据 app 上的资源文件信息加载资源文件
      * @description 加载资源文件，并把 css 加入容器
@@ -164,6 +167,9 @@ declare module '@versea/core' {
      */
     scripts?: (SourceScript | string)[];
 
+    /** 入口路径 */
+    entry?: string;
+
     /** 资源文件公共路径 */
     assetsPublicPath?: string;
 
@@ -186,6 +192,9 @@ declare module '@versea/core' {
 
     /** 应用脚本 */
     scripts?: SourceScript[];
+
+    /** 应用入口路径 */
+    entry?: string;
 
     /** 资源文件公共路径 */
     assetsPublicPath?: string;

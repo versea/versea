@@ -4,8 +4,7 @@ import { ExtensibleEntity } from '@versea/shared';
 import { ICurrentApp } from '../../current-app/interface';
 import { globalEnv } from '../../global-env';
 import { IDocumentEffect } from '../document-effect/interface';
-import { VerseaAppWindow } from '../sandbox/interface';
-import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
+import { TimerEventRecord, VerseaAppEventListener, VerseaAppWindow } from '../sandbox/types';
 import { IWindowEffect } from '../window-effect/interface';
 import { ISandboxEffect, SandboxEffectDependencies, SandboxEffectOptions } from './interface';
 

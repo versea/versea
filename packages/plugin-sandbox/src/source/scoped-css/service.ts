@@ -4,7 +4,7 @@ import { completionPath, IContainerRenderer, IInternalApp, SourceStyle } from '@
 import { SyncHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
-import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
+import { PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
 import { IScopedCSS, RewriteCSSRuleHookContext } from './interface';
 
@@ -55,7 +55,7 @@ export class ScopedCSS implements IScopedCSS {
   }
 
   public apply(): void {
-    this._hooks.rewriteCSSRule.tap(VERSEA_PLUGIN_SANDBOX_TAP, (context) => {
+    this._hooks.rewriteCSSRule.tap(PLUGIN_SANDBOX_TAP, (context) => {
       context.result = context.rule.cssText;
       if (context.rule.type === RuleType.STYLE) {
         context.result = this._rewriteStyleRuleSelector(context.result, context.prefix);

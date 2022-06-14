@@ -1,4 +1,5 @@
 import { ExtensibleEntity, logWarn, memoizePromise, VerseaError } from '@versea/shared';
+import { omit } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
@@ -200,5 +201,10 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     this._lifeCycles = lifeCycles;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  protected toJSON(): Record<string, unknown> {
+    return omit(['_Status'], this);
   }
 }

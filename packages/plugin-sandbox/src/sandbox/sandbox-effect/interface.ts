@@ -3,7 +3,7 @@ import { interfaces } from 'inversify';
 
 import { ICurrentApp } from '../../current-app/interface';
 import { IDocumentEffect } from '../document-effect/interface';
-import { VerseaAppWindow } from '../sandbox/interface';
+import { VerseaAppWindow } from '../sandbox/types';
 import { IWindowEffect } from '../window-effect/interface';
 
 export const ISandboxEffect = createServiceSymbol('ISandboxEffect');

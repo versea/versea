@@ -200,7 +200,7 @@ export function createProvider(MetaDataKey: string): CreateProviderReturnType {
           .onActivation(bindLazyInjection);
       });
 
-      // 自动实例化所有依赖
+      // 尝试实例化所有依赖的类
       provideMetadata.forEach(({ serviceIdentifier }) => {
         container.get(serviceIdentifier);
       });

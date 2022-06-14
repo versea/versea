@@ -10,7 +10,7 @@ import { Deferred, isPromise, logError, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
-import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
+import { PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
 import { ILoadEvent } from '../load-event/interface';
 import { IScriptLoader, ProcessScripCodeHookContext } from './interface';
@@ -97,20 +97,20 @@ export class ScriptLoader implements IScriptLoader {
   }
 
   public apply(): void {
-    this._hooks.loadScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, script }) => {
-      await this.ensureScriptCode(script, app);
+    this._hooks.loadScript.tap(PLUGIN_SANDBOX_TAP, async ({ app, script }) => {
+      await this.ensureCode(script, app);
     });
 
-    this._hooks.runScript.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, code, script, element, appendToBody }) => {
+    this._hooks.runScript.tap(PLUGIN_SANDBOX_TAP, async ({ app, code, script, element, appendToBody }) => {
       await this._runScript(code, script, app, element, appendToBody);
     });
 
-    this._hooks.processScriptCode.tap(VERSEA_PLUGIN_SANDBOX_TAP, (context) => {
+    this._hooks.processScriptCode.tap(PLUGIN_SANDBOX_TAP, (context) => {
       context.result = this._processCode(context.code, context.script, context.app);
     });
 
     this._hooks.loadDynamicScript.tap(
-      VERSEA_PLUGIN_SANDBOX_TAP,
+      PLUGIN_SANDBOX_TAP,
       async ({ app, script, scriptElement, originElement, cachedScript }) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const _script = cachedScript ?? script;
@@ -118,7 +118,7 @@ export class ScriptLoader implements IScriptLoader {
           this._sourceController.insertScript(script, app);
         }
         try {
-          await this.ensureScriptCode(_script, app);
+          await this.ensureCode(_script, app);
           await this._hooks.runScript.call({
             script: _script,
             app,
@@ -162,6 +162,10 @@ export class ScriptLoader implements IScriptLoader {
     return Promise.resolve();
   }
 
+  public async waitLoaded(app: IApp): Promise<void> {
+    return this._scriptDeferred.get(app)?.promise;
+  }
+
   public dispose(app: IApp): void {
     this._scriptDeferred.delete(app);
     if (!this._getPersistentSourceCode(app)) {
@@ -169,7 +173,7 @@ export class ScriptLoader implements IScriptLoader {
     }
   }
 
-  public async ensureScriptCode(script: SourceScript, app: IApp): Promise<void> {
+  public async ensureCode(script: SourceScript, app: IApp): Promise<void> {
     const { src, code, async, isGlobal } = script;
 
     if (isPromise(code)) {
@@ -199,18 +203,28 @@ export class ScriptLoader implements IScriptLoader {
     script.code = script.async ? fetchScriptPromise : await fetchScriptPromise;
   }
 
-  public async execScripts(app: IApp): Promise<void> {
+  public async exec(app: IApp): Promise<void> {
     if (!app.scripts || !app.scripts.length) {
       return;
     }
 
     await Promise.all(
       app.scripts.map(async (script) => {
-        const { code } = script;
-        const stringCode = isPromise(code) ? await code : code;
+        let stringCode = script.code;
+        if (!stringCode) {
+          return;
+        }
+
+        if (isPromise(stringCode)) {
+          try {
+            stringCode = await stringCode;
+          } catch (error) {
+            logError(error, app.name);
+            stringCode = '';
+          }
+        }
         const element = this.createElementForRunScript(script, app);
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        return this._hooks.runScript.call({ app, script, code: stringCode!, element, appendToBody: true });
+        return this._hooks.runScript.call({ app, script, code: stringCode, element, appendToBody: true });
       }),
     );
   }
@@ -229,7 +243,6 @@ export class ScriptLoader implements IScriptLoader {
       originElement,
       scriptElement,
     });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return scriptElement;
   }
 

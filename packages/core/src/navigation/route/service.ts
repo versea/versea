@@ -156,6 +156,7 @@ export class Route extends ExtensibleEntity implements IRoute {
         query: options.query ?? {},
         cloneDeep(): MatchedRoute {
           return cloneObjectWith(this, {
+            // app 是唯一的，apps 不需要深拷贝
             apps: (value) => [...value],
           });
         },
@@ -168,6 +169,7 @@ export class Route extends ExtensibleEntity implements IRoute {
         },
       },
       {
+        // app 是唯一的，apps 不需要深拷贝
         apps: (value) => [...value],
       },
     );

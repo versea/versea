@@ -22,8 +22,6 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
 
   public readonly mismatchIndex: number;
 
-  public bail = false;
-
   protected readonly _appService: IAppService;
 
   constructor(

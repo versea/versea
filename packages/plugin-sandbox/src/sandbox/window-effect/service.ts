@@ -2,8 +2,7 @@ import { provide } from '@versea/core';
 import { ExtensibleEntity } from '@versea/shared';
 
 import { globalEnv } from '../../global-env';
-import { VerseaAppWindow } from '../sandbox/interface';
-import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
+import { TimerEventRecord, VerseaAppEventListener, VerseaAppWindow } from '../sandbox/types';
 import { IWindowEffect, WindowEffectOptions } from './interface';
 
 export * from './interface';

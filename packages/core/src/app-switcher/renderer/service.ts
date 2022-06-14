@@ -60,17 +60,17 @@ export class Renderer implements IRenderer {
 
   /** 添加内置渲染 Hooks */
   protected _initHooks(): void {
-    this._tapUnmount();
-    this._tapUnmountApps();
-    this._tapUnmountRootFragmentApps();
-    this._tapMount();
-    this._tapMountMainApp();
-    this._tapMountRootFragmentApps();
-    this._tapMountFragmentApps();
+    this._onUnmount();
+    this._onUnmountApps();
+    this._onUnmountRootFragmentApps();
+    this._onMount();
+    this._onMountMainApp();
+    this._onMountRootFragmentApps();
+    this._onMountFragmentApps();
   }
 
   /** 销毁应用 */
-  protected _tapUnmount(): void {
+  protected _onUnmount(): void {
     const { unmount, unmountApps, unmountRootFragmentApps } = this._hooks;
 
     unmount.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
@@ -84,7 +84,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 销毁普通路由的应用 */
-  protected _tapUnmountApps(): void {
+  protected _onUnmountApps(): void {
     this._hooks.unmountApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRoutes, targetRoutes, mismatchIndex, routeState } = hookContext;
 
@@ -116,7 +116,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 销毁根部路由碎片应用 */
-  protected _tapUnmountRootFragmentApps(): void {
+  protected _onUnmountRootFragmentApps(): void {
     this._hooks.unmountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRootFragmentRoutes, targetRootFragmentRoutes, routeState } = hookContext;
 
@@ -136,7 +136,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 渲染应用 */
-  protected _tapMount(): void {
+  protected _onMount(): void {
     const { mount, mountMainApps, mountRootFragmentApps, mountFragmentApps } = this._hooks;
 
     mount.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
@@ -151,7 +151,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 渲染主应用 */
-  protected _tapMountMainApp(): void {
+  protected _onMountMainApp(): void {
     this._hooks.mountMainApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRoutes, targetRoutes, routeState } = hookContext;
 
@@ -171,7 +171,7 @@ export class Renderer implements IRenderer {
   }
 
   /** 渲染根部路由碎片应用 */
-  protected _tapMountRootFragmentApps(): void {
+  protected _onMountRootFragmentApps(): void {
     this._hooks.mountRootFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { currentRootFragmentRoutes, targetRootFragmentRoutes, routeState } = hookContext;
 
@@ -191,7 +191,7 @@ export class Renderer implements IRenderer {
     });
   }
 
-  protected _tapMountFragmentApps(): void {
+  protected _onMountFragmentApps(): void {
     this._hooks.mountFragmentApps.tap(VERSEA_INTERNAL_TAP, async (hookContext: IRendererHookContext) => {
       const { switcherContext, currentRoutes, targetRoutes, routeState } = hookContext;
 
