@@ -11,11 +11,14 @@ export interface IStyleLoader {
   /** 加载资源文件 */
   load: (context: LoadSourceHookContext) => Promise<void>;
 
+  /** 等待加载资源文件完成  */
+  waitLoaded: (app: IApp) => Promise<void>;
+
   /** 释放 app 加载的资源文件内容 */
   dispose: (app: IApp) => void;
 
   /** 尝试设置 style.code */
-  ensureStyleCode: (style: SourceStyle, app: IApp) => Promise<void>;
+  ensureCode: (style: SourceStyle, app: IApp) => Promise<void>;
 
   /** 给样式表增加前缀 */
   scopeCSS: (styleLink: HTMLStyleElement, style: SourceStyle, app: IApp) => void;

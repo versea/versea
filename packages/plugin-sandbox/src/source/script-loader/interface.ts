@@ -11,14 +11,17 @@ export interface IScriptLoader {
   /** 加载资源文件 */
   load: (context: LoadSourceHookContext) => Promise<void>;
 
+  /** 等待加载资源文件完成  */
+  waitLoaded: (app: IApp) => Promise<void>;
+
   /** 释放 app 加载的资源文件内容 */
   dispose: (app: IApp) => void;
 
   /** 尝试设置 script.code */
-  ensureScriptCode: (script: SourceScript, app: IApp) => Promise<void>;
+  ensureCode: (script: SourceScript, app: IApp) => Promise<void>;
 
   /** 执行资源文件 */
-  execScripts: (app: IApp) => Promise<void>;
+  exec: (app: IApp) => Promise<void>;
 
   /** 创建执行 RunScript 的元素 */
   createElementForRunScript: (script: SourceScript, app: IApp) => Comment | HTMLScriptElement;

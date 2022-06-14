@@ -1,4 +1,4 @@
-import { IApp, IConfig, provide } from '@versea/core';
+import { IApp, IConfig, IStarter, provide } from '@versea/core';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
@@ -12,10 +12,13 @@ export * from './interface';
 export class ContainerRender implements IContainerRenderer {
   protected _config: IConfig;
 
+  protected _starter: IStarter;
+
   protected _hasInjectVerseaAppStyle = false;
 
-  constructor(@inject(IConfig) config: IConfig) {
+  constructor(@inject(IConfig) config: IConfig, @inject(IStarter) starter: IStarter) {
     this._config = config;
+    this._starter = starter;
   }
 
   public createContainerElement(app: IApp): HTMLElement {
@@ -41,6 +44,11 @@ export class ContainerRender implements IContainerRenderer {
         }
       }
       return true;
+    }
+
+    // 未执行 start 时不触发渲染
+    if (!this._starter.isStarted) {
+      return false;
     }
 
     const parentContainerElement = this._getParentContainerElement(context);

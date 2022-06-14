@@ -4,5 +4,5 @@ export const VERSEA_METADATA_LAZY_INJECT_KEY = Symbol.for('VERSEA_METADATA_LAZY_
 
 export const VERSEA_METADATA_INJECTION_KEY = Symbol.for('VERSEA_METADATA_INJECTION_KEY');
 
-/** versea tap 名称 */
+/** versea 默认监听名称 */
 export const VERSEA_INTERNAL_TAP = 'versea-internal-tap';

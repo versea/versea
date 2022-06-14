@@ -1,7 +1,6 @@
 import { createServiceSymbol } from '@versea/core';
 
-import { VerseaAppWindow } from '../sandbox/interface';
-import { TimerEventRecord, VerseaAppEventListener } from '../sandbox/types';
+import { TimerEventRecord, VerseaAppEventListener, VerseaAppWindow } from '../sandbox/types';
 
 export const IWindowEffect = createServiceSymbol('IWindowEffect');
 

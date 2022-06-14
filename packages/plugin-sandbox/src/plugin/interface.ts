@@ -50,7 +50,7 @@ declare module '@versea/core' {
 
     /**
      * 沙箱环境执行 script
-     * @description 执行动态 InlineScript 时，会忽略 VERSEA_PLUGIN_SANDBOX_TAP 之前的监听，如果希望在动态 InlineScript 之前增加监听，可以使用 beforeRunDynamicInlineScript
+     * @description 执行动态 InlineScript 时，会忽略 PLUGIN_SANDBOX_TAP 之前的监听，如果希望在动态 InlineScript 之前增加监听，可以使用 beforeRunDynamicInlineScript
      */
     runScript: AsyncSeriesHook<RunScriptHookContext>;
 

@@ -10,7 +10,7 @@ import { Deferred, logError, VerseaError, isPromise } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
-import { VERSEA_PLUGIN_SANDBOX_TAP } from '../../constants';
+import { PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
 import { ILoadEvent } from '../load-event/interface';
 import { IScopedCSS } from '../scoped-css/interface';
@@ -58,13 +58,13 @@ export class StyleLoader implements IStyleLoader {
 
   public apply(): void {
     this._scopedCSS.apply();
-    this._hooks.loadStyle.tap(VERSEA_PLUGIN_SANDBOX_TAP, async ({ app, style }) => {
-      await this.ensureStyleCode(style, app);
+    this._hooks.loadStyle.tap(PLUGIN_SANDBOX_TAP, async ({ app, style }) => {
+      await this.ensureCode(style, app);
       this._appendStyleElement(style, app);
     });
 
     this._hooks.loadDynamicStyle.tap(
-      VERSEA_PLUGIN_SANDBOX_TAP,
+      PLUGIN_SANDBOX_TAP,
       async ({ app, style, cachedStyle, originElement, styleElement }) => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const _style = cachedStyle ?? style;
@@ -72,7 +72,7 @@ export class StyleLoader implements IStyleLoader {
           this._sourceController.insertStyle(style, app);
         }
         try {
-          await this.ensureStyleCode(_style, app);
+          await this.ensureCode(_style, app);
           styleElement.textContent = _style.code as string;
           this.scopeCSS(styleElement, _style, app);
           this._loadEvent.dispatchOnLoadEvent(originElement);
@@ -112,6 +112,10 @@ export class StyleLoader implements IStyleLoader {
     return Promise.resolve();
   }
 
+  public async waitLoaded(app: IApp): Promise<void> {
+    return this._styleDeferred.get(app)?.promise;
+  }
+
   public dispose(app: IApp): void {
     this._styleDeferred.delete(app);
     if (!this._getPersistentSourceCode(app)) {
@@ -119,7 +123,7 @@ export class StyleLoader implements IStyleLoader {
     }
   }
 
-  public async ensureStyleCode(style: SourceStyle, app: IApp): Promise<void> {
+  public async ensureCode(style: SourceStyle, app: IApp): Promise<void> {
     const { src, code, isGlobal } = style;
 
     if (isPromise(code)) {

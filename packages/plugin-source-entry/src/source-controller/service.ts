@@ -4,7 +4,7 @@ import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 import { pick } from 'ramda';
 
-import { VERSEA_PLUGIN_SOURCE_ENTRY_TAP } from '../constants';
+import { PLUGIN_SOURCE_ENTRY_TAP } from '../constants';
 import { globalEnv } from '../global-env';
 import { LoadAppHookContext, MountAppHookContext, SourceScript, SourceStyle } from '../plugin/interface';
 import { completionPath } from '../utils';
@@ -28,7 +28,7 @@ export class SourceController implements ISourceController {
   }
 
   public apply(): void {
-    this._hooks.execSource.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context) => {
+    this._hooks.execSource.tap(PLUGIN_SOURCE_ENTRY_TAP, async (context) => {
       const { app } = context;
       if (app.styles?.length) {
         await Promise.all(

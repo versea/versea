@@ -43,12 +43,12 @@ export class Loader implements ILoader {
   }
 
   protected _initHooks(): void {
-    this._tapLoad();
-    this._tapLoadApps();
+    this._onLoad();
+    this._onLoadApps();
   }
 
   /** 加载应用 */
-  protected _tapLoad(): void {
+  protected _onLoad(): void {
     const { load, loadApps } = this._hooks;
     load.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const { switcherContext } = hookContext;
@@ -65,7 +65,7 @@ export class Loader implements ILoader {
     });
   }
 
-  protected _tapLoadApps(): void {
+  protected _onLoadApps(): void {
     this._hooks.loadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
       const apps = hookContext.currentLoadApps;
       await Promise.all(

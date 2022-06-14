@@ -5,12 +5,12 @@ import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
 import {
-  VERSEA_PLUGIN_SOURCE_ENTRY_TAP,
-  VERSEA_PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP,
-  VERSEA_PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP,
-  VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP,
-  VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
-  VERSEA_PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
+  PLUGIN_SOURCE_ENTRY_TAP,
+  PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP,
+  PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP,
+  PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP,
+  PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
+  PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
 } from '../constants';
 import { IContainerRenderer } from '../container-renderer/interface';
 import { ISourceController } from '../source-controller/interface';
@@ -25,11 +25,22 @@ import {
 
 export * from './interface';
 
+function formatPath(path?: string): string | undefined {
+  return path ? getEffectivePath(addProtocol(path)) : path;
+}
+
 App.defineProp('styles');
 App.defineProp('scripts');
+App.defineProp('entry', {
+  validator: (value) => value === undefined || typeof value === 'string',
+  format: (value) => formatPath(value as string),
+});
 App.defineProp('assetsPublicPath', {
   validator: (value) => value === undefined || typeof value === 'string',
-  format: (value) => (value ? getEffectivePath(addProtocol(value as string)) : value),
+  format: (value, options) => {
+    const assetsPublicPath = formatPath(value as string);
+    return assetsPublicPath ?? formatPath(options.entry as string);
+  },
 });
 App.defineProp('_fetch', { optionKey: 'fetch' });
 App.defineProp('_parentContainer', { optionKey: 'container' });
@@ -65,10 +76,11 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.addHook('loadApp', new AsyncSeriesHook());
     this._hooks.addHook('mountApp', new AsyncSeriesHook());
     this._hooks.addHook('unmountApp', new AsyncSeriesHook());
+    this._hooks.addHook('afterRenderContainer', new AsyncSeriesHook());
   }
 
   public apply(): void {
-    this._hooks.beforeRegisterApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, ({ config }) => {
+    this._hooks.beforeRegisterApp.tap(PLUGIN_SOURCE_ENTRY_TAP, ({ config }) => {
       if (config.loadApp) {
         logWarn('Can not set app loadApp function, because it is defined.', config.name);
         return;
@@ -81,17 +93,17 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       };
     });
 
-    this._tapLoadApp();
-    this._tapMountApp();
-    this._tapUnMountApp();
+    this._onLoadApp();
+    this._onMountApp();
+    this._onUnmountApp();
     this._sourceController.apply();
 
     this.isApplied = true;
   }
 
-  protected _tapLoadApp(): void {
+  protected _onLoadApp(): void {
     // 规范 App 上的资源信息
-    this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
 
       // 将字符串的 style 转化 SourceStyle
@@ -104,17 +116,21 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
 
     // 创建容器和加载资源
-    this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
       const { app } = context;
-      app.container = this._containerRenderer.createContainerElement(app);
+      if (!app.container) {
+        app.container = this._containerRenderer.createContainerElement(app);
+      }
       await this._sourceController.load(context);
     });
 
     // Load 阶段尝试运行资源文件
-    this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
       const isRendered = this._containerRenderer.renderContainer(context);
       if (isRendered) {
+        await this._hooks.afterRenderContainer.call(context);
+
         const lifeCycles = await this._sourceController.exec(context);
         (app as IInternalApp)._isSourceExecuted = true;
         context.lifeCycles = { ...lifeCycles };
@@ -124,7 +140,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
 
     // 重写 lifeCycles
-    this._hooks.loadApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP, async (context): Promise<void> => {
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP, async (context): Promise<void> => {
       const originLifeCycles = { ...context.lifeCycles };
       context.lifeCycles!.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
         const mountContext = {
@@ -153,15 +169,17 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
   }
 
-  protected _tapMountApp(): void {
+  protected _onMountApp(): void {
     // Mount 阶段加载容器并尝试运行资源文件
-    this._hooks.mountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
+    this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
       const { app, dangerouslySetLifeCycles, props } = context;
 
       const isRendered = this._containerRenderer.renderContainer(context);
       if (!isRendered) {
         throw new VerseaError('Can not find container element.');
       }
+
+      await this._hooks.afterRenderContainer.call(context);
 
       if (!(app as IInternalApp)._isSourceExecuted) {
         const lifeCycles = await this._sourceController.exec(context);
@@ -176,7 +194,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
 
     // 执行 mount 生命周期
-    this._hooks.mountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP, async (context): Promise<void> => {
+    this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP, async (context): Promise<void> => {
       const { lifeCycles, props } = context;
       if (lifeCycles.mount) {
         context.result = await lifeCycles.mount(props);
@@ -184,9 +202,9 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
   }
 
-  protected _tapUnMountApp(): void {
+  protected _onUnmountApp(): void {
     // 执行 unmount 生命周期
-    this._hooks.unmountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP, async (context): Promise<void> => {
+    this._hooks.unmountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP, async (context): Promise<void> => {
       const { lifeCycles, props } = context;
       if (lifeCycles.unmount) {
         context.result = await lifeCycles.unmount(props);
@@ -194,7 +212,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     });
 
     // 销毁容器
-    this._hooks.unmountApp.tap(VERSEA_PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
+    this._hooks.unmountApp.tap(PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
       this._containerRenderer.renderContainer(context, null);
       return Promise.resolve();
     });

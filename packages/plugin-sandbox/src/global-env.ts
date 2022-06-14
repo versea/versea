@@ -3,7 +3,7 @@
 import { isBrowser } from '@versea/shared';
 
 import { ICurrentApp } from './current-app/service';
-import { VerseaAppWindow } from './sandbox/sandbox/interface';
+import { VerseaAppWindow } from './sandbox/sandbox/types';
 
 declare global {
   interface Window {

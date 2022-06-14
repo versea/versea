@@ -21,8 +21,6 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   public readonly routeState: IRouteState;
 
-  public bail = false;
-
   /** 路由事件 */
   protected _navigationEvent?: Event;
 
@@ -37,6 +35,11 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   protected readonly _starter: IStarter;
 
+  /**
+   * 生成 AppSwitcherContext 实例
+   * @param options AppSwitcherContext 实例化的参数
+   * @param dependencies 由于 AppSwitcherContext 继承 ExtensibleEntity，导致无法使用依赖注入，依赖必须自己管理。
+   */
   constructor(
     options: SwitcherOptions,
     // eslint-disable-next-line @typescript-eslint/naming-convention
