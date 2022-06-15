@@ -4,8 +4,8 @@ import { uniq } from 'ramda';
 
 import { bindFunction } from '../../bind-function';
 import { ICurrentApp } from '../../current-app/interface';
+import { IElementPatch } from '../../element-patch/interface';
 import { globalEnv } from '../../global-env';
-import { IElementPatch } from '../../patch/element-patch/interface';
 import { IDocumentEffect } from '../document-effect/interface';
 import { ISandboxEffect } from '../sandbox-effect/interface';
 import { VerseaAppWindow } from '../sandbox/types';
@@ -63,14 +63,15 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
   ) {
     super(options);
 
-    const { app } = options;
-    this.appWindow = this._createVerseaAppWindow(app);
-    this.proxyWindow = this._createProxyWindow(app);
-
     // 绑定依赖
     this._currentApp = currentApp;
     this._documentEffect = documentEffect;
     this._elementPatch = elementPatch;
+
+    const { app } = options;
+    this.appWindow = {} as VerseaAppWindow;
+    this.proxyWindow = this._createProxyWindow(app);
+    this._initVerseaAppWindow(app);
 
     this._sandboxEffect = new SandboxEffect(
       // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
@@ -80,8 +81,8 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
   }
 
   public start(): void {
-    if (!this.active) {
-      this.active = true;
+    if (!this._active) {
+      this._active = true;
 
       // BUG FIX: bable-polyfill@6.x
       if (globalEnv.rawWindow._babelPolyfill) {
@@ -93,8 +94,8 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
   }
 
   public stop(): void {
-    if (this.active) {
-      this.active = false;
+    if (this._active) {
+      this._active = false;
       this._sandboxEffect.releaseEffect();
 
       this._injectedKeys.forEach((key: PropertyKey) => {
@@ -131,8 +132,8 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
     this._sandboxEffect.rebuildEffect();
   }
 
-  protected _createVerseaAppWindow(app: IApp): VerseaAppWindow {
-    const appWindow = {
+  protected _initVerseaAppWindow(app: IApp): void {
+    Object.assign(this.appWindow, {
       /* eslint-disable @typescript-eslint/naming-convention */
       __VERSEA_APP_ENVIRONMENT__: true,
       __VERSEA_APP_NAME__: app.name,
@@ -147,12 +148,10 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
       removeScope: (): void => {
         this._currentApp.setName();
       },
-    } as VerseaAppWindow;
-    appWindow.__VERSEA_APP_WINDOW__ = appWindow;
-    this._setMappingPropertiesWithRawDescriptor(appWindow);
-    this._setHijackProperties(appWindow, app.name);
-
-    return appWindow;
+    } as VerseaAppWindow);
+    this.appWindow.__VERSEA_APP_WINDOW__ = this.appWindow;
+    this._setMappingPropertiesWithRawDescriptor(this.appWindow);
+    this._setHijackProperties(this.appWindow, app.name);
   }
 
   protected _createProxyWindow(app: IApp): VerseaAppWindow {
@@ -175,7 +174,7 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
         return typeof value === 'function' ? bindFunction(rawWindow, value) : value;
       },
       set: (target: VerseaAppWindow, key: PropertyKey, value: unknown): boolean => {
-        if (this.active) {
+        if (this._active) {
           if (escapeSetterKeyList.includes(key)) {
             Reflect.set(rawWindow, key, value);
           } else if (
