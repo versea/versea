@@ -138,12 +138,12 @@ export class ScopedCSS implements IScopedCSS {
 
   protected _ruleMedia(rule: CSSMediaRule, prefix: string, style: SourceStyle, app: IApp): string {
     const css = this._rewrite(transformRulesToArray(rule.cssRules), prefix, style, app);
-    return `@media ${rule.conditionText} {${css}}`;
+    return `@media ${rule.conditionText || rule.media.mediaText} {${css}}`;
   }
 
   protected _ruleSupport(rule: CSSSupportsRule, prefix: string, style: SourceStyle, app: IApp): string {
     const css = this._rewrite(transformRulesToArray(rule.cssRules), prefix, style, app);
-    return `@supports ${rule.conditionText} {${css}}`;
+    return `@supports ${rule.conditionText || rule.cssText.split('{')[0]} {${css}}`;
   }
 
   protected _rewriteRule(rule: CSSRule, prefix: string, style: SourceStyle, app: IApp): string {
