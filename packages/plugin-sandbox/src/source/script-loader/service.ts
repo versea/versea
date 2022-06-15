@@ -6,7 +6,7 @@ import {
   LoadSourceHookContext,
   SourceScript,
 } from '@versea/plugin-source-entry';
-import { Deferred, isPromise, logError, VerseaError } from '@versea/shared';
+import { Deferred, isPromise, logError, requestIdleCallback, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
@@ -208,25 +208,13 @@ export class ScriptLoader implements IScriptLoader {
       return;
     }
 
-    await Promise.all(
-      app.scripts.map(async (script) => {
-        let stringCode = script.code;
-        if (!stringCode) {
-          return;
-        }
-
-        if (isPromise(stringCode)) {
-          try {
-            stringCode = await stringCode;
-          } catch (error) {
-            logError(error, app.name);
-            stringCode = '';
-          }
-        }
-        const element = this.createElementForRunScript(script, app);
-        return this._hooks.runScript.call({ app, script, code: stringCode, element, appendToBody: true });
-      }),
-    );
+    for (const script of app.scripts) {
+      if (script.async) {
+        requestIdleCallback(() => void this._execScript(script, app));
+      } else {
+        await this._execScript(script, app);
+      }
+    }
   }
 
   public addDynamicScript(
@@ -254,6 +242,24 @@ export class ScriptLoader implements IScriptLoader {
     return document.createComment(
       `${script.src ? `script with src='${script.src}'` : 'inline script'} extract by versea-app`,
     );
+  }
+
+  protected async _execScript(script: SourceScript, app: IApp): Promise<void> {
+    let stringCode = script.code;
+    if (!stringCode) {
+      return;
+    }
+
+    if (isPromise(stringCode)) {
+      try {
+        stringCode = await stringCode;
+      } catch (error) {
+        logError(error, app.name);
+        stringCode = '';
+      }
+    }
+    const element = this.createElementForRunScript(script, app);
+    await this._hooks.runScript.call({ app, script, code: stringCode, element, appendToBody: true });
   }
 
   protected async _runScript(
@@ -315,7 +321,7 @@ export class ScriptLoader implements IScriptLoader {
   protected _getDocumentBody(app: IApp): Element {
     let body: Element | null = globalEnv.rawGetElementsByTagName.call(document, 'body')[0];
     if (app.container) {
-      body = globalEnv.rawQuerySelector.call(app.container, 'versea-app-body');
+      body = app.container.querySelector('versea-app-body');
       if (!body) {
         throw new VerseaError('Can not find "versea-app-body" element');
       }
@@ -338,20 +344,19 @@ export class ScriptLoader implements IScriptLoader {
       const blob = new Blob([code], { type: 'text/javascript' });
       scriptElement.src = URL.createObjectURL(blob);
       globalEnv.rawSetAttribute.call(scriptElement, 'type', 'module');
-    } else {
-      scriptElement.textContent = code;
+      return new Promise((resolve) => {
+        scriptElement.onload = (): void => {
+          resolve();
+        };
+        scriptElement.onerror = (error): void => {
+          // script 执行失败，不影响主流程执行
+          logError(error, app.name);
+          resolve();
+        };
+      });
     }
 
-    return new Promise((resolve) => {
-      scriptElement.onload = (): void => {
-        resolve();
-      };
-      scriptElement.onerror = (error): void => {
-        // script 执行失败，不影响主流程执行
-        logError(error, app.name);
-        resolve();
-      };
-    });
+    scriptElement.textContent = code;
   }
 
   protected _getPersistentSourceCode(app: IApp): boolean | undefined {

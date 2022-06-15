@@ -3,11 +3,11 @@ import { completionPath, IInternalApp, SourceScript, SourceStyle } from '@versea
 import { AsyncSeriesHook, Tap } from '@versea/tapable';
 import { inject } from 'inversify';
 
-import { PLUGIN_SANDBOX_TAP } from '../../constants';
-import { ICurrentApp } from '../../current-app/interface';
-import { globalEnv } from '../../global-env';
-import { IScriptLoader, RunScriptHookContext } from '../../source/script-loader/interface';
-import { IStyleLoader } from '../../source/style-loader/interface';
+import { PLUGIN_SANDBOX_TAP } from '../constants';
+import { ICurrentApp } from '../current-app/interface';
+import { globalEnv } from '../global-env';
+import { IScriptLoader, RunScriptHookContext } from '../source/script-loader/interface';
+import { IStyleLoader } from '../source/style-loader/interface';
 import { IElementPatch } from './interface';
 
 export * from './interface';

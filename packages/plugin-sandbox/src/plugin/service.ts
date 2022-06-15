@@ -1,4 +1,4 @@
-import { App, IApp, IConfig, IHooks, provide, provideValue } from '@versea/core';
+import { App, AppLifeCycles, IApp, IConfig, IHooks, provide, provideValue } from '@versea/core';
 import {
   IInternalApp,
   IPluginSourceEntry,
@@ -11,7 +11,8 @@ import { inject, interfaces } from 'inversify';
 
 import { PLUGIN_SANDBOX_TAP } from '../constants';
 import { ICurrentApp } from '../current-app/interface';
-import { IElementPatch } from '../patch/element-patch/interface';
+import { IElementPatch } from '../element-patch/interface';
+import { globalEnv } from '../global-env';
 import { IDocumentEffect } from '../sandbox/document-effect/interface';
 import { ISandboxEffect } from '../sandbox/sandbox-effect/interface';
 import { ISandbox } from '../sandbox/sandbox/interface';
@@ -157,7 +158,8 @@ export class PluginSandbox implements IPluginSandbox {
   protected _onExecSource(): void {
     this._hooks.execSource.tap(
       PLUGIN_SOURCE_ENTRY_TAP,
-      async ({ app }) => {
+      async (context) => {
+        const { app } = context;
         const styleLoader = this._styleLoader;
         const scriptLoader = this._scriptLoader;
 
@@ -165,6 +167,7 @@ export class PluginSandbox implements IPluginSandbox {
         await scriptLoader.exec(app);
         styleLoader.dispose(app);
         scriptLoader.dispose(app);
+        context.result = this._getAppLifeCycles(app);
       },
       {
         replace: true,
@@ -190,5 +193,11 @@ export class PluginSandbox implements IPluginSandbox {
         before: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
       },
     );
+  }
+
+  protected _getAppLifeCycles(app: IApp): AppLifeCycles {
+    const global = app.sandbox?.proxyWindow ?? globalEnv.rawWindow;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (global as Record<string, any> & Window)[app.name] as AppLifeCycles;
   }
 }

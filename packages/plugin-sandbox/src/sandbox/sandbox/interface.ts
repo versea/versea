@@ -2,7 +2,7 @@ import { createServiceSymbol, IApp } from '@versea/core';
 import { interfaces } from 'inversify';
 
 import { ICurrentApp } from '../../current-app/interface';
-import { IElementPatch } from '../../patch/element-patch/interface';
+import { IElementPatch } from '../../element-patch/interface';
 import { IDocumentEffect } from '../document-effect/interface';
 import { ISandboxEffect } from '../sandbox-effect/interface';
 import { IWindowEffect } from '../window-effect/interface';
