@@ -106,27 +106,28 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
 
-      // 将字符串的 style 转化 SourceStyle
       app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
-
-      // 将字符串的 script 转化 SourceScript
       app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
 
-      return Promise.resolve();
+      return noop();
     });
 
     // 创建容器和加载资源
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
       const { app } = context;
+
+      // 容器无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
       if (!app.container) {
         app.container = this._containerRenderer.createContainerElement(app);
       }
+
       await this._sourceController.load(context);
     });
 
     // Load 阶段尝试运行资源文件
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
       const { app } = context;
+
       const isRendered = this._containerRenderer.renderContainer(context);
       if (isRendered) {
         await this._hooks.afterRenderContainer.call(context);
@@ -135,11 +136,12 @@ export class PluginSourceEntry implements IPluginSourceEntry {
         (app as IInternalApp)._isSourceExecuted = true;
         context.lifeCycles = { ...lifeCycles };
       } else {
+        // 容器未渲染，代码未执行，设置空的 mount 和 unmount 函数
         context.lifeCycles = { mount: noop, unmount: noop };
       }
     });
 
-    // 重写 lifeCycles
+    // 重写生命周期函数
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP, async (context): Promise<void> => {
       const originLifeCycles = { ...context.lifeCycles };
       context.lifeCycles!.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
@@ -165,7 +167,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
         return unmountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
       };
 
-      return Promise.resolve();
+      return noop();
     });
   }
 
@@ -184,9 +186,9 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       if (!(app as IInternalApp)._isSourceExecuted) {
         const lifeCycles = await this._sourceController.exec(context);
         (app as IInternalApp)._isSourceExecuted = true;
-        // 重置应用的生命周期函数
+        // Load 阶段没有执行资源文件，因此必须在 Mount 阶段再一次设置应用的生命周期函数，替换之后默认的空函数
         dangerouslySetLifeCycles(lifeCycles);
-        // 在 Load 阶段可能没有执行资源文件，因此 bootstrap 可能之前没有赋值而被忽略，这里重新执行 bootstrap 生命周期
+        // Load 阶段没有执行资源文件，因此 bootstrap 生命周期之前没有赋值而被忽略，这里重新执行一次 bootstrap 生命周期
         if (!app.isBootstrapped) {
           await app.bootstrapOnMounting(props.context, props.route!);
         }
@@ -214,7 +216,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     // 销毁容器
     this._hooks.unmountApp.tap(PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
       this._containerRenderer.renderContainer(context, null);
-      return Promise.resolve();
+      return noop();
     });
   }
 }

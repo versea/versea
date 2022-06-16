@@ -25,6 +25,7 @@ export function memoizePromise(index = 0, deleteMemo = true) {
       if (typeof args[index] === 'string' || typeof args[index] === 'number') {
         key = args[index] as string;
       }
+
       key = `${_propertyKey}_${key}`;
 
       // 在类的实例上存储 promise
@@ -37,6 +38,7 @@ export function memoizePromise(index = 0, deleteMemo = true) {
       if (map[key]) {
         return map[key];
       }
+
       map[key] = originValue.call(this, ...args);
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return map[key]!.finally(() => {

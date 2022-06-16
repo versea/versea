@@ -1,14 +1,25 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { VerseaError } from './error';
 
+/** 扩展属性的描述 */
 export interface ExtensiblePropDescription {
+  /** 扩展属性对应的 options 的名称 */
   optionKey?: string;
+
+  /** 是否必传字段 */
   required?: boolean;
+
+  /** 默认值 */
   default?: unknown;
+
+  /** 验证函数 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator?: (value: unknown, options: Record<string, any>) => boolean;
+
+  /** 格式化函数 */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   format?: (value: unknown, options: Record<string, any>) => unknown;
+
   onMerge?: (value: unknown, otherValue: unknown) => unknown;
   onClone?: (value: unknown) => unknown;
 }

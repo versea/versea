@@ -83,7 +83,7 @@ export interface SourceScript {
 
 /**
  * 插件内部使用的 IApp
- * @description 在 IApp 增加一些 protected 的属性
+ * @description 插件在 IApp 增加一些不希望使用者需要理解的属性
  */
 export interface IInternalApp extends IApp {
   /**
@@ -110,6 +110,11 @@ export interface IInternalApp extends IApp {
 
 declare module '@versea/core' {
   interface IConfig {
+    /**
+     * 默认容器节点
+     * @description 在复杂的情况下，例如存在嵌套应用，可能会存在问题，因此建议每个应用尽量设置 container
+     * @example #app
+     */
     defaultContainer?: string;
 
     /** 获取资源文件 */
@@ -131,7 +136,7 @@ declare module '@versea/core' {
 
     /**
      * 根据 app 上的资源文件信息加载资源文件
-     * @description 加载资源文件，并把 css 加入容器
+     * @description 加载资源文件
      */
     loadSource: AsyncSeriesHook<LoadSourceHookContext>;
 
@@ -182,7 +187,7 @@ declare module '@versea/core' {
 
   interface IApp {
     /** 容器节点 */
-    container?: HTMLElement | null;
+    container?: HTMLElement;
 
     /** 文档内容外层 div className */
     documentFragmentWrapperClass?: string;

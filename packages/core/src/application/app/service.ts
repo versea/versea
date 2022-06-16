@@ -190,9 +190,6 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   protected _setLifeCycles(lifeCycles: AppLifeCycles = {}): void {
-    if (!lifeCycles.bootstrap) {
-      logWarn(`App does not export a valid bootstrap function`, this.name);
-    }
     if (!lifeCycles.mount) {
       logWarn(`App does not export a valid mount function`, this.name);
     }
