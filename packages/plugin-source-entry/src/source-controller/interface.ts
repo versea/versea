@@ -21,7 +21,7 @@ export interface ISourceController {
    */
   exec: (context: LoadAppHookContext | MountAppHookContext) => Promise<AppLifeCycles>;
 
-  /** 将字符串的数组转化成标准 Source */
+  /** 将链接数组转化成标准 Source 数组 */
   normalizeSource: <T extends SourceScript | SourceStyle>(sources?: (T | string)[], assetsPublicPath?: string) => T[];
 
   /** 查找 SourceScript */
@@ -56,6 +56,6 @@ export interface ExecSourceHookContext extends HookContext {
   /** Load 或 Mount 参数 */
   props: AppProps;
 
-  /** 执行 scripts 之后返回的生命周期函数 */
+  /** 执行 scripts 之后获取到的导出的声明周期 */
   result?: AppLifeCycles;
 }

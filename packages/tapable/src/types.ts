@@ -5,18 +5,18 @@ export interface Tap<T extends object, K extends Promise<void> | void> {
   /** 监听函数 */
   fn: (context: T) => K;
 
-  /** 优先级，越小越优先 */
+  /** 优先级，越小优先级越高，可以设置负数 */
   priority: number;
 }
 
 export interface TapOptions {
-  /** 在某个监听名称之前 */
+  /** 在某个监听者之前 */
   before?: string;
 
-  /** 在某个监听名称之后 */
+  /** 在某个监听者之后 */
   after?: string;
 
-  /** 优先级，越小越优先 */
+  /** 优先级，越小优先级越高，可以设置负数 */
   priority?: number;
 
   /**

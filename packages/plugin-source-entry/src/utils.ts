@@ -22,6 +22,9 @@ export function getEffectivePath(url?: string): string {
 
 /** 完善路径 */
 export function completionPath(path: string, baseURL?: string): string {
-  if (!path || !baseURL || /^((((ht|f)tps?)|file):)?\/\//.test(path) || /^(data|blob):/.test(path)) return path;
+  if (!path || !baseURL || /^((((ht|f)tps?)|file):)?\/\//.test(path) || /^(data|blob):/.test(path)) {
+    return path;
+  }
+
   return new URL(path, baseURL).toString();
 }

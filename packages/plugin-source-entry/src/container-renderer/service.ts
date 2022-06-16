@@ -14,6 +14,7 @@ export class ContainerRender implements IContainerRenderer {
 
   protected _starter: IStarter;
 
+  /** 是否已经注入自定义元素的样式 */
   protected _hasInjectVerseaAppStyle = false;
 
   constructor(@inject(IConfig) config: IConfig, @inject(IStarter) starter: IStarter) {
@@ -28,21 +29,24 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   public getWrapperId(name: string): string {
-    return `__versea_app_for_${snakeCase(name)}__`;
+    return `__versea_${snakeCase(name)}__`;
   }
 
   public renderContainer(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
-    container = context.app.container,
+    container = context.app.container as Node | null | undefined,
   ): boolean {
+    const appContainer = context.app.container;
+
     if ((context.app as IInternalApp)._disableRenderContent) {
       if (!document.body.contains(container as Node | null)) {
         if (container) {
           globalEnv.rawAppendChild.call(document.body, container);
-        } else if (context.app.container && document.body.contains(context.app.container)) {
-          globalEnv.rawRemoveChild.call(document.body, context.app.container);
+        } else if (appContainer && document.body.contains(appContainer)) {
+          globalEnv.rawRemoveChild.call(document.body, appContainer);
         }
       }
+
       return true;
     }
 
@@ -54,8 +58,10 @@ export class ContainerRender implements IContainerRenderer {
     const parentContainerElement = this._getParentContainerElement(context);
     if (parentContainerElement && !parentContainerElement.contains(container as Node | null)) {
       // 清空元素
-      while (parentContainerElement.firstChild) {
-        globalEnv.rawRemoveChild.call(parentContainerElement, parentContainerElement.firstChild);
+      if ((container === null && parentContainerElement.contains(appContainer as Node)) || container) {
+        while (parentContainerElement.firstChild) {
+          globalEnv.rawRemoveChild.call(parentContainerElement, parentContainerElement.firstChild);
+        }
       }
 
       if (container) {
@@ -66,6 +72,7 @@ export class ContainerRender implements IContainerRenderer {
     return !!parentContainerElement;
   }
 
+  /** 获取应用容器 */
   protected _getAppContent(app: IApp): string {
     this._injectVerseaAppStyle();
     const {
@@ -93,6 +100,7 @@ export class ContainerRender implements IContainerRenderer {
     } data-name="${name}">${content}</div>`;
   }
 
+  /** 获取父应用的容器元素 */
   protected _getParentContainerElement(
     context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
   ): HTMLElement | null {

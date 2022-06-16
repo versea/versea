@@ -69,6 +69,7 @@ export class BaseHook<T extends HookContext, K extends Promise<void> | void> {
     if (index < 0) {
       throw new VerseaError(`Insert ${type} failed with tap name "${name}".`);
     }
+
     tap.priority = this._taps[index].priority;
     const appendIndex = type === 'before' ? index : index + 1;
     this._taps.splice(appendIndex, 0, tap);
