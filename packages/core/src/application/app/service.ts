@@ -25,8 +25,6 @@ export class App extends ExtensibleEntity implements IApp {
 
   public isLoaded = false;
 
-  public isBootstrapped = false;
-
   protected readonly _loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 
   protected readonly _props: AppConfigProps;
@@ -71,51 +69,10 @@ export class App extends ExtensibleEntity implements IApp {
     try {
       const lifeCycles = await this._loadApp(this.getProps(context, route));
       this.isLoaded = true;
-      this.status = this._Status.NotBootstrapped;
+      this.status = this._Status.NotMounted;
       this._setLifeCycles(lifeCycles);
     } catch (error) {
       this.status = this._Status.LoadError;
-      throw error;
-    }
-  }
-
-  @memoizePromise()
-  public async bootstrap(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
-    if (this.status !== this._Status.NotBootstrapped) {
-      throw new VerseaError(`Can not bootstrap app "${this.name}" with status "${this.status}".`);
-    }
-
-    if (!this._lifeCycles.bootstrap) {
-      this.status = this._Status.NotMounted;
-      return;
-    }
-
-    this.status = this._Status.Bootstrapping;
-    try {
-      await this._lifeCycles.bootstrap(this.getProps(context, route));
-      this.isBootstrapped = true;
-      this.status = this._Status.NotMounted;
-    } catch (error) {
-      this.status = this._Status.Broken;
-      throw error;
-    }
-  }
-
-  @memoizePromise()
-  public async bootstrapOnMounting(context: IAppSwitcherContext, route: MatchedRoute): Promise<void> {
-    if (this.status !== this._Status.Mounting) {
-      throw new VerseaError(`Can not bootstrapOnMounting app "${this.name}" with status "${this.status}".`);
-    }
-
-    if (!this._lifeCycles.bootstrap) {
-      return;
-    }
-
-    try {
-      await this._lifeCycles.bootstrap(this.getProps(context, route));
-      this.isBootstrapped = true;
-    } catch (error) {
-      this.status = this._Status.Broken;
       throw error;
     }
   }

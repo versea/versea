@@ -2,6 +2,7 @@ import { App, AppLifeCycles, IApp, IConfig, IHooks, provide, provideValue } from
 import {
   IInternalApp,
   IPluginSourceEntry,
+  PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
   PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_TAP,
@@ -93,9 +94,9 @@ export class PluginSandbox implements IPluginSandbox {
     this._onLoadSource();
     this._onCreateSandbox();
     this._onStartSandbox();
+    this._onMountEffect();
     this._onExecSource();
     this._onStopSandbox();
-    this._onMountEffect();
 
     this._styleLoader.apply();
     this._scriptLoader.apply();
@@ -136,21 +137,34 @@ export class PluginSandbox implements IPluginSandbox {
   }
 
   protected _onStartSandbox(): void {
-    this._hooks.afterRenderContainer.tap(PLUGIN_SANDBOX_TAP, async ({ app }) => {
-      app.sandbox?.start();
-      return Promise.resolve();
-    });
-  }
-
-  protected _onStopSandbox(): void {
-    this._hooks.unmountApp.tap(
+    this._hooks.mountApp.tap(
       PLUGIN_SANDBOX_TAP,
       async ({ app }) => {
-        app.sandbox?.stop();
+        app.sandbox?.start();
         return Promise.resolve();
       },
       {
-        before: PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
+        after: PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP,
+      },
+    );
+  }
+
+  protected _onMountEffect(): void {
+    this._hooks.mountApp.tap(
+      PLUGIN_SOURCE_ENTRY_TAP,
+      async ({ app }) => {
+        if ((app as IInternalApp)._isSourceExecuted && app.sandbox) {
+          if ((app as IApp & { _hasBeenMounted: boolean })._hasBeenMounted) {
+            app.sandbox.rebuildSnapshot();
+          } else {
+            app.sandbox.recordSnapshot();
+            (app as IApp & { _hasBeenMounted: boolean })._hasBeenMounted = true;
+          }
+        }
+        return Promise.resolve();
+      },
+      {
+        before: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
       },
     );
   }
@@ -175,22 +189,15 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
-  protected _onMountEffect(): void {
-    this._hooks.mountApp.tap(
-      PLUGIN_SOURCE_ENTRY_TAP,
+  protected _onStopSandbox(): void {
+    this._hooks.unmountApp.tap(
+      PLUGIN_SANDBOX_TAP,
       async ({ app }) => {
-        if ((app as IInternalApp)._isSourceExecuted && app.sandbox) {
-          if ((app as IApp & { _hasBeenMounted: boolean })._hasBeenMounted) {
-            app.sandbox.rebuildSnapshot();
-          } else {
-            app.sandbox.recordSnapshot();
-            (app as IApp & { _hasBeenMounted: boolean })._hasBeenMounted = true;
-          }
-        }
+        app.sandbox?.stop();
         return Promise.resolve();
       },
       {
-        before: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
+        before: PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
       },
     );
   }

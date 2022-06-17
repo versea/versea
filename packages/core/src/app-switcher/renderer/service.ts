@@ -162,7 +162,7 @@ export class Renderer implements IRenderer {
           const parentAppLike: IApp | null = i === 0 ? null : targetRoutes[i - 1].apps[0];
           // 不相等证明 parentAppLike 是 mainApp 的父应用
           if (mainApp !== parentAppLike) {
-            await switcherContext.runTask(async () => hookContext.bootstrapAndMount(mainApp, targetRoute));
+            await switcherContext.runTask(async () => hookContext.mount(mainApp, targetRoute));
           }
           routeState.append(targetRoute, [mainApp]);
         }
@@ -184,7 +184,7 @@ export class Renderer implements IRenderer {
       );
       await Promise.all(
         differentRoutes.map(async (route) => {
-          await hookContext.bootstrapAndMount(route.apps[0], route);
+          await hookContext.mount(route.apps[0], route);
           routeState.appendRootFragment(route);
         }),
       );
@@ -204,7 +204,7 @@ export class Renderer implements IRenderer {
         );
         if (toMountFragmentApps.length > 0) {
           await switcherContext.runTask(async () =>
-            Promise.all(toMountFragmentApps.map(async (app) => hookContext.bootstrapAndMount(app, targetRoute))),
+            Promise.all(toMountFragmentApps.map(async (app) => hookContext.mount(app, targetRoute))),
           );
           routeState.appendApps(i, toMountFragmentApps, targetRoute.meta);
         }

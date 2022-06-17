@@ -5,8 +5,6 @@ export const IStatus = createServiceSymbol('IStatus');
 const Status = {
   NotLoaded: 'NotLoaded',
   LoadingSourceCode: 'LoadingSourceCode',
-  NotBootstrapped: 'NotBootstrapped',
-  Bootstrapping: 'Bootstrapping',
   NotMounted: 'NotMounted',
   Mounting: 'Mounting',
   Mounted: 'Mounted',

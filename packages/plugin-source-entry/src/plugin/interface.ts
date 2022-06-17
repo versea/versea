@@ -28,8 +28,8 @@ export interface MountAppHookContext extends HookContext {
   /** 应用的生命周期函数 */
   lifeCycles: AppLifeCycles;
 
-  /** 修改应用已有的生命周期函数 */
-  dangerouslySetLifeCycles: (lifeCycles: AppLifeCycles) => void;
+  /** 设置应用导出的生命周期 */
+  setLifeCycles: (lifeCycles: AppLifeCycles) => void;
 
   /** Mount 返回的结果 */
   result?: unknown;
@@ -130,9 +130,6 @@ declare module '@versea/core' {
 
     /** 卸载应用 */
     unmountApp: AsyncSeriesHook<UnmountAppHookContext>;
-
-    /** 渲染容器之后 */
-    afterRenderContainer: AsyncSeriesHook<LoadAppHookContext | MountAppHookContext>;
 
     /**
      * 根据 app 上的资源文件信息加载资源文件

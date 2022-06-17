@@ -36,7 +36,7 @@ export interface IRendererHookContext extends HookContext {
   readonly mismatchIndex: number;
 
   /** 引导再渲染应用 */
-  bootstrapAndMount: (app: IApp, route: MatchedRoute) => Promise<void>;
+  mount: (app: IApp, route: MatchedRoute) => Promise<void>;
 }
 
 export interface RendererHookContextOptions {

@@ -19,7 +19,7 @@ export interface ISourceController {
    * 执行资源文件
    * @description 执行存储的文件内容
    */
-  exec: (context: LoadAppHookContext | MountAppHookContext) => Promise<AppLifeCycles>;
+  exec: (context: MountAppHookContext) => Promise<AppLifeCycles>;
 
   /** 将链接数组转化成标准 Source 数组 */
   normalizeSource: <T extends SourceScript | SourceStyle>(sources?: (T | string)[], assetsPublicPath?: string) => T[];

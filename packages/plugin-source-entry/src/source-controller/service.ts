@@ -62,7 +62,7 @@ export class SourceController implements ISourceController {
     await this._hooks.loadSource.call(pick(['app', 'props'], context));
   }
 
-  public async exec(context: LoadAppHookContext | MountAppHookContext): Promise<AppLifeCycles> {
+  public async exec(context: MountAppHookContext): Promise<AppLifeCycles> {
     const execHookContext = pick(['app', 'props'], context) as ExecSourceHookContext;
     await this._hooks.execSource.call(execHookContext);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
