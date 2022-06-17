@@ -49,11 +49,8 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
     return this.routeState.currentRootFragments;
   }
 
-  public async bootstrapAndMount(app: IApp, route: MatchedRoute): Promise<void> {
+  public async mount(app: IApp, route: MatchedRoute): Promise<void> {
     const switcherContext = this.switcherContext;
-    if (!app.isBootstrapped) {
-      await app.bootstrap(switcherContext, route);
-    }
     // 解构出应用对应的 meta 信息
     const meta = route.getMeta(app);
     if (meta.parentAppName && meta.parentContainerName) {

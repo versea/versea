@@ -1,6 +1,6 @@
 import { createServiceSymbol, IApp } from '@versea/core';
 
-import { LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
+import { MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
 
 export const IContainerRenderer = createServiceSymbol('IContainerRenderer');
 
@@ -15,8 +15,5 @@ export interface IContainerRenderer {
    * 渲染容器内容
    * @returns {boolean} 是否渲染成功
    */
-  renderContainer: (
-    context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
-    element?: HTMLElement | null,
-  ) => boolean;
+  renderContainer: (context: MountAppHookContext | UnmountAppHookContext, element?: HTMLElement | null) => boolean;
 }

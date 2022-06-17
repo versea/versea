@@ -36,10 +36,6 @@ function getAppWithLoadHook(
   return getAppInstance({
     loadApp: async () => {
       return Promise.resolve({
-        bootstrap: async () => {
-          await delay(1);
-          return;
-        },
         mount: async () => {
           await delay(1);
           return mountHooks;
@@ -74,7 +70,7 @@ describe('App', () => {
       const promise = app.load({} as IAppSwitcherContext);
       expect(app.status).toBe(Status.LoadingSourceCode);
       await promise;
-      expect(app.status).toBe(Status.NotBootstrapped);
+      expect(app.status).toBe(Status.NotMounted);
     });
 
     test('实例化应用时没有 loadApp 参数，加载应用时会报错', () => {
@@ -104,52 +100,10 @@ describe('App', () => {
     });
   });
 
-  describe('App.bootstrap', () => {
-    test('应用 bootstrap 之前和之后，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadHook({ name: 'app' });
-      await app.load({} as IAppSwitcherContext);
-
-      expect(app.status).toBe(Status.NotBootstrapped);
-      const promise = app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
-      expect(app.status).toBe(Status.Bootstrapping);
-      await promise;
-      expect(app.status).toBe(Status.NotMounted);
-    });
-
-    test('没有 bootstrap 的 hook，应用的状态变化应该正确', async () => {
-      const app = getAppWithLoadHook({ name: 'app' }, { bootstrap: undefined });
-      await app.load({} as IAppSwitcherContext);
-
-      expect(app.status).toBe(Status.NotBootstrapped);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
-      expect(app.status).toBe(Status.NotMounted);
-    });
-
-    test('应用 bootstrap 失败，应用的状态变化为 broken', async () => {
-      const app = getAppWithLoadHook(
-        { name: 'app' },
-        {
-          bootstrap: async () => {
-            await delay(1);
-            throw new Error('bootstrap error');
-          },
-        },
-      );
-      await app.load({} as IAppSwitcherContext);
-
-      try {
-        await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
-      } catch (error) {
-        expect(app.status).toBe(Status.Broken);
-      }
-    });
-  });
-
   describe('App.mount', () => {
     test('应用 mount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' });
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.NotMounted);
       const promise = app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
@@ -161,7 +115,6 @@ describe('App', () => {
     test('没有 mount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, { mount: undefined });
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.NotMounted);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
@@ -179,7 +132,6 @@ describe('App', () => {
         },
       );
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
 
       try {
         await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
@@ -204,7 +156,6 @@ describe('App', () => {
       );
 
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.waitForChildContainer('foo', {} as IAppSwitcherContext);
 
@@ -216,7 +167,6 @@ describe('App', () => {
     test('应用 unmount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, {});
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.Mounted);
@@ -229,7 +179,6 @@ describe('App', () => {
     test('没有 unmount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, { unmount: undefined });
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.Mounted);
@@ -248,7 +197,6 @@ describe('App', () => {
         },
       );
       await app.load({} as IAppSwitcherContext);
-      await app.bootstrap({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       try {

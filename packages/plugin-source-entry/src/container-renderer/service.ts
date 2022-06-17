@@ -3,7 +3,7 @@ import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
 import { globalEnv } from '../global-env';
-import { IInternalApp, LoadAppHookContext, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
+import { IInternalApp, MountAppHookContext, UnmountAppHookContext } from '../plugin/interface';
 import { IContainerRenderer } from './interface';
 
 export * from './interface';
@@ -33,7 +33,7 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   public renderContainer(
-    context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
+    context: MountAppHookContext | UnmountAppHookContext,
     container = context.app.container as Node | null | undefined,
   ): boolean {
     const appContainer = context.app.container;
@@ -101,9 +101,7 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   /** 获取父应用的容器元素 */
-  protected _getParentContainerElement(
-    context: LoadAppHookContext | MountAppHookContext | UnmountAppHookContext,
-  ): HTMLElement | null {
+  protected _getParentContainerElement(context: MountAppHookContext | UnmountAppHookContext): HTMLElement | null {
     const { app, props } = context;
 
     // 从 route 获取容器

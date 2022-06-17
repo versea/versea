@@ -42,13 +42,13 @@ void versea.start();
 
 #### loadApp
 1. TapName: PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP 设置 app 的资源信息
-2. TapName: PLUGIN_SOURCE_ENTRY_TAP 创建容器并执行加载资源文件
-3. TapName: PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP 尝试渲染容器并执行资源文件
-4. TapName: PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP 重写应用生命周期函数
+2. TapName: PLUGIN_SOURCE_ENTRY_TAP 创建容器并加载资源文件
+3. TapName: PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP 重写应用生命周期函数
 
 #### mountApp
-1. TapName: PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP 尝试渲染容器并执行资源文件
-2. TapName: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP 执行应用 mount 生命周期函数
+1. TapName: PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP 渲染容器
+2. TapName: PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP 执行资源文件
+3. TapName: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP 执行应用 mount 生命周期函数
 
 #### unmountApp
 1. TapName: PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP 执行应用 unmount 生命周期函数

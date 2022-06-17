@@ -26,7 +26,6 @@ export type AppLifeCycleFunction<T = unknown> = (props: AppProps) => Promise<T>;
  * @description 应用加载和挂载的各个阶段会分别调用这些生命周期。
  */
 export interface AppLifeCycles {
-  bootstrap?: AppLifeCycleFunction;
   mount?: AppLifeCycleFunction<Record<string, AppLifeCycleFunction>> | AppLifeCycleFunction<void>;
   unmount?: AppLifeCycleFunction;
 }
@@ -41,23 +40,8 @@ export interface IApp {
   /** 应用是否已经加载 */
   isLoaded: boolean;
 
-  /** 应用是否已经执行引导 */
-  isBootstrapped: boolean;
-
   /** 加载应用 */
   load: (context: IAppSwitcherContext, route?: MatchedRoute) => Promise<void>;
-
-  /**
-   * 引导
-   * @description 应用内容首次挂载到页面前调用。
-   */
-  bootstrap: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
-
-  /**
-   * 在 Mounting 阶段尝试执行 bootstrap
-   * @description 应用内容首次挂载到页面前调用。
-   */
-  bootstrapOnMounting: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
 
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;

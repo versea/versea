@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { App, AppLifeCycleFunction, AppLifeCycles, AppProps, IConfig, IHooks, provide } from '@versea/core';
 import { logWarn, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
@@ -8,6 +7,7 @@ import {
   PLUGIN_SOURCE_ENTRY_TAP,
   PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP,
   PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP,
+  PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP,
   PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
   PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
@@ -47,10 +47,6 @@ App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
 App.defineProp('_disableRenderContent', { optionKey: 'disableRenderContent' });
 
-async function noop(): Promise<void> {
-  return Promise.resolve();
-}
-
 @provide(IPluginSourceEntry)
 export class PluginSourceEntry implements IPluginSourceEntry {
   public isApplied = false;
@@ -76,7 +72,6 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.addHook('loadApp', new AsyncSeriesHook());
     this._hooks.addHook('mountApp', new AsyncSeriesHook());
     this._hooks.addHook('unmountApp', new AsyncSeriesHook());
-    this._hooks.addHook('afterRenderContainer', new AsyncSeriesHook());
   }
 
   public apply(): void {
@@ -89,6 +84,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       config.loadApp = async (props: AppProps): Promise<AppLifeCycles> => {
         const context = { app: props.app, props } as LoadAppHookContext;
         await this._hooks.loadApp.call(context);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return context.lifeCycles!;
       };
     });
@@ -109,7 +105,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
       app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
 
-      return noop();
+      return Promise.resolve();
     });
 
     // 创建容器和加载资源
@@ -124,32 +120,18 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       await this._sourceController.load(context);
     });
 
-    // Load 阶段尝试运行资源文件
-    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
-      const { app } = context;
-
-      const isRendered = this._containerRenderer.renderContainer(context);
-      if (isRendered) {
-        await this._hooks.afterRenderContainer.call(context);
-
-        const lifeCycles = await this._sourceController.exec(context);
-        (app as IInternalApp)._isSourceExecuted = true;
-        context.lifeCycles = { ...lifeCycles };
-      } else {
-        // 容器未渲染，代码未执行，设置空的 mount 和 unmount 函数
-        context.lifeCycles = { mount: noop, unmount: noop };
-      }
-    });
-
-    // 重写生命周期函数
+    // 设置生命周期函数
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP, async (context): Promise<void> => {
-      const originLifeCycles = { ...context.lifeCycles };
-      context.lifeCycles!.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
+      // 资源文件返回的生命周期
+      const originLifeCycles = {};
+
+      context.lifeCycles = {};
+      context.lifeCycles.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
         const mountContext = {
           app: context.app,
           props,
           lifeCycles: originLifeCycles,
-          dangerouslySetLifeCycles: (lifeCycles: AppLifeCycles) => {
+          setLifeCycles: (lifeCycles: AppLifeCycles) => {
             Object.assign(originLifeCycles, lifeCycles);
           },
         } as MountAppHookContext;
@@ -157,7 +139,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
         return mountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
       };
 
-      context.lifeCycles!.unmount = async (props: AppProps): Promise<unknown> => {
+      context.lifeCycles.unmount = async (props: AppProps): Promise<unknown> => {
         const unmountContext = {
           app: context.app,
           props,
@@ -167,31 +149,28 @@ export class PluginSourceEntry implements IPluginSourceEntry {
         return unmountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
       };
 
-      return noop();
+      return Promise.resolve();
     });
   }
 
   protected _onMountApp(): void {
     // Mount 阶段加载容器并尝试运行资源文件
-    this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
-      const { app, dangerouslySetLifeCycles, props } = context;
-
+    this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP, async (context): Promise<void> => {
       const isRendered = this._containerRenderer.renderContainer(context);
       if (!isRendered) {
         throw new VerseaError('Can not find container element.');
       }
+      return Promise.resolve();
+    });
 
-      await this._hooks.afterRenderContainer.call(context);
+    this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP, async (context): Promise<void> => {
+      const { app, setLifeCycles } = context;
 
       if (!(app as IInternalApp)._isSourceExecuted) {
         const lifeCycles = await this._sourceController.exec(context);
         (app as IInternalApp)._isSourceExecuted = true;
-        // Load 阶段没有执行资源文件，因此必须在 Mount 阶段再一次设置应用的生命周期函数，替换之后默认的空函数
-        dangerouslySetLifeCycles(lifeCycles);
-        // Load 阶段没有执行资源文件，因此 bootstrap 生命周期之前没有赋值而被忽略，这里重新执行一次 bootstrap 生命周期
-        if (!app.isBootstrapped) {
-          await app.bootstrapOnMounting(props.context, props.route!);
-        }
+        // Load 阶段没有执行资源文件，必须在 Mount 阶段设置应用的生命周期函数
+        setLifeCycles(lifeCycles);
       }
     });
 
@@ -216,7 +195,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     // 销毁容器
     this._hooks.unmountApp.tap(PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
       this._containerRenderer.renderContainer(context, null);
-      return noop();
+      return Promise.resolve();
     });
   }
 }
