@@ -6,7 +6,7 @@ import { pick } from 'ramda';
 
 import { PLUGIN_SOURCE_ENTRY_TAP } from '../constants';
 import { globalEnv } from '../global-env';
-import { LoadAppHookContext, MountAppHookContext, SourceScript, SourceStyle } from '../plugin/interface';
+import { IInternalApp, LoadAppHookContext, MountAppHookContext, SourceScript, SourceStyle } from '../plugin/interface';
 import { completionPath } from '../utils';
 import { ExecSourceHookContext, ISourceController } from './interface';
 
@@ -53,8 +53,7 @@ export class SourceController implements ISourceController {
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-      context.result = (window as any)[app.name] as AppLifeCycles;
+      context.result = this.getLifeCycles(window, app);
     });
   }
 
@@ -67,6 +66,11 @@ export class SourceController implements ISourceController {
     await this._hooks.execSource.call(execHookContext);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return execHookContext.result!;
+  }
+
+  public getLifeCycles(global: Window, app: IApp): AppLifeCycles {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    return (global as any)[(app as IInternalApp)._libraryName ?? app.name] as AppLifeCycles;
   }
 
   public normalizeSource<T extends SourceScript | SourceStyle>(

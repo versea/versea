@@ -33,8 +33,6 @@ export class Hooks implements IHooks {
 
   public load = new AsyncSeriesHook<ILoaderHookContext>();
 
-  public loadApps = new AsyncSeriesHook<ILoaderHookContext>();
-
   public unmount = new AsyncSeriesHook<IRendererHookContext>();
 
   public unmountApps = new AsyncSeriesHook<IRendererHookContext>();

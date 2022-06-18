@@ -27,5 +27,4 @@ export type { LoadStyleHookContext, LoadDynamicStyleHookContext } from './source
 export { IStyleLoader } from './source/style-loader/service';
 
 export * from './constants';
-export * from './global-env';
-export * from './utils';
+export { globalEnv } from './global-env';

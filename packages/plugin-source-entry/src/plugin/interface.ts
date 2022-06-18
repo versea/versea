@@ -104,6 +104,9 @@ export interface IInternalApp extends IApp {
   /** 资源是否已经被执行 */
   _isSourceExecuted?: boolean;
 
+  /** UMD 导出名称 */
+  _libraryName?: string;
+
   /** 获取资源文件 */
   _fetch?: (url: string, options?: RequestInit) => Promise<string>;
 }
@@ -131,10 +134,7 @@ declare module '@versea/core' {
     /** 卸载应用 */
     unmountApp: AsyncSeriesHook<UnmountAppHookContext>;
 
-    /**
-     * 根据 app 上的资源文件信息加载资源文件
-     * @description 加载资源文件
-     */
+    /** 根据 app 上的资源文件信息加载资源文件 */
     loadSource: AsyncSeriesHook<LoadSourceHookContext>;
 
     /** 根据 app 上的 scripts 信息执行 scripts */
@@ -174,6 +174,9 @@ declare module '@versea/core' {
 
     /** 资源文件公共路径 */
     assetsPublicPath?: string;
+
+    /** UMD 导出名称 */
+    libraryName?: string;
 
     /** 禁用渲染内容 */
     disableRenderContent?: boolean;

@@ -12,9 +12,9 @@ export function getEffectivePath(url?: string): string {
   const { origin, pathname } = new URL(url);
   if (/\.(\w+)$/.test(pathname)) {
     const fullPath = `${origin}${pathname}`;
-    const pathArr = fullPath.split('/');
-    pathArr.pop();
-    return pathArr.join('/') + '/';
+    const pathArray = fullPath.split('/');
+    pathArray.pop();
+    return pathArray.join('/') + '/';
   }
 
   return `${origin}${pathname}/`.replace(/\/\/$/, '/');

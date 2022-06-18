@@ -33,7 +33,7 @@ declare module '@versea/core' {
   }
 
   interface IHooks {
-    /** 沙箱环境加载 style */
+    /** 沙箱环境加载 style，不包含动态加载 */
     loadStyle: AsyncSeriesHook<LoadStyleHookContext>;
 
     /** 沙箱环境加载动态样式（仅仅包含 link 元素，不包含动态添加 style 元素） */
@@ -42,7 +42,7 @@ declare module '@versea/core' {
     /** 重写 CSSRule */
     rewriteCSSRule: SyncHook<RewriteCSSRuleHookContext>;
 
-    /** 沙箱环境加载 script */
+    /** 沙箱环境加载 script，不包含动态加载 */
     loadScript: AsyncSeriesHook<LoadScriptHookContext>;
 
     /** 沙箱环境加载动态脚本（不包含行内脚本） */

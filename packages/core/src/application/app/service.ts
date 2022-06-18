@@ -55,7 +55,7 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  public async load(context: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
+  public async load(context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
       throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
     }
@@ -67,7 +67,7 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.LoadingSourceCode;
     try {
-      const lifeCycles = await this._loadApp(this.getProps(context, route));
+      const lifeCycles = await this._loadApp(this.getProps(context));
       this.isLoaded = true;
       this.status = this._Status.NotMounted;
       this._setLifeCycles(lifeCycles);

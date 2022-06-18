@@ -29,52 +29,34 @@ export class Loader implements ILoader {
     this._SwitcherStatus = SwitcherStatus;
     this._HookContext = HookContext;
 
-    this._initHooks();
+    this._onLoad();
   }
 
   public async load(switcherContext: IAppSwitcherContext): Promise<void> {
     const { load } = this._hooks;
-    const hookContext = this._createLoaderHookContext(switcherContext);
-    await switcherContext.runTask(async () => load.call(hookContext));
+    const context = this._createContext(switcherContext);
+    await switcherContext.runTask(async () => load.call(context));
   }
 
   public restore(): void {
     // 销毁本次加载的副作用
   }
 
-  protected _initHooks(): void {
-    this._onLoad();
-    this._onLoadApps();
-  }
-
   /** 加载应用 */
   protected _onLoad(): void {
-    const { load, loadApps } = this._hooks;
-    load.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
-      const { switcherContext } = hookContext;
+    this._hooks.load.tap(VERSEA_INTERNAL_TAP, async (context) => {
+      const { switcherContext, apps } = context;
 
       // 开始加载应用
       switcherContext.status = this._SwitcherStatus.Loading;
-      for (const apps of hookContext.targetApps) {
-        hookContext.currentLoadApps = apps;
-        await switcherContext.runTask(async () => loadApps.call(hookContext));
-        hookContext.currentLoadApps = [];
-      }
+      await Promise.all(apps.map(async (app) => app.load(switcherContext)));
       // 加载应用完成，修改状态
-      hookContext.switcherContext.status = this._SwitcherStatus.Loaded;
+      switcherContext.status = this._SwitcherStatus.Loaded;
     });
   }
 
-  protected _onLoadApps(): void {
-    this._hooks.loadApps.tap(VERSEA_INTERNAL_TAP, async (hookContext) => {
-      const apps = hookContext.currentLoadApps;
-      await Promise.all(
-        apps.map(async (app) => app.load(hookContext.switcherContext, hookContext.findMatchedRouteByApp(app))),
-      );
-    });
-  }
-
-  protected _createLoaderHookContext(switcherContext: IAppSwitcherContext): ILoaderHookContext {
+  /** 创建加载应用的上下文 */
+  protected _createContext(switcherContext: IAppSwitcherContext): ILoaderHookContext {
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
     return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult });
   }

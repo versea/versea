@@ -22,6 +22,7 @@ function isInvalidQuerySelectorKey(key: string): boolean {
 
 @provide(IElementPatch)
 export class ElementPatch implements IElementPatch {
+  /** 新增的节点和替换的节点的 Map */
   protected _dynamicElement = new WeakMap<Node, Comment | Element>();
 
   protected _appService: IAppService;
@@ -76,9 +77,10 @@ export class ElementPatch implements IElementPatch {
   }
 
   protected _patchDocument(): void {
-    const { rawDocument } = globalEnv;
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
+
+    const { rawDocument } = globalEnv;
 
     Document.prototype.createElement = function createElement(
       tagName: string,
@@ -157,7 +159,7 @@ export class ElementPatch implements IElementPatch {
         !appName ||
         isUniqueElement(key) ||
         isInvalidQuerySelectorKey(key) ||
-        ((self._appService.getApp(appName) as IInternalApp)?._inlineScript && /^script$/i.test(key))
+        (!(self._appService.getApp(appName) as IInternalApp)?._inlineScript && /^script$/i.test(key))
       ) {
         return globalEnv.rawGetElementsByTagName.call(this, key);
       }
@@ -220,15 +222,15 @@ export class ElementPatch implements IElementPatch {
       }
     };
 
-    Element.prototype.removeChild = function removeChild<T extends Node>(oldChild: T): T {
-      if (oldChild?.__VERSEA_APP_NAME__) {
-        const app = self._appService.getApp(oldChild.__VERSEA_APP_NAME__);
+    Element.prototype.removeChild = function removeChild<T extends Node>(child: T): T {
+      if (child?.__VERSEA_APP_NAME__) {
+        const app = self._appService.getApp(child.__VERSEA_APP_NAME__);
         if (app?.container) {
-          return self._invokePrototypeMethod(app, globalEnv.rawRemoveChild, this, self._getMappingNode(oldChild)) as T;
+          return self._invokeMethod(app, globalEnv.rawRemoveChild, this, self._getMappingElement(child)) as T;
         }
       }
 
-      return globalEnv.rawRemoveChild.call(this, oldChild) as T;
+      return globalEnv.rawRemoveChild.call(this, child) as T;
     };
 
     Element.prototype.cloneNode = function cloneNode(deep?: boolean): Node {
@@ -257,16 +259,16 @@ export class ElementPatch implements IElementPatch {
     // eslint-disable-next-line @typescript-eslint/ban-types
     rawMethod: (newChild: Node, passiveChild?: Node | null) => Node,
   ): Node {
-    // 处理具有 __VERSEA_APP_NAME__ 的 Element
+    // 处理具有 __VERSEA_APP_NAME__ 的 Element，被标记元素可能特殊处理，如替换元素
     if (newChild?.__VERSEA_APP_NAME__) {
       const app = this._appService.getApp(newChild.__VERSEA_APP_NAME__);
       if (app?.container) {
-        return this._invokePrototypeMethod(
+        return this._invokeMethod(
           app,
           rawMethod,
           parent,
           this._handleNewNode(newChild, app),
-          passiveChild && this._getMappingNode(passiveChild),
+          passiveChild && this._getMappingElement(passiveChild),
         );
       }
 
@@ -277,7 +279,7 @@ export class ElementPatch implements IElementPatch {
       return rawMethod.call(parent, newChild, passiveChild);
     }
 
-    // 处理没有 __VERSEA_APP_NAME__ 的 Element
+    // 处理没有 __VERSEA_APP_NAME__ 的 Element，不被标记的元素只能放在正确的节点位置
     if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
       const appName = this._currentApp.getName();
       if (!(newChild instanceof Node) && appName) {
@@ -296,51 +298,23 @@ export class ElementPatch implements IElementPatch {
     return rawMethod.call(parent, newChild, passiveChild);
   }
 
-  protected _invokePrototypeMethod(
+  protected _invokeMethod(
     app: IApp,
     rawMethod: (newChild: Node, passiveChild?: Node | null) => Node,
     parent: Node,
     targetChild: Node,
     passiveChild?: Node | null,
   ): Node {
-    /**
-     * If passiveChild is not the child node, insertBefore replaceChild will have a problem, at this time, it will be degraded to appendChild
-     * E.g: document.head.insertBefore(targetChild, document.head.childNodes[0])
-     */
     if (parent === document.head) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const verseaAppHead = app.container!.querySelector('versea-app-head')!;
-      /**
-       * 1. If passiveChild exists, it must be insertBefore or replaceChild
-       * 2. When removeChild, targetChild may not be in versea-app-head or head
-       */
-      if (passiveChild && !verseaAppHead.contains(passiveChild)) {
-        return globalEnv.rawAppendChild.call(verseaAppHead, targetChild);
-      } else if (rawMethod === globalEnv.rawRemoveChild && !verseaAppHead.contains(targetChild)) {
-        if (parent.contains(targetChild)) {
-          return rawMethod.call(parent, targetChild);
-        }
-        return targetChild;
-      } else if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
-        return rawMethod.call(verseaAppHead, targetChild);
-      }
-      return rawMethod.call(verseaAppHead, targetChild, passiveChild);
+      return this._invokeUniqueElementMethod(rawMethod, parent, verseaAppHead, targetChild, passiveChild);
     }
 
     if (parent === document.body) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const verseaAppBody = app.container!.querySelector('versea-app-body')!;
-      if (passiveChild && !verseaAppBody.contains(passiveChild)) {
-        return globalEnv.rawAppendChild.call(verseaAppBody, targetChild);
-      } else if (rawMethod === globalEnv.rawRemoveChild && !verseaAppBody.contains(targetChild)) {
-        if (parent.contains(targetChild)) {
-          return rawMethod.call(parent, targetChild);
-        }
-        return targetChild;
-      } else if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
-        return rawMethod.call(verseaAppBody, targetChild);
-      }
-      return rawMethod.call(verseaAppBody, targetChild, passiveChild);
+      return this._invokeUniqueElementMethod(rawMethod, parent, verseaAppBody, targetChild, passiveChild);
     }
 
     if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
@@ -348,6 +322,32 @@ export class ElementPatch implements IElementPatch {
     }
 
     return rawMethod.call(parent, targetChild, passiveChild);
+  }
+
+  protected _invokeUniqueElementMethod(
+    rawMethod: (newChild: Node, passiveChild?: Node | null) => Node,
+    parent: Node,
+    scopedParent: Node,
+    targetChild: Node,
+    passiveChild?: Node | null,
+  ): Node {
+    if (passiveChild && !scopedParent.contains(passiveChild)) {
+      return globalEnv.rawAppendChild.call(scopedParent, targetChild);
+    }
+
+    if (rawMethod === globalEnv.rawRemoveChild && !scopedParent.contains(targetChild)) {
+      if (parent.contains(targetChild)) {
+        return rawMethod.call(parent, targetChild);
+      }
+
+      return targetChild;
+    }
+
+    if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
+      return rawMethod.call(scopedParent, targetChild);
+    }
+
+    return rawMethod.call(scopedParent, targetChild, passiveChild);
   }
 
   protected _handleNewNode(node: Node, app: IApp): Node {
@@ -394,6 +394,7 @@ export class ElementPatch implements IElementPatch {
 
     const rel = element.getAttribute('rel');
     const href = element.getAttribute('href');
+    // 处理 link 的样式
     if (rel === 'stylesheet' && href) {
       const style: SourceStyle = {
         src: completionPath(href, app.assetsPublicPath),
@@ -408,6 +409,7 @@ export class ElementPatch implements IElementPatch {
       return styleElement;
     }
 
+    // 处理 link 的其他需要忽略的标签
     if (rel && ['prefetch', 'preload', 'prerender', 'icon', 'apple-touch-icon'].includes(rel)) {
       const comment = document.createComment(
         `link element with rel=${rel}${href ? ` & href=${href}` : ''} removed by versea-app`,
@@ -489,7 +491,7 @@ export class ElementPatch implements IElementPatch {
     void runScriptHook.call(context);
   }
 
-  protected _getMappingNode(node: Node): Node {
+  protected _getMappingElement(node: Node): Node {
     return this._dynamicElement.get(node) ?? node;
   }
 }

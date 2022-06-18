@@ -46,6 +46,7 @@ App.defineProp('_fetch', { optionKey: 'fetch' });
 App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
 App.defineProp('_disableRenderContent', { optionKey: 'disableRenderContent' });
+App.defineProp('_libraryName', { optionKey: 'libraryName' });
 
 @provide(IPluginSourceEntry)
 export class PluginSourceEntry implements IPluginSourceEntry {
@@ -114,7 +115,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
       // 容器无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
       if (!app.container) {
-        app.container = this._containerRenderer.createContainerElement(app);
+        app.container = this._containerRenderer.createElement(app);
       }
 
       await this._sourceController.load(context);
@@ -156,7 +157,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   protected _onMountApp(): void {
     // Mount 阶段加载容器并尝试运行资源文件
     this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP, async (context): Promise<void> => {
-      const isRendered = this._containerRenderer.renderContainer(context);
+      const isRendered = this._containerRenderer.render(context);
       if (!isRendered) {
         throw new VerseaError('Can not find container element.');
       }
@@ -194,7 +195,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
     // 销毁容器
     this._hooks.unmountApp.tap(PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP, async (context): Promise<void> => {
-      this._containerRenderer.renderContainer(context, null);
+      this._containerRenderer.render(context, null);
       return Promise.resolve();
     });
   }

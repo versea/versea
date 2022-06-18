@@ -295,9 +295,9 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
   }
 
   protected _setHijackProperties(appWindow: VerseaAppWindow, appName: string): void {
-    let modifiedEval: unknown = undefined;
-    let modifiedImage: unknown = undefined;
     const currentApp = this._currentApp;
+
+    let modifiedEval: unknown = undefined;
     rawDefineProperties(appWindow, {
       document: {
         get() {
@@ -314,17 +314,6 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
         },
         set: (value) => {
           modifiedEval = value;
-        },
-        configurable: true,
-        enumerable: false,
-      },
-      Image: {
-        get() {
-          currentApp.throttleDeferForSetAppName(appName);
-          return modifiedImage || globalEnv.ImageProxy;
-        },
-        set: (value) => {
-          modifiedImage = value;
         },
         configurable: true,
         enumerable: false,
