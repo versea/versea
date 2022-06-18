@@ -1,17 +1,12 @@
 import { provide } from '@versea/core';
 
-import { bindCurrentApp } from '../global-env';
 import { ICurrentApp } from './interface';
 
 export * from './interface';
 
-interface ZoneWindow extends Window {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  Zone: () => void;
-}
-
 const nextTick: (cb: () => void) => void =
-  typeof (window as unknown as ZoneWindow).Zone === 'function'
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  typeof (window as unknown as Window & { Zone: () => void }).Zone === 'function'
     ? setTimeout
     : async (cb): Promise<void> => Promise.resolve().then(cb);
 
@@ -19,11 +14,8 @@ const nextTick: (cb: () => void) => void =
 export class CurrentApp implements ICurrentApp {
   protected _name: string | undefined = undefined;
 
-  protected _taskPending = false;
-
-  constructor() {
-    bindCurrentApp(this);
-  }
+  /** 是否已经存在异步任务 */
+  protected _isPending = false;
 
   public getName(): string | undefined {
     return this._name;
@@ -37,11 +29,11 @@ export class CurrentApp implements ICurrentApp {
     if (!this._name || this._name !== name) {
       this.setName(name);
     }
-    if (!this._taskPending) {
-      this._taskPending = true;
+    if (!this._isPending) {
+      this._isPending = true;
       nextTick(() => {
         this.setName();
-        this._taskPending = false;
+        this._isPending = false;
       });
     }
   }

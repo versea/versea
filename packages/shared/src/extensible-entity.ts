@@ -3,7 +3,7 @@ import { VerseaError } from './error';
 
 /** 扩展属性的描述 */
 export interface ExtensiblePropDescription {
-  /** 扩展属性对应的 options 的名称 */
+  /** 扩展属性对应的 option 的 key */
   optionKey?: string;
 
   /** 是否必传字段 */
@@ -36,7 +36,7 @@ function findAllDerivedClass(
 ): typeof ExtensibleEntity[] {
   const targetConstructor = instance.constructor as typeof ExtensibleEntity;
 
-  // 只寻找派生类，不包含这个基类
+  // 只寻找派生类，不包含这个基类本身
   if (targetConstructor === baseClass) {
     return currentValue;
   }

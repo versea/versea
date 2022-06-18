@@ -1,4 +1,4 @@
-/** 依赖注入类型的插件的默认定义 */
+/** 依赖注入类型的插件 */
 export interface IPlugin {
   apply: () => void;
 }

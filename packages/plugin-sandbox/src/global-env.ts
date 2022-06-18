@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { isBrowser } from '@versea/shared';
 
-import { ICurrentApp } from './current-app/service';
 import { VerseaAppWindow } from './sandbox/sandbox/types';
 
 declare global {
@@ -44,7 +43,6 @@ interface GlobalEnv {
   rawGetElementsByClassName: typeof Document.prototype.getElementsByClassName;
   rawGetElementsByTagName: typeof Document.prototype.getElementsByTagName;
   rawGetElementsByName: typeof Document.prototype.getElementsByName;
-  ImageProxy: typeof Image;
 
   rawWindow: Window;
   rawDocument: Document;
@@ -58,12 +56,6 @@ interface GlobalEnv {
   rawClearTimeout: typeof window.clearTimeout;
   rawDocumentAddEventListener: typeof document.addEventListener;
   rawDocumentRemoveEventListener: typeof document.removeEventListener;
-}
-
-// eslint-disable-next-line @typescript-eslint/naming-convention
-let _currentApp: ICurrentApp | null = null;
-export function bindCurrentApp(currentApp: ICurrentApp): void {
-  _currentApp = currentApp;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-implied-eval
@@ -98,15 +90,6 @@ if (isBrowser) {
     rawGetElementsByClassName: Document.prototype.getElementsByClassName,
     rawGetElementsByTagName: Document.prototype.getElementsByTagName,
     rawGetElementsByName: Document.prototype.getElementsByName,
-    ImageProxy: new Proxy(Image, {
-      construct(Target, args: [number | undefined, number | undefined]): HTMLImageElement {
-        const elementImage = new Target(...args);
-        if (_currentApp) {
-          elementImage.__VERSEA_APP_NAME__ = _currentApp.getName();
-        }
-        return elementImage;
-      },
-    }),
 
     // 全局通用变量
     rawWindow,

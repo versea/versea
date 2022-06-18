@@ -22,9 +22,9 @@ export class ContainerRender implements IContainerRenderer {
     this._starter = starter;
   }
 
-  public createContainerElement(app: IApp): HTMLElement {
+  public createElement(app: IApp): HTMLElement {
     const wrapperElement = globalEnv.rawCreateElement.call(document, 'div');
-    wrapperElement.innerHTML = this._getAppContent(app);
+    wrapperElement.innerHTML = this._getContent(app);
     return wrapperElement.firstChild as HTMLElement;
   }
 
@@ -32,14 +32,13 @@ export class ContainerRender implements IContainerRenderer {
     return `__versea_${snakeCase(name)}__`;
   }
 
-  public renderContainer(
+  public render(
     context: MountAppHookContext | UnmountAppHookContext,
     container = context.app.container as Node | null | undefined,
   ): boolean {
-    const appContainer = context.app.container;
-
     if ((context.app as IInternalApp)._disableRenderContent) {
       if (!document.body.contains(container as Node | null)) {
+        const appContainer = context.app.container;
         if (container) {
           globalEnv.rawAppendChild.call(document.body, container);
         } else if (appContainer && document.body.contains(appContainer)) {
@@ -50,18 +49,11 @@ export class ContainerRender implements IContainerRenderer {
       return true;
     }
 
-    // 未执行 start 时不触发渲染
-    if (!this._starter.isStarted) {
-      return false;
-    }
-
-    const parentContainerElement = this._getParentContainerElement(context);
+    const parentContainerElement = this._getParentContainer(context);
     if (parentContainerElement && !parentContainerElement.contains(container as Node | null)) {
       // 清空元素
-      if ((container === null && parentContainerElement.contains(appContainer as Node)) || container) {
-        while (parentContainerElement.firstChild) {
-          globalEnv.rawRemoveChild.call(parentContainerElement, parentContainerElement.firstChild);
-        }
+      while (parentContainerElement.firstChild) {
+        globalEnv.rawRemoveChild.call(parentContainerElement, parentContainerElement.firstChild);
       }
 
       if (container) {
@@ -73,7 +65,7 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   /** 获取应用容器 */
-  protected _getAppContent(app: IApp): string {
+  protected _getContent(app: IApp): string {
     this._injectVerseaAppStyle();
     const {
       name,
@@ -101,31 +93,31 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   /** 获取父应用的容器元素 */
-  protected _getParentContainerElement(context: MountAppHookContext | UnmountAppHookContext): HTMLElement | null {
+  protected _getParentContainer(context: MountAppHookContext | UnmountAppHookContext): HTMLElement | null {
     const { app, props } = context;
 
     // 从 route 获取容器
     if (props.route) {
       const meta = props.route.getMeta(app);
       if (meta.parentContainerName) {
-        return this._queryParentContainerElement(`#${meta.parentContainerName}`);
+        return this._querySelector(`#${meta.parentContainerName}`);
       }
     }
 
     if ((app as IInternalApp)._parentContainer) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this._queryParentContainerElement((app as IInternalApp)._parentContainer!);
+      return this._querySelector((app as IInternalApp)._parentContainer!);
     }
 
     // 获取默认容器
     if (props.route?.apps[0] === app && this._config.defaultContainer) {
-      return this._queryParentContainerElement(this._config.defaultContainer);
+      return this._querySelector(this._config.defaultContainer);
     }
 
     return null;
   }
 
-  protected _queryParentContainerElement(selector: string): HTMLElement | null {
+  protected _querySelector(selector: string): HTMLElement | null {
     return globalEnv.rawQuerySelector.call(document, selector) as HTMLElement | null;
   }
 
@@ -136,7 +128,7 @@ export class ContainerRender implements IContainerRenderer {
       const style = globalEnv.rawCreateElement.call(document, 'style');
       globalEnv.rawSetAttribute.call(style, 'type', 'text/css');
       style.textContent = `versea-app-body { display: block; } \nversea-app-head { display: none; }`;
-      document.head.appendChild(style);
+      globalEnv.rawAppendChild.call(document.head, style);
     }
   }
 }

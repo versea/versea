@@ -35,7 +35,7 @@ export interface IRendererHookContext extends HookContext {
   /** 当前普通路由和目标普通路由不匹配的位置 */
   readonly mismatchIndex: number;
 
-  /** 引导再渲染应用 */
+  /** 渲染应用 */
   mount: (app: IApp, route: MatchedRoute) => Promise<void>;
 }
 

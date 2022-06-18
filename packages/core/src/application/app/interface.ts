@@ -41,7 +41,7 @@ export interface IApp {
   isLoaded: boolean;
 
   /** 加载应用 */
-  load: (context: IAppSwitcherContext, route?: MatchedRoute) => Promise<void>;
+  load: (context: IAppSwitcherContext) => Promise<void>;
 
   /** 挂载应用 */
   mount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;

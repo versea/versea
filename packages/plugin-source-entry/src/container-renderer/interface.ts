@@ -6,7 +6,7 @@ export const IContainerRenderer = createServiceSymbol('IContainerRenderer');
 
 export interface IContainerRenderer {
   /** 生成容器元素 */
-  createContainerElement: (app: IApp) => HTMLElement;
+  createElement: (app: IApp) => HTMLElement;
 
   /** 获取容器 ID */
   getWrapperId: (name: string) => string;
@@ -15,5 +15,5 @@ export interface IContainerRenderer {
    * 渲染容器内容
    * @returns {boolean} 是否渲染成功
    */
-  renderContainer: (context: MountAppHookContext | UnmountAppHookContext, element?: HTMLElement | null) => boolean;
+  render: (context: MountAppHookContext | UnmountAppHookContext, element?: HTMLElement | null) => boolean;
 }

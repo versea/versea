@@ -21,6 +21,9 @@ export interface ISourceController {
    */
   exec: (context: MountAppHookContext) => Promise<AppLifeCycles>;
 
+  /** 从 Window 获取生命周期 */
+  getLifeCycles: (global: Window, app: IApp) => AppLifeCycles;
+
   /** 将链接数组转化成标准 Source 数组 */
   normalizeSource: <T extends SourceScript | SourceStyle>(sources?: (T | string)[], assetsPublicPath?: string) => T[];
 
@@ -53,9 +56,9 @@ export interface LoadSourceHookContext extends HookContext {
 export interface ExecSourceHookContext extends HookContext {
   app: IApp;
 
-  /** Load 或 Mount 参数 */
+  /** Mount 参数 */
   props: AppProps;
 
-  /** 执行 scripts 之后获取到的导出的声明周期 */
+  /** 执行 scripts 之后获取到的生命周期 */
   result?: AppLifeCycles;
 }

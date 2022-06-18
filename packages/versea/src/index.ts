@@ -15,10 +15,6 @@ import { Container } from 'inversify';
 
 export * from '@versea/core';
 
-export interface IVerseaPlugin {
-  apply: (container: Container) => void;
-}
-
 export class Versea {
   public container: Container;
 
@@ -65,7 +61,15 @@ export class Versea {
   }
 
   /** 使用插件 */
-  public use(plugin: IVerseaPlugin | string | symbol | ((container: Container) => void)): void {
+  public use(
+    plugin:
+      | string
+      | symbol
+      | ((container: Container) => void)
+      | {
+          apply: (container: Container) => void;
+        },
+  ): void {
     if (typeof plugin === 'function') {
       plugin(this.container);
       return;
