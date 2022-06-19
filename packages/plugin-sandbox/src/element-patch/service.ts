@@ -326,28 +326,28 @@ export class ElementPatch implements IElementPatch {
 
   protected _invokeUniqueElementMethod(
     rawMethod: (newChild: Node, passiveChild?: Node | null) => Node,
+    originParent: Node,
     parent: Node,
-    scopedParent: Node,
     targetChild: Node,
     passiveChild?: Node | null,
   ): Node {
-    if (passiveChild && !scopedParent.contains(passiveChild)) {
-      return globalEnv.rawAppendChild.call(scopedParent, targetChild);
+    if (passiveChild && !parent.contains(passiveChild)) {
+      return globalEnv.rawAppendChild.call(parent, targetChild);
     }
 
-    if (rawMethod === globalEnv.rawRemoveChild && !scopedParent.contains(targetChild)) {
-      if (parent.contains(targetChild)) {
-        return rawMethod.call(parent, targetChild);
+    if (rawMethod === globalEnv.rawRemoveChild && !parent.contains(targetChild)) {
+      if (originParent.contains(targetChild)) {
+        return rawMethod.call(originParent, targetChild);
       }
 
       return targetChild;
     }
 
     if (rawMethod === globalEnv.rawAppend || rawMethod === globalEnv.rawPrepend) {
-      return rawMethod.call(scopedParent, targetChild);
+      return rawMethod.call(parent, targetChild);
     }
 
-    return rawMethod.call(scopedParent, targetChild, passiveChild);
+    return rawMethod.call(parent, targetChild, passiveChild);
   }
 
   protected _handleNewNode(node: Node, app: IApp): Node {
