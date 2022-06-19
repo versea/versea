@@ -1,4 +1,4 @@
-import { App, AppLifeCycles, IApp, IConfig, IHooks, provide, provideValue } from '@versea/core';
+import { App, IApp, IConfig, IHooks, provide, provideValue } from '@versea/core';
 import {
   IInternalApp,
   IPluginSourceEntry,
@@ -6,11 +6,12 @@ import {
   PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP,
   PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_TAP,
+  ISourceController,
 } from '@versea/plugin-source-entry';
 import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
-import { PLUGIN_SANDBOX_TAP } from '../constants';
+import { PLUGIN_SANDBOX_TAP, PLUGIN_SANDBOX_EFFECT_TAP } from '../constants';
 import { ICurrentApp } from '../current-app/interface';
 import { IElementPatch } from '../element-patch/interface';
 import { globalEnv } from '../global-env';
@@ -57,6 +58,8 @@ export class PluginSandbox implements IPluginSandbox {
 
   protected _elementPatch: IElementPatch;
 
+  protected _sourceController: ISourceController;
+
   protected _pluginSourceEntry: IPluginSourceEntry;
 
   constructor(
@@ -72,6 +75,7 @@ export class PluginSandbox implements IPluginSandbox {
     @inject(ISandbox) Sandbox: interfaces.Newable<ISandbox>,
     /* eslint-enable @typescript-eslint/naming-convention */
     @inject(IElementPatch) elementPatch: IElementPatch,
+    @inject(ISourceController) sourceController: ISourceController,
     @inject(IPluginSourceEntry) pluginSourceEntry: IPluginSourceEntry,
   ) {
     this._config = config;
@@ -84,6 +88,7 @@ export class PluginSandbox implements IPluginSandbox {
     this._SandboxEffect = SandboxEffect;
     this._Sandbox = Sandbox;
     this._elementPatch = elementPatch;
+    this._sourceController = sourceController;
     this._pluginSourceEntry = pluginSourceEntry;
   }
 
@@ -103,6 +108,7 @@ export class PluginSandbox implements IPluginSandbox {
     this.isApplied = true;
   }
 
+  /** 加载资源文件 */
   protected _onLoadSource(): void {
     this._hooks.loadSource.tap(PLUGIN_SANDBOX_TAP, async (context) => {
       await this._styleLoader.load(context);
@@ -110,6 +116,7 @@ export class PluginSandbox implements IPluginSandbox {
     });
   }
 
+  /** 创建沙箱 */
   protected _onCreateSandbox(): void {
     this._hooks.loadApp.tap(
       PLUGIN_SANDBOX_TAP,
@@ -136,6 +143,7 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
+  /** 启动沙箱 */
   protected _onStartSandbox(): void {
     this._hooks.mountApp.tap(
       PLUGIN_SANDBOX_TAP,
@@ -149,9 +157,10 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
+  /** 记录和重置沙箱副作用 */
   protected _onMountEffect(): void {
     this._hooks.mountApp.tap(
-      PLUGIN_SOURCE_ENTRY_TAP,
+      PLUGIN_SANDBOX_EFFECT_TAP,
       async ({ app }) => {
         if ((app as IInternalApp)._isSourceExecuted && app.sandbox) {
           if ((app as IApp & { _hasBeenMounted: boolean })._hasBeenMounted) {
@@ -169,7 +178,9 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
+  /** 执行资源文件 */
   protected _onExecSource(): void {
+    // 替换 @versea/plugin-source-entry 插件原有的执行资源的监听函数
     this._hooks.execSource.tap(
       PLUGIN_SOURCE_ENTRY_TAP,
       async (context) => {
@@ -177,11 +188,16 @@ export class PluginSandbox implements IPluginSandbox {
         const styleLoader = this._styleLoader;
         const scriptLoader = this._scriptLoader;
 
+        // 等待资源加载完成
         await Promise.all([styleLoader.waitLoaded(app), scriptLoader.waitLoaded(app)]);
+
         await scriptLoader.exec(app);
+        // 获取导出的生命周期函数
+        context.result = this._sourceController.getLifeCycles(app.sandbox?.proxyWindow ?? globalEnv.rawWindow, app);
+
+        // 释放资源
         styleLoader.dispose(app);
         scriptLoader.dispose(app);
-        context.result = this._getAppLifeCycles(app);
       },
       {
         replace: true,
@@ -189,6 +205,7 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
+  /** 通知沙箱 */
   protected _onStopSandbox(): void {
     this._hooks.unmountApp.tap(
       PLUGIN_SANDBOX_TAP,
@@ -200,11 +217,5 @@ export class PluginSandbox implements IPluginSandbox {
         before: PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
       },
     );
-  }
-
-  protected _getAppLifeCycles(app: IApp): AppLifeCycles {
-    const global = app.sandbox?.proxyWindow ?? globalEnv.rawWindow;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (global as Record<string, any> & Window)[app.name] as AppLifeCycles;
   }
 }

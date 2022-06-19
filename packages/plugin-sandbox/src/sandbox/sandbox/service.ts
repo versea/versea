@@ -175,6 +175,8 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
       },
       set: (target: VerseaAppWindow, key: PropertyKey, value: unknown): boolean => {
         if (this._active) {
+          this._currentApp.throttleDeferForSetAppName(app.name);
+
           if (escapeSetterKeyList.includes(key)) {
             Reflect.set(rawWindow, key, value);
           } else if (
