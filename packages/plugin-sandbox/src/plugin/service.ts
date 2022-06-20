@@ -205,7 +205,7 @@ export class PluginSandbox implements IPluginSandbox {
     );
   }
 
-  /** 通知沙箱 */
+  /** 停止沙箱 */
   protected _onStopSandbox(): void {
     this._hooks.unmountApp.tap(
       PLUGIN_SANDBOX_TAP,
