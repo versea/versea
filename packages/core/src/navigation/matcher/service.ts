@@ -117,6 +117,7 @@ export class Matcher implements IMatcher {
       if (matchRouteHookContext.isMatched) {
         context.routes.push(route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }));
         this._matchTree(context, route.children);
+        return;
       }
     }
   }
