@@ -1,6 +1,6 @@
 {
   "name": "@versea/plugin-source-entry",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -24,9 +24,9 @@
   },
   "dependencies": {
     "@types/ramda": "^0.28.3",
-    "@versea/core": "0.1.1",
-    "@versea/shared": "0.1.1",
-    "@versea/tapable": "0.1.1",
+    "@versea/core": "0.2.0",
+    "@versea/shared": "0.2.0",
+    "@versea/tapable": "0.2.0",
     "inversify": "^6.0.1",
     "ramda": "^0.28.0",
     "snake-case": "^3.0.4",
