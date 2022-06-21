@@ -2,6 +2,7 @@ import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/int
 import { IStatus } from '../../enum/status';
 import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
+import { IAppService } from '../app-service/interface';
 
 export const IApp = createServiceSymbol('IApp');
 
@@ -13,7 +14,7 @@ export interface AppProps extends Record<string, unknown> {
   app: IApp;
 
   /** 当前正在运行的应用切换上下文 */
-  context: IAppSwitcherContext;
+  context?: IAppSwitcherContext;
 
   /** 当前操作的 route 节点 */
   route?: MatchedRoute;
@@ -41,16 +42,16 @@ export interface IApp {
   isLoaded: boolean;
 
   /** 加载应用 */
-  load: (context: IAppSwitcherContext) => Promise<void>;
+  load: (context?: IAppSwitcherContext) => Promise<void>;
 
   /** 挂载应用 */
-  mount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
+  mount: (context?: IAppSwitcherContext, route?: MatchedRoute) => Promise<void>;
 
   /** 卸载应用 */
-  unmount: (context: IAppSwitcherContext, route: MatchedRoute) => Promise<void>;
+  unmount: (context?: IAppSwitcherContext, route?: MatchedRoute) => Promise<void>;
 
   /** 获取传给加载和挂载的各个生命周期函数的属性 */
-  getProps: (context: IAppSwitcherContext, route?: MatchedRoute) => AppProps;
+  getProps: (context?: IAppSwitcherContext, route?: MatchedRoute) => AppProps;
 
   /**
    * 等待应用内部容器渲染完成
@@ -58,6 +59,12 @@ export interface IApp {
    * @description 参考 issue https://github.com/versea/versea/issues/8。
    */
   waitForChildContainer: (containerName: string, context: IAppSwitcherContext) => Promise<void>;
+
+  /** 注册包裹 */
+  registerParcel: (config: AppConfig) => IApp;
+
+  /** 加载包裹 */
+  loadParcel: (app: IApp) => Promise<void>;
 }
 
 /** App 实例化的参数 */
@@ -81,4 +88,5 @@ export interface AppConfig {
 export interface AppDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Status: IStatus;
+  appService: IAppService;
 }
