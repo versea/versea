@@ -64,7 +64,7 @@ export interface IApp {
   registerParcel: (config: AppConfig) => IApp;
 
   /** 加载包裹 */
-  loadParcel: (app: IApp) => Promise<void>;
+  loadAndMount: () => Promise<void>;
 }
 
 /** App 实例化的参数 */

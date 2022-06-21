@@ -41,7 +41,7 @@ export class App extends ExtensibleEntity implements IApp {
   /** "等待应用内部容器渲染完成"的 Hooks */
   protected _waitForChildrenContainerHooks: Record<string, AppLifeCycleFunction> = {};
 
-  protected _parcelMountMap: Map<string, Promise<void>> = new Map();
+  protected _parcels: IApp[] = [];
 
   /**
    * 生成一个 App 实例
@@ -114,16 +114,12 @@ export class App extends ExtensibleEntity implements IApp {
     this.status = this._Status.Unmounting;
 
     await Promise.all(
-      Array.from(this._parcelMountMap.entries()).map(async ([name, promise]): Promise<void> => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const app = this._appService.getApp(name)!;
+      this._parcels.map(async (app): Promise<void> => {
         if (app.status === this._Status.Mounted) {
-          await promise;
           await app.unmount();
         }
       }),
     );
-    this._parcelMountMap.clear();
 
     if (!this._lifeCycles.unmount) {
       this.status = this._Status.NotMounted;
@@ -172,28 +168,20 @@ export class App extends ExtensibleEntity implements IApp {
       return appService.getApp(config.name)!;
     }
 
-    return appService.registerApp(config, false);
+    const app = appService.registerApp(config, false);
+    this._parcels.push(app);
+    return app;
   }
 
-  public async loadParcel(app: IApp): Promise<void> {
-    const Status = this._Status;
-
-    async function loadAndMount(): Promise<void> {
-      if (!app.isLoaded) {
-        await app.load();
-      }
-      try {
-        await app.mount();
-      } catch (error) {
-        logError(error, app.name);
-        app.status = Status.NotMounted;
-      }
+  public async loadAndMount(): Promise<void> {
+    if (!this.isLoaded) {
+      await this.load();
     }
-
-    if (app) {
-      const promise = loadAndMount();
-      this._parcelMountMap.set(app.name, promise);
-      await promise;
+    try {
+      await this.mount();
+    } catch (error) {
+      logError(error, this.name);
+      this.status = this._Status.NotMounted;
     }
   }
 
