@@ -3,7 +3,10 @@ import { VerseaError } from './error';
 
 /** 扩展属性的描述 */
 export interface ExtensiblePropDescription {
-  /** 扩展属性对应的 option 的 key */
+  /**
+   * 扩展属性对应的 option 的 key
+   * @description A.defineProp('_a', { optionKey: 'a' }) A 的实例会增加 _a，取值会取 New A({ a: 'foo' }) 的 a 参数
+   */
   optionKey?: string;
 
   /** 是否必传字段 */

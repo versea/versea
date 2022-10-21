@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 export class Deferred<T> {
   public promise: Promise<T>;
 
   public resolve!: (value: PromiseLike<T> | T) => void;
 
-  public reject!: (reason?: any) => void;
+  public reject!: (reason?: unknown) => void;
 
   constructor() {
     this.promise = new Promise((resolve, reject) => {
