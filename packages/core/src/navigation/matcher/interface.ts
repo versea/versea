@@ -30,6 +30,7 @@ export interface MatchRoutesHookContext extends HookContext {
   routes: MatchedRoute[];
   fragmentRoutes: MatchedRoute[];
   trees: IRoute[];
+  routesList: IRoute[];
   rootFragments: IRoute[];
 }
 

@@ -92,10 +92,10 @@ export interface RouteConfig {
 export interface RouteMeta {
   [key: string]: unknown;
 
-  /** 嵌套的父应用名称 */
+  /** 具有嵌套功能的父应用名称 */
   parentAppName?: string;
 
-  /** 嵌套的父应用的容器名称 */
+  /** 具有嵌套功能的父应用的容器名称 */
   parentContainerName?: string;
 }
 

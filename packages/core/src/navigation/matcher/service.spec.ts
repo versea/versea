@@ -459,7 +459,7 @@ describe('Matcher', () => {
       const app = getAppInstance(container, 'name1');
       matcher.addRoutes([{ path: 'path1/:id' }], app);
 
-      expect(matcher.match('/path1/1/path2', {}).routes).toMatchObject([
+      expect(matcher.match('/path1/1', {}).routes).toMatchObject([
         {
           path: '/path1/:id',
           apps: [

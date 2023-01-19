@@ -94,7 +94,7 @@ export class ScopedCSS implements IScopedCSS {
     });
 
     // since observer will be deleted when node be removed
-    // we dont need create a cleanup function manually
+    // we don't need create a cleanup function manually
     // see https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/disconnect
     mutator.observe(styleNode, { childList: true });
   }

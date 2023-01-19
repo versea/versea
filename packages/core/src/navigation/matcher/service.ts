@@ -3,6 +3,7 @@ import { VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 import { Key } from 'path-to-regexp';
 import queryString from 'query-string';
+import { flatten } from 'ramda';
 
 import { IApp } from '../../application/app/interface';
 import { VERSEA_INTERNAL_TAP } from '../../constants';
@@ -26,6 +27,9 @@ export class Matcher implements IMatcher {
    * @description 数组的每一项都是一个仅有空 children 的 Route。
    */
   protected readonly _rootFragments: IRoute[] = [];
+
+  /** 普通路由拍平结构 */
+  protected _routesList: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   protected readonly _RouteConstructor: interfaces.Newable<IRoute>;
@@ -64,6 +68,7 @@ export class Matcher implements IMatcher {
       routes: [],
       fragmentRoutes: [],
       trees: this._trees,
+      routesList: this._routesList,
       rootFragments: this._rootFragments,
     };
     // 先匹配普通路由，再匹配根部碎片路由
@@ -105,8 +110,8 @@ export class Matcher implements IMatcher {
     this._trees.splice(wildIndex, 0, route);
   }
 
-  protected _matchTree(context: MatchRoutesHookContext, trees: IRoute[] = context.trees): void {
-    for (const route of trees) {
+  protected _matchTree(context: MatchRoutesHookContext): void {
+    for (const route of context.routesList) {
       const matchRouteHookContext = {
         ...context,
         route,
@@ -115,8 +120,13 @@ export class Matcher implements IMatcher {
       };
       this._hooks.matchRoute.call(matchRouteHookContext);
       if (matchRouteHookContext.isMatched) {
-        context.routes.push(route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }));
-        this._matchTree(context, route.children);
+        let currentRoute: IRoute | null = route;
+        while (currentRoute) {
+          context.routes.unshift(
+            currentRoute.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }),
+          );
+          currentRoute = currentRoute.parent;
+        }
         return;
       }
     }
@@ -218,5 +228,7 @@ export class Matcher implements IMatcher {
         }
       }
     }
+
+    this._routesList = flatten(this._trees.map((item) => item.flatten()));
   }
 }

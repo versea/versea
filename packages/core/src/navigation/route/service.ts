@@ -125,7 +125,6 @@ export class Route extends ExtensibleEntity implements IRoute {
 
   public compile(keys: Key[]): RegExp {
     return pathToRegexp(this.fullPath, keys, {
-      end: false,
       ...this.pathToRegexpOptions,
     });
   }
