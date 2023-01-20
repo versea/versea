@@ -43,7 +43,11 @@ export class AppService implements IAppService {
     beforeRegisterApp.call(registerAppHookContext);
 
     // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    const app = new this._AppConstructor(registerAppHookContext.config, { Status: this._Status, appService: this });
+    const app = new this._AppConstructor(registerAppHookContext.config, {
+      Status: this._Status,
+      appService: this,
+      hooks: this._hooks,
+    });
     this._appMap.set(app.name, app);
 
     registerAppHookContext.app = app;

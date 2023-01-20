@@ -4,6 +4,7 @@ import { IAppSwitcherContext } from '../app-switcher/app-switcher-context/interf
 import { ILoaderHookContext } from '../app-switcher/loader-hook-context/interface';
 import { IRendererHookContext } from '../app-switcher/renderer-hook-context/interface';
 import { RegisterAppHookContext } from '../application/app-service/interface';
+import { WaitForChildContainerContext } from '../application/app/interface';
 import { MatchRouteHookContext, MatchRoutesHookContext } from '../navigation/matcher/interface';
 import { RerouteHookContext } from '../navigation/router/interface';
 import { provide } from '../provider';
@@ -46,6 +47,8 @@ export class Hooks implements IHooks {
   public mountRootFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public mountFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
+
+  public waitForChildContainer = new AsyncSeriesHook<WaitForChildContainerContext>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public addHook(key: string, hook: BaseHook<any, any>): void {

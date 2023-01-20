@@ -19,6 +19,7 @@ interface ProvideSyntax {
   serviceIdentifier: interfaces.ServiceIdentifier;
   replace?: (current: unknown, previous: unknown) => unknown;
 }
+
 interface CreateProviderReturnType {
   provide: (
     serviceIdentifier: interfaces.ServiceIdentifier,

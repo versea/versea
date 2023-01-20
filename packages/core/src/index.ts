@@ -19,6 +19,7 @@ export type {
   AppLifeCycleFunction,
   AppLifeCycles,
   AppProps,
+  WaitForChildContainerContext,
   AppDependencies,
 } from './application/app/service';
 export { IApp, App } from './application/app/service';

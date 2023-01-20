@@ -1,5 +1,8 @@
+import { HookContext } from '@versea/tapable';
+
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/interface';
 import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
 import { createServiceSymbol } from '../../utils';
 import { IAppService } from '../app-service/interface';
@@ -18,6 +21,10 @@ export interface AppProps extends Record<string, unknown> {
 
   /** 当前操作的 route 节点 */
   route?: MatchedRoute;
+}
+
+export interface WaitForChildContainerContext extends HookContext {
+  appProps: AppProps;
 }
 
 export type AppLifeCycleFunction<T = unknown> = (props: AppProps) => Promise<T>;
@@ -89,4 +96,5 @@ export interface AppDependencies {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   Status: IStatus;
   appService: IAppService;
+  hooks: IHooks;
 }

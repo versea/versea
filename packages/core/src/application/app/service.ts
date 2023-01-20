@@ -3,6 +3,7 @@ import { omit } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
 import { IStatus } from '../../enum/status';
+import { IHooks } from '../../hooks/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
 import { provide } from '../../provider';
 import { IAppService } from '../app-service/interface';
@@ -35,6 +36,8 @@ export class App extends ExtensibleEntity implements IApp {
 
   protected readonly _appService: IAppService;
 
+  protected readonly _hooks: IHooks;
+
   /** 加载应用返回的声明周期 */
   protected _lifeCycles: AppLifeCycles = {};
 
@@ -53,6 +56,7 @@ export class App extends ExtensibleEntity implements IApp {
     // 绑定依赖
     this._Status = dependencies.Status;
     this._appService = dependencies.appService;
+    this._hooks = dependencies.hooks;
 
     this.name = config.name;
     this._props = config.props ?? {};
@@ -141,12 +145,14 @@ export class App extends ExtensibleEntity implements IApp {
       throw new VerseaError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
     }
 
+    const appProps = this.getProps(context);
     if (!this._waitForChildrenContainerHooks[containerName]) {
-      logWarn(`Can not found waiting for function, it may cause mounting child app error.`, this.name);
+      logWarn(`Can not find waiting for function, it may cause mounting child app error.`, this.name);
+      await this._hooks.waitForChildContainer.call({ appProps });
       return;
     }
 
-    await this._waitForChildrenContainerHooks[containerName](this.getProps(context));
+    await this._waitForChildrenContainerHooks[containerName](appProps);
     return;
   }
 

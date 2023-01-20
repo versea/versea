@@ -4,6 +4,7 @@ import { IAppSwitcherContext } from '../app-switcher/app-switcher-context/interf
 import { ILoaderHookContext } from '../app-switcher/loader-hook-context/interface';
 import { IRendererHookContext } from '../app-switcher/renderer-hook-context/interface';
 import { RegisterAppHookContext } from '../application/app-service/interface';
+import { WaitForChildContainerContext } from '../application/app/interface';
 import { MatchRoutesHookContext, MatchRouteHookContext } from '../navigation/matcher/interface';
 import { RerouteHookContext } from '../navigation/router/interface';
 import { createServiceSymbol } from '../utils';
@@ -60,6 +61,9 @@ export interface IHooks {
 
   /** 渲染碎片应用 */
   mountFragmentApps: AsyncSeriesHook<IRendererHookContext>;
+
+  /** 等待子应用的容器的容器渲染 */
+  waitForChildContainer: AsyncSeriesHook<WaitForChildContainerContext>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addHook: (key: string, hook: BaseHook<any, any>) => void;
