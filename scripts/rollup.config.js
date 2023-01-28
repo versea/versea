@@ -12,8 +12,9 @@ const presets = () => {
     '@versea/shared': 'Versea.Shared',
     '@versea/tapable': 'Versea.Tapable',
     '@versea/versea': 'Versea.Versea',
-    '@versea/plugin-source-entry': 'Versea.PluginSourceEntry',
+    '@versea/plugin-auto-wait-container': 'Versea.PluginAutoWaitContainer',
     '@versea/plugin-custom-match-route': 'Versea.PluginCustomMatchRoute',
+    '@versea/plugin-source-entry': 'Versea.PluginSourceEntry',
     '@versea/plugin-sandbox': 'Versea.PluginSandbox',
   };
 

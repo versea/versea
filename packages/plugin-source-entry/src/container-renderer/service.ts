@@ -64,6 +64,10 @@ export class ContainerRender implements IContainerRenderer {
     return !!parentContainerElement;
   }
 
+  public querySelector(selector: string): HTMLElement | null {
+    return globalEnv.rawQuerySelector.call(document, selector) as HTMLElement | null;
+  }
+
   /** 获取应用容器 */
   protected _getContent(app: IApp): string {
     this._injectVerseaAppStyle();
@@ -100,25 +104,21 @@ export class ContainerRender implements IContainerRenderer {
     if (props.route) {
       const meta = props.route.getMeta(app);
       if (meta.parentContainerName) {
-        return this._querySelector(`#${meta.parentContainerName}`);
+        return this.querySelector(`#${meta.parentContainerName}`);
       }
     }
 
     if ((app as IInternalApp)._parentContainer) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this._querySelector((app as IInternalApp)._parentContainer!);
+      return this.querySelector((app as IInternalApp)._parentContainer!);
     }
 
     // 获取默认容器
     if (props.route?.apps[0] === app && this._config.defaultContainer) {
-      return this._querySelector(this._config.defaultContainer);
+      return this.querySelector(this._config.defaultContainer);
     }
 
     return null;
-  }
-
-  protected _querySelector(selector: string): HTMLElement | null {
-    return globalEnv.rawQuerySelector.call(document, selector) as HTMLElement | null;
   }
 
   /** 增加自定义元素样式 */

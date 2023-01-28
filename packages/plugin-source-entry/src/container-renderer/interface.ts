@@ -16,4 +16,7 @@ export interface IContainerRenderer {
    * @returns {boolean} 是否渲染成功
    */
   render: (context: MountAppHookContext | UnmountAppHookContext, element?: HTMLElement | null) => boolean;
+
+  /** 查找 Dom 节点 */
+  querySelector: (selector: string) => HTMLElement | null;
 }

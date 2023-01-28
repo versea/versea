@@ -24,18 +24,21 @@ export interface AppProps extends Record<string, unknown> {
 }
 
 export interface WaitForChildContainerContext extends HookContext {
+  containerName: string;
   appProps: AppProps;
 }
 
-export type AppLifeCycleFunction<T = unknown> = (props: AppProps) => Promise<T>;
+export interface AppMountedResult {
+  containerController: { wait: (containerName: string, props: AppProps) => Promise<unknown> };
+}
 
 /**
  * 应用加载函数的返回的生命周期
  * @description 应用加载和挂载的各个阶段会分别调用这些生命周期。
  */
 export interface AppLifeCycles {
-  mount?: AppLifeCycleFunction<Record<string, AppLifeCycleFunction>> | AppLifeCycleFunction<void>;
-  unmount?: AppLifeCycleFunction;
+  mount?: ((props: AppProps) => Promise<AppMountedResult>) | ((props: AppProps) => Promise<void>);
+  unmount?: (props: AppProps) => Promise<unknown>;
 }
 
 export interface IApp {
@@ -61,7 +64,7 @@ export interface IApp {
   getProps: (context?: IAppSwitcherContext, route?: MatchedRoute) => AppProps;
 
   /**
-   * 等待应用内部容器渲染完成
+   * 等待容器渲染完成
    * @param containerName - 能嵌套应用的容器的名称
    * @description 参考 issue https://github.com/versea/versea/issues/8。
    */

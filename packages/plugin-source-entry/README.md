@@ -24,6 +24,9 @@ versea.registerApps([
     routes: [
       {
         path: 'sub-app',
+        pathToRegexpOptions: {
+          end: false,
+        },
       },
     ],
     scripts: [

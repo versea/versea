@@ -16,8 +16,8 @@ export { IRouteState, RouteState } from './app-switcher/route-state/service';
 export type {
   AppConfig,
   AppConfigProps,
-  AppLifeCycleFunction,
   AppLifeCycles,
+  AppMountedResult,
   AppProps,
   WaitForChildContainerContext,
   AppDependencies,

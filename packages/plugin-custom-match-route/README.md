@@ -12,7 +12,7 @@ npm install --save @versea/versea @versea/plugin-custom-match-route
 
 ```ts
 import { Versea, AppLifeCycles } from '@versea/versea';
-import { IPluginCustomMatchRoute } from '@versea/versea';
+import { IPluginCustomMatchRoute } from '@versea/plugin-custom-match-route';
 
 async function loadScript(url): Promise<void> {
   console.log(url);

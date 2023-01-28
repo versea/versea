@@ -21,7 +21,7 @@ import {
   AppProps,
   AppConfigProps,
   AppLifeCycles,
-  AppLifeCycleFunction,
+  AppMountedResult,
 } from './interface';
 
 export * from './interface';
@@ -48,8 +48,8 @@ export class App extends ExtensibleEntity implements IApp {
   /** 加载应用返回的声明周期 */
   protected _lifeCycles: AppLifeCycles = {};
 
-  /** "等待应用内部容器渲染完成"的 Hooks */
-  protected _waitForChildrenContainerHooks: Record<string, AppLifeCycleFunction> = {};
+  /** 处理容器应用渲染完成控制器 */
+  protected _containerController?: AppMountedResult['containerController'];
 
   protected _parcels: IApp[] = [];
 
@@ -108,12 +108,12 @@ export class App extends ExtensibleEntity implements IApp {
     this.status = this._Status.Mounting;
     try {
       const result = await this._lifeCycles.mount(this.getProps(context, route));
-      this._waitForChildrenContainerHooks = result ?? {};
+      this._containerController = result?.containerController;
       this.status = this._Status.Mounted;
     } catch (error) {
       // 没有寻找到容器的错误可以被再次渲染
       if (error instanceof VerseaNotFoundContainerError) {
-        this.status = this._Status.NotMounted;
+        this.status = this._Status.Mounted;
       } else {
         this.status = this._Status.Broken;
       }
@@ -158,13 +158,13 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     const appProps = this.getProps(context);
-    if (!this._waitForChildrenContainerHooks[containerName]) {
+    if (!this._containerController) {
       logWarn(`Can not find waiting for function, it may cause mounting child app error.`, this.name);
-      await this._hooks.waitForChildContainer.call({ appProps });
+      await this._hooks.waitForChildContainer.call({ containerName, appProps });
       return;
     }
 
-    await this._waitForChildrenContainerHooks[containerName](appProps);
+    await this._containerController.wait(containerName, appProps);
     return;
   }
 

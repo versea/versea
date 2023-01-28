@@ -1,4 +1,4 @@
-import { ExtensibleEntity, VerseaNotFoundContainerError } from '@versea/shared';
+import { ExtensibleEntity, logError, VerseaNotFoundContainerError } from '@versea/shared';
 
 import { IAppService } from '../../application/app-service/interface';
 import { IApp } from '../../application/app/interface';
@@ -63,7 +63,9 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
     try {
       await app.mount(switcherContext, route);
     } catch (error) {
-      if (!(error instanceof VerseaNotFoundContainerError)) {
+      if (error instanceof VerseaNotFoundContainerError) {
+        logError(error, app.name);
+      } else {
         throw error;
       }
     }

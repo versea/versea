@@ -3,8 +3,8 @@ import { Container } from 'inversify';
 import {
   buildProviderModule,
   AppConfig,
-  AppLifeCycleFunction,
   AppLifeCycles,
+  AppMountedResult,
   IApp,
   IAppService,
   IAppSwitcherContext,
@@ -31,14 +31,14 @@ function getAppInstance(config: AppConfig): IApp {
 function getAppWithLoadHook(
   config: AppConfig,
   hooks: AppLifeCycles = {},
-  mountHooks: Record<string, AppLifeCycleFunction> = {},
+  result: AppMountedResult = {} as AppMountedResult,
 ): IApp {
   return getAppInstance({
     loadApp: async () => {
       return Promise.resolve({
         mount: async () => {
           await delay(1);
-          return mountHooks;
+          return result;
         },
         unmount: async () => {
           await delay(1);
@@ -148,9 +148,11 @@ describe('App', () => {
         { name: 'app' },
         {},
         {
-          foo: async () => {
-            await delay(1);
-            return test();
+          containerController: {
+            wait: async () => {
+              await delay(1);
+              return test();
+            },
           },
         },
       );

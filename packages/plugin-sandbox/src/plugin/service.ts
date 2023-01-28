@@ -96,6 +96,7 @@ export class PluginSandbox implements IPluginSandbox {
     if (!this._pluginSourceEntry.isApplied) {
       throw new VerseaError('Please use plugin "@versea/plugin-source-entry" before "@versea/plugin-sandbox".');
     }
+
     this._onLoadSource();
     this._onCreateSandbox();
     this._onStartSandbox();

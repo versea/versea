@@ -33,6 +33,9 @@ container.get<IAppService>(IAppService).registerApps([
     routes: [
       {
         path: 'sub-app',
+        pathToRegexpOptions: {
+          end: false,
+        },
       },
     ],
     loadApp: async (): AppLifeCycles => {

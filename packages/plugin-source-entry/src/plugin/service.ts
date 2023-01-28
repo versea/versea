@@ -1,4 +1,4 @@
-import { App, AppLifeCycleFunction, AppLifeCycles, AppProps, IConfig, IHooks, provide } from '@versea/core';
+import { App, AppLifeCycles, AppMountedResult, AppProps, IConfig, IHooks, provide } from '@versea/core';
 import { logWarn, VerseaNotFoundContainerError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
@@ -127,7 +127,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       const originLifeCycles = {};
 
       context.lifeCycles = {};
-      context.lifeCycles.mount = async (props: AppProps): Promise<Record<string, AppLifeCycleFunction>> => {
+      context.lifeCycles.mount = async (props: AppProps): Promise<AppMountedResult> => {
         const mountContext = {
           app: context.app,
           props,
@@ -137,7 +137,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
           },
         } as MountAppHookContext;
         await this._hooks.mountApp.call(mountContext);
-        return mountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
+        return mountContext.result as Promise<AppMountedResult>;
       };
 
       context.lifeCycles.unmount = async (props: AppProps): Promise<unknown> => {
@@ -147,7 +147,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
           lifeCycles: originLifeCycles,
         } as UnmountAppHookContext;
         await this._hooks.unmountApp.call(unmountContext);
-        return unmountContext.result as Promise<Record<string, AppLifeCycleFunction>>;
+        return unmountContext.result as Promise<AppMountedResult>;
       };
 
       return Promise.resolve();
