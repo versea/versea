@@ -1,4 +1,11 @@
-import { ExtensibleEntity, logError, logWarn, memoizePromise, VerseaError } from '@versea/shared';
+import {
+  ExtensibleEntity,
+  logError,
+  logWarn,
+  memoizePromise,
+  VerseaError,
+  VerseaNotFoundContainerError,
+} from '@versea/shared';
 import { omit } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
@@ -104,7 +111,12 @@ export class App extends ExtensibleEntity implements IApp {
       this._waitForChildrenContainerHooks = result ?? {};
       this.status = this._Status.Mounted;
     } catch (error) {
-      this.status = this._Status.Broken;
+      // 没有寻找到容器的错误可以被再次渲染
+      if (error instanceof VerseaNotFoundContainerError) {
+        this.status = this._Status.NotMounted;
+      } else {
+        this.status = this._Status.Broken;
+      }
       throw error;
     }
   }

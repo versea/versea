@@ -185,7 +185,7 @@ export class Route extends ExtensibleEntity implements IRoute {
 
       // 碎片应用 meta 必须声明 parentAppName 和 parentContainerName
       if (!config.meta) {
-        throw new VerseaError(`FragmentRoute "meta" option should be scoped.`);
+        throw new VerseaError(`FragmentRoute "meta" option should be defined.`);
       }
       if (!config.meta.parentAppName) {
         throw new VerseaError(`FragmentRoute "meta.parentAppName" should be defined.`);

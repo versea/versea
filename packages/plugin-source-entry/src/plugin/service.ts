@@ -1,5 +1,5 @@
 import { App, AppLifeCycleFunction, AppLifeCycles, AppProps, IConfig, IHooks, provide } from '@versea/core';
-import { logWarn, VerseaError } from '@versea/shared';
+import { logWarn, VerseaNotFoundContainerError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
@@ -159,7 +159,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP, async (context): Promise<void> => {
       const isRendered = this._containerRenderer.render(context);
       if (!isRendered) {
-        throw new VerseaError('Can not find container element.');
+        throw new VerseaNotFoundContainerError('Can not find container element.');
       }
       return Promise.resolve();
     });

@@ -37,10 +37,8 @@
 
 ## 贡献者
 
-感谢所有的贡献者
-
 <a href="https://github.com/versea/versea/graphs/contributors"><img src="https://contrib.rocks/image?repo=versea/versea" /></a>
 
 ## LICENSE
 
-Versea 是 MIT LICENSE [MIT](https://github.com/versea/versea/blob/main/LICENSE).
+[MIT](https://github.com/versea/versea/blob/main/LICENSE).
