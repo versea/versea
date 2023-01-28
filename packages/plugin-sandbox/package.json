@@ -1,6 +1,6 @@
 {
   "name": "@versea/plugin-sandbox",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -23,10 +23,10 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@versea/core": "0.2.2",
-    "@versea/plugin-source-entry": "0.2.2",
-    "@versea/shared": "0.2.2",
-    "@versea/tapable": "0.2.2",
+    "@versea/core": "0.2.3",
+    "@versea/plugin-source-entry": "0.2.3",
+    "@versea/shared": "0.2.3",
+    "@versea/tapable": "0.2.3",
     "inversify": "^6.0.1",
     "tslib": "^2.3.1"
   },
