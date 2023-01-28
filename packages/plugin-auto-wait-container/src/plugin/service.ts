@@ -1,11 +1,10 @@
 import { IApp, IConfig, IHooks, provide, provideValue } from '@versea/core';
 import { IContainerRenderer, IPluginSourceEntry } from '@versea/plugin-source-entry';
-import { DeferredContainer, VerseaError, VerseaNotFoundContainerError } from '@versea/shared';
+import { DeferredContainer, logWarn, VerseaError } from '@versea/shared';
 import { inject } from 'inversify';
 
 import { PLUGIN_AUTO_WAIT_CONTAINER_TAP } from '../constants';
 import { observeChildListOnce } from '../observer';
-import { delay } from '../utils';
 import { IPluginAutoWaitContainer } from './interface';
 
 export * from './interface';
@@ -53,12 +52,18 @@ export class PluginAutoWaitContainer implements IPluginAutoWaitContainer {
     }
 
     this._hooks.waitForChildContainer.tap(PLUGIN_AUTO_WAIT_CONTAINER_TAP, async ({ appProps, containerName }) => {
+      logWarn(`Use "@versea/plugin-auto-wait-container" to find container.`, appProps.app.name);
+
       if (this._containerRenderer.querySelector(`#${containerName}`)) {
         return Promise.resolve();
       }
 
-      void this._handleTimeout(containerName, appProps.app);
-      await this._deferredContainer.wait(containerName, appProps);
+      const timer = this._handleTimeout(containerName, appProps.app);
+      try {
+        await this._deferredContainer.wait(containerName, appProps);
+      } finally {
+        window.clearTimeout(timer);
+      }
     });
   }
 
@@ -71,15 +76,14 @@ export class PluginAutoWaitContainer implements IPluginAutoWaitContainer {
     });
   }
 
-  protected async _handleTimeout(containerName: string, app: IApp): Promise<void> {
-    await delay(this._config.autoWaitContainerTimeout ?? DefaultTimeOut);
+  protected _handleTimeout(containerName: string, app: IApp): number {
+    return window.setTimeout(() => {
+      if (this._deferredContainer.has(containerName)) {
+        logWarn(`Use "@versea/plugin-auto-wait-container" to find container failed.`, app.name);
 
-    if (this._deferredContainer.has(containerName)) {
-      this._deferredContainer.reject(
-        containerName,
-        new VerseaNotFoundContainerError(`[${app.name}]Can not find container element.`),
-      );
-      this._deferredContainer.delete(containerName);
-    }
+        this._deferredContainer.resolve(containerName);
+        this._deferredContainer.delete(containerName);
+      }
+    }, this._config.autoWaitContainerTimeout ?? DefaultTimeOut);
   }
 }
