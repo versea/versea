@@ -44,6 +44,9 @@ export interface ISourceController {
 
   /** 删除 styles 缓存 */
   removeStyles: (app: IApp) => void;
+
+  /** 以 inlineScript 的方式运行脚本代码  */
+  runCodeInline: (code: string, scriptElement: HTMLScriptElement, script: SourceScript, app: IApp) => Promise<void>;
 }
 
 export interface LoadSourceHookContext extends HookContext {

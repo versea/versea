@@ -120,6 +120,35 @@ export class SourceController implements ISourceController {
     app.styles = undefined;
   }
 
+  public async runCodeInline(
+    code: string,
+    scriptElement: HTMLScriptElement,
+    script: SourceScript,
+    app: IApp,
+  ): Promise<void> {
+    if (script.src) {
+      globalEnv.rawSetAttribute.call(scriptElement, 'data-origin-src', script.src);
+    }
+
+    if (script.module) {
+      const blob = new Blob([code], { type: 'text/javascript' });
+      scriptElement.src = URL.createObjectURL(blob);
+      globalEnv.rawSetAttribute.call(scriptElement, 'type', 'module');
+      return new Promise((resolve) => {
+        scriptElement.onload = (): void => {
+          resolve();
+        };
+        scriptElement.onerror = (error): void => {
+          // script 执行失败，不影响主流程执行
+          logError(error, app.name);
+          resolve();
+        };
+      });
+    }
+
+    scriptElement.textContent = code;
+  }
+
   protected async _handleScript(sourceScript: SourceScript, app: IApp): Promise<unknown> {
     if (sourceScript.code) {
       await this._runScript(sourceScript, app);
@@ -136,33 +165,15 @@ export class SourceController implements ISourceController {
   protected async _runScript(sourceScript: SourceScript, app: IApp): Promise<void> {
     const stringCode = isPromise(sourceScript.code) ? await sourceScript.code : sourceScript.code;
     const scriptElement = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
-
-    if (sourceScript.src) {
-      globalEnv.rawSetAttribute.call(scriptElement, 'data-origin-src', sourceScript.src);
-    }
-
-    if (sourceScript.module) {
-      const blob = new Blob([stringCode ?? ''], { type: 'text/javascript' });
-      scriptElement.src = URL.createObjectURL(blob);
-      globalEnv.rawSetAttribute.call(scriptElement, 'type', 'module');
-      return new Promise((resolve) => {
-        scriptElement.onload = (): void => {
-          resolve();
-        };
-        scriptElement.onerror = (error): void => {
-          // script 执行失败，不影响主流程执行
-          logError(error, app.name);
-          resolve();
-        };
-      });
-    }
-
-    scriptElement.textContent = stringCode ?? '';
+    const promise = this.runCodeInline(stringCode ?? '', scriptElement, sourceScript, app);
+    const body = globalEnv.rawGetElementsByTagName.call(document, 'body')[0];
+    globalEnv.rawAppendChild.call(body, scriptElement);
+    return promise;
   }
 
   protected async _loadScript(sourceScript: SourceScript, app: IApp): Promise<Event | string> {
     return new Promise((resolve) => {
-      const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
+      const body = globalEnv.rawGetElementsByTagName.call(document, 'body')[0];
       const script = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
       script.type = sourceScript.module ? 'module' : 'text/javascript';
       script.onload = (event): void => {
@@ -176,7 +187,7 @@ export class SourceController implements ISourceController {
       };
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       script.src = sourceScript.src!;
-      globalEnv.rawAppendChild.call(head, script);
+      globalEnv.rawAppendChild.call(body, script);
     });
   }
 

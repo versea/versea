@@ -273,7 +273,7 @@ export class ScriptLoader implements IScriptLoader {
     const resultCode = context.result;
 
     if ((app as IInternalApp)._inlineScript || script.module) {
-      const promise = this._runCodeInline(resultCode, element as HTMLScriptElement, script, app);
+      const promise = this._sourceController.runCodeInline(resultCode, element as HTMLScriptElement, script, app);
       if (appendToBody) {
         const body = this._getDocumentBody(app);
         body.appendChild(element);
@@ -326,36 +326,6 @@ export class ScriptLoader implements IScriptLoader {
       }
     }
     return body;
-  }
-
-  /** 以 inlineScript 的方式运行脚本代码  */
-  protected async _runCodeInline(
-    code: string,
-    scriptElement: HTMLScriptElement,
-    script: SourceScript,
-    app: IApp,
-  ): Promise<void> {
-    if (script.src) {
-      globalEnv.rawSetAttribute.call(scriptElement, 'data-origin-src', script.src);
-    }
-
-    if (script.module) {
-      const blob = new Blob([code], { type: 'text/javascript' });
-      scriptElement.src = URL.createObjectURL(blob);
-      globalEnv.rawSetAttribute.call(scriptElement, 'type', 'module');
-      return new Promise((resolve) => {
-        scriptElement.onload = (): void => {
-          resolve();
-        };
-        scriptElement.onerror = (error): void => {
-          // script 执行失败，不影响主流程执行
-          logError(error, app.name);
-          resolve();
-        };
-      });
-    }
-
-    scriptElement.textContent = code;
   }
 
   protected _getPersistentSourceCode(app: IApp): boolean | undefined {
