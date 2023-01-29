@@ -1,7 +1,7 @@
 # versea
 
 <p align="center">
-  <img width="500" src="./docs/.vuepress/public/assets/logo.png"><br/>
+  <img width="500" src="./logo.png"><br/>
   <img src="https://img.shields.io/npm/dt/@versea/core"/>
   <img src="https://img.shields.io/npm/dm/@versea/core"/>
   <a href="https://www.npmjs.com/package/@versea/core"><img src="https://img.shields.io/npm/v/@versea/core.svg"></a>
