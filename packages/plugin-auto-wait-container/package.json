@@ -1,6 +1,6 @@
 {
   "name": "@versea/plugin-auto-wait-container",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -24,9 +24,9 @@
   },
   "dependencies": {
     "@types/ramda": "^0.28.3",
-    "@versea/core": "0.2.4",
-    "@versea/plugin-source-entry": "0.2.4",
-    "@versea/shared": "0.2.4",
+    "@versea/core": "0.2.5",
+    "@versea/plugin-source-entry": "0.2.5",
+    "@versea/shared": "0.2.5",
     "inversify": "^6.0.1",
     "ramda": "^0.28.0",
     "tslib": "^2.3.1"
