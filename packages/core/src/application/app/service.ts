@@ -154,7 +154,8 @@ export class App extends ExtensibleEntity implements IApp {
   @memoizePromise()
   public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
-      throw new VerseaError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
+      logError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
+      return;
     }
 
     const appProps = this.getProps(context);

@@ -9,7 +9,7 @@ export interface IStyleLoader {
   apply: () => void;
 
   /** 加载资源文件 */
-  load: (context: LoadSourceHookContext) => Promise<void>;
+  load: (context: LoadSourceHookContext) => void;
 
   /** 等待加载资源文件完成  */
   waitLoaded: (app: IApp) => Promise<void>;

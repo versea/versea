@@ -112,8 +112,9 @@ export class PluginSandbox implements IPluginSandbox {
   /** 加载资源文件 */
   protected _onLoadSource(): void {
     this._hooks.loadSource.tap(PLUGIN_SANDBOX_TAP, async (context) => {
-      await this._styleLoader.load(context);
-      await this._scriptLoader.load(context);
+      this._styleLoader.load(context);
+      this._scriptLoader.load(context);
+      return Promise.resolve();
     });
   }
 

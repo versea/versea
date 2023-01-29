@@ -134,7 +134,7 @@ export class ScriptLoader implements IScriptLoader {
     );
   }
 
-  public async load({ app }: LoadSourceHookContext): Promise<void> {
+  public load({ app }: LoadSourceHookContext): void {
     const deferred = new Deferred<void>();
     this._scriptDeferred.set(app, deferred);
 
@@ -158,8 +158,6 @@ export class ScriptLoader implements IScriptLoader {
     } else {
       deferred.resolve();
     }
-
-    return Promise.resolve();
   }
 
   public async waitLoaded(app: IApp): Promise<void> {
@@ -177,10 +175,11 @@ export class ScriptLoader implements IScriptLoader {
     const { src, code, async, isGlobal } = script;
 
     if (isPromise(code)) {
-      // 异步脚本已经是 Promise 忽略
-      if (async) return;
-
-      script.code = await script.code;
+      // 异步脚本 code 是 Promise 不用处理，等到执行时再处理
+      // 非异步脚本 cod 是 Promise 需要转化成返回值
+      if (!async) {
+        script.code = await script.code;
+      }
     }
 
     // 没有资源文件链接或具有 code 忽略
@@ -200,7 +199,7 @@ export class ScriptLoader implements IScriptLoader {
     if (isGlobal) {
       this._globalScripts.set(src, fetchScriptPromise);
     }
-    script.code = script.async ? fetchScriptPromise : await fetchScriptPromise;
+    script.code = async ? fetchScriptPromise : await fetchScriptPromise;
   }
 
   public async exec(app: IApp): Promise<void> {

@@ -1,5 +1,5 @@
 import { AppLifeCycles, IApp, IHooks, provide } from '@versea/core';
-import { logError, requestIdleCallback, VerseaError } from '@versea/shared';
+import { isPromise, logError, requestIdleCallback, VerseaError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 import { pick } from 'ramda';
@@ -33,9 +33,15 @@ export class SourceController implements ISourceController {
       if (app.styles?.length) {
         await Promise.all(
           app.styles.map(async (style) => {
-            if (!style.src || style.code) {
-              throw new VerseaError('@versea/plugin-source-entry is not support inline style.');
+            if (style.code) {
+              await this._runStyle(style);
+              return;
             }
+
+            if (!style.src) {
+              throw new VerseaError('Can not find style source.');
+            }
+
             return this._loadStyle(style.src, app);
           }),
         );
@@ -43,13 +49,11 @@ export class SourceController implements ISourceController {
 
       if (app.scripts) {
         for (const script of app.scripts) {
-          if (!script.src || script.code) {
-            throw new VerseaError('@versea/plugin-source-entry is not support inline script.');
-          }
           if (script.async) {
-            requestIdleCallback(() => void this._loadScript(script, app));
+            requestIdleCallback(() => void this._handleScript(script, app));
+          } else {
+            await this._handleScript(script, app);
           }
-          await this._loadScript(script, app);
         }
       }
 
@@ -116,6 +120,46 @@ export class SourceController implements ISourceController {
     app.styles = undefined;
   }
 
+  protected async _handleScript(sourceScript: SourceScript, app: IApp): Promise<unknown> {
+    if (sourceScript.code) {
+      await this._runScript(sourceScript, app);
+      return;
+    }
+
+    if (!sourceScript.src) {
+      throw new VerseaError('Can not find script source.');
+    }
+
+    return this._loadScript(sourceScript, app);
+  }
+
+  protected async _runScript(sourceScript: SourceScript, app: IApp): Promise<void> {
+    const stringCode = isPromise(sourceScript.code) ? await sourceScript.code : sourceScript.code;
+    const scriptElement = globalEnv.rawCreateElement.call(document, 'script') as HTMLScriptElement;
+
+    if (sourceScript.src) {
+      globalEnv.rawSetAttribute.call(scriptElement, 'data-origin-src', sourceScript.src);
+    }
+
+    if (sourceScript.module) {
+      const blob = new Blob([stringCode ?? ''], { type: 'text/javascript' });
+      scriptElement.src = URL.createObjectURL(blob);
+      globalEnv.rawSetAttribute.call(scriptElement, 'type', 'module');
+      return new Promise((resolve) => {
+        scriptElement.onload = (): void => {
+          resolve();
+        };
+        scriptElement.onerror = (error): void => {
+          // script 执行失败，不影响主流程执行
+          logError(error, app.name);
+          resolve();
+        };
+      });
+    }
+
+    scriptElement.textContent = stringCode ?? '';
+  }
+
   protected async _loadScript(sourceScript: SourceScript, app: IApp): Promise<Event | string> {
     return new Promise((resolve) => {
       const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
@@ -134,6 +178,16 @@ export class SourceController implements ISourceController {
       script.src = sourceScript.src!;
       globalEnv.rawAppendChild.call(head, script);
     });
+  }
+
+  protected async _runStyle(sourceStyle: SourceStyle): Promise<void> {
+    const stringCode = isPromise(sourceStyle.code) ? await sourceStyle.code : sourceStyle.code;
+    const styleElement = globalEnv.rawCreateElement.call(document, 'style') as HTMLStyleElement;
+    styleElement.textContent = stringCode ?? '';
+    styleElement.setAttribute('data-origin-href', sourceStyle.src ?? '');
+
+    const head = globalEnv.rawGetElementsByTagName.call(document, 'head')[0];
+    globalEnv.rawAppendChild.call(head, styleElement);
   }
 
   protected async _loadStyle(url: string, app: IApp): Promise<Event | string> {

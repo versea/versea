@@ -44,8 +44,8 @@ void versea.start();
 本插件新增的所有 Hook 和内部监听者名称。
 
 #### loadApp
-1. TapName: PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP 设置 app 的资源信息
-2. TapName: PLUGIN_SOURCE_ENTRY_TAP 创建容器并加载资源文件
+1. TapName: PLUGIN_SOURCE_ENTRY_CREATE_CONTAINER_TAP 创建容器
+2. TapName: PLUGIN_SOURCE_ENTRY_TAP 加载资源文件
 3. TapName: PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP 重写应用生命周期函数
 
 #### mountApp

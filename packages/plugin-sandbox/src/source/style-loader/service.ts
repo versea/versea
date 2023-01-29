@@ -84,7 +84,7 @@ export class StyleLoader implements IStyleLoader {
     );
   }
 
-  public async load({ app }: LoadSourceHookContext): Promise<void> {
+  public load({ app }: LoadSourceHookContext): void {
     const deferred = new Deferred<void>();
     this._styleDeferred.set(app, deferred);
 
@@ -108,8 +108,6 @@ export class StyleLoader implements IStyleLoader {
     } else {
       deferred.resolve();
     }
-
-    return Promise.resolve();
   }
 
   public async waitLoaded(app: IApp): Promise<void> {

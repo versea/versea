@@ -16,6 +16,7 @@ const presets = () => {
     '@versea/plugin-custom-match-route': 'Versea.PluginCustomMatchRoute',
     '@versea/plugin-source-entry': 'Versea.PluginSourceEntry',
     '@versea/plugin-sandbox': 'Versea.PluginSandbox',
+    '@versea/plugin-html-entry': 'Versea.PluginHtmlEntry',
   };
 
   return [

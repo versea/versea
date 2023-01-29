@@ -5,7 +5,7 @@ import { inject } from 'inversify';
 
 import {
   PLUGIN_SOURCE_ENTRY_TAP,
-  PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP,
+  PLUGIN_SOURCE_ENTRY_CREATE_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_UPDATE_LIFECYCLE_TAP,
   PLUGIN_SOURCE_ENTRY_RENDER_CONTAINER_TAP,
   PLUGIN_SOURCE_ENTRY_EXEC_SOURCE_TAP,
@@ -99,24 +99,24 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   }
 
   protected _onLoadApp(): void {
-    // 规范 App 上的资源信息
-    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_NORMALIZE_SOURCE_TAP, async (context): Promise<void> => {
-      const { app } = context;
-
-      app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
-      app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
-
-      return Promise.resolve();
-    });
-
-    // 创建容器和加载资源
-    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
+    // 创建容器
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_CREATE_CONTAINER_TAP, async (context): Promise<void> => {
       const { app } = context;
 
       // 容器无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
       if (!app.container) {
         app.container = this._containerRenderer.createElement(app);
       }
+
+      return Promise.resolve();
+    });
+
+    // 加载资源
+    this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_TAP, async (context): Promise<void> => {
+      const { app } = context;
+
+      app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
+      app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
 
       await this._sourceController.load(context);
     });
