@@ -1,6 +1,6 @@
 {
   "name": "@versea/plugin-html-entry",
-  "version": "0.2.6",
+  "version": "0.3.0",
   "license": "MIT",
   "main": "lib",
   "module": "esm",
@@ -23,9 +23,9 @@
     "type:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@versea/core": "0.2.6",
-    "@versea/plugin-source-entry": "0.2.6",
-    "@versea/shared": "0.2.6",
+    "@versea/core": "0.3.0",
+    "@versea/plugin-source-entry": "0.3.0",
+    "@versea/shared": "0.3.0",
     "inversify": "^6.0.1",
     "tslib": "^2.3.1"
   },
