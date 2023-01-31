@@ -71,6 +71,7 @@ export class StyleLoader implements IStyleLoader {
         if (!cachedStyle) {
           this._sourceController.insertStyle(style, app);
         }
+
         try {
           await this.ensureCode(_style, app);
           styleElement.textContent = _style.code as string;

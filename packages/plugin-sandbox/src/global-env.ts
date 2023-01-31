@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/unbound-method */
+import { isSupportModuleScript } from '@versea/plugin-source-entry';
 import { isBrowser } from '@versea/shared';
 
 import { VerseaAppWindow } from './sandbox/sandbox/types';
@@ -62,11 +63,6 @@ interface GlobalEnv {
 const rawWindow: Window & typeof globalThis = Function('return window')();
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-implied-eval
 const rawDocument: Document = Function('return document')();
-
-function isSupportModuleScript(): boolean {
-  const s = document.createElement('script');
-  return 'noModule' in s;
-}
 
 export const globalEnv: GlobalEnv = {} as GlobalEnv;
 

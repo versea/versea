@@ -1,3 +1,5 @@
+import { isSupportModuleScript } from '@versea/plugin-source-entry';
+
 export function isImageElement(target: unknown): target is HTMLImageElement {
   return (target as HTMLImageElement)?.tagName?.toUpperCase() === 'IMG';
 }
@@ -12,11 +14,6 @@ export function isStyleElement(target: unknown): target is HTMLStyleElement {
 
 export function isScriptElement(target: unknown): target is HTMLScriptElement {
   return (target as HTMLScriptElement)?.tagName?.toUpperCase() === 'SCRIPT';
-}
-
-function isSupportModuleScript(): boolean {
-  const s = document.createElement('script');
-  return 'noModule' in s;
 }
 
 export const supportModuleScript = isSupportModuleScript();

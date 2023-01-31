@@ -80,7 +80,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
   public apply(): void {
     this._hooks.beforeRegisterApp.tap(PLUGIN_SOURCE_ENTRY_TAP, ({ config }) => {
       if (config.loadApp) {
-        logWarn('Can not set app loadApp function, because it is defined.', config.name);
+        logWarn('Can not set app "loadApp" function, because it is defined.', config.name);
         return;
       }
 
@@ -105,7 +105,7 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.loadApp.tap(PLUGIN_SOURCE_ENTRY_CREATE_CONTAINER_TAP, async (context): Promise<void> => {
       const { app } = context;
 
-      // 容器无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
+      // 容器只能设置一次，无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
       if (!app.container) {
         app.container = await this._containerRenderer.createElement(app);
       }

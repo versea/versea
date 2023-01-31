@@ -14,16 +14,17 @@ export interface IAppSwitcher {
   /**
    * 当前的 context
    * @description 不同于最新的 context，它是真实的正在运行的路由和应用状态。
-   * ---
-   * 每次切换路由之后应用的加载、销毁、渲染都是异步的，因此整个 switch 操作也是异步的。
    */
   currentContext: IAppSwitcherContext | null;
 
-  /** 使用匹配的路由切换应用 */
+  /** 切换应用 */
   switch: (options: SwitcherOptions) => Promise<void>;
 }
 
 export interface SwitcherOptions {
+  /** 路由变更的 event 对象 */
   navigationEvent?: Event;
+
+  /** 路由匹配的结果 */
   matchedResult: MatchedResult;
 }

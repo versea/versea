@@ -47,7 +47,6 @@ export class AppSwitcher implements IAppSwitcher {
   ) {
     this._AppSwitcherContext = AppSwitcherContext;
     this._SwitcherStatus = SwitcherStatus;
-
     this._loader = loader;
     this._renderer = renderer;
     this._routeState = routeState;

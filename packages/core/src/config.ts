@@ -17,7 +17,7 @@ const config: IConfig = {
 };
 
 // 使用合并策略取代替换策略
-// 例如再次 `provideValue({ test: 'test' }, IConfig)` 的值是 { routerMode: 'history', test: 'test' }
+// 例如再次执行 `provideValue({ test: 'test' }, IConfig)`，config 的值是 { routerMode: 'history', test: 'test' }
 provideValue<IConfig>(config, IConfig, 'ConstantValue', (previous, current) => ({
   ...previous,
   ...current,

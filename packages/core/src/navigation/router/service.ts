@@ -83,6 +83,7 @@ export class Router implements IRouter {
         query,
       };
     }
+
     return {
       path: window.location.pathname,
       query: parse(window.location.search),

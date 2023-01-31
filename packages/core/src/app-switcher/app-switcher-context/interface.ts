@@ -21,10 +21,10 @@ export interface IAppSwitcherContext extends HookContext {
   /** SwitcherContext 运行状态 */
   status: ISwitcherStatus[keyof ISwitcherStatus];
 
-  /** 匹配的路由 */
+  /** 匹配结果 */
   readonly matchedResult: MatchedResult;
 
-  /** 路由状态 */
+  /** 当前路由状态 */
   readonly routeState: IRouteState;
 
   /** 当前的普通路由 */

@@ -16,7 +16,7 @@ export interface AppProps extends Record<string, unknown> {
   /** 应用实例 */
   app: IApp;
 
-  /** 当前正在运行的应用切换上下文 */
+  /** 当前应用切换上下文 */
   context?: IAppSwitcherContext;
 
   /** 当前操作的 route 节点 */
@@ -24,11 +24,15 @@ export interface AppProps extends Record<string, unknown> {
 }
 
 export interface WaitForChildContainerContext extends HookContext {
+  /** 子应用渲染的容器名称 */
   containerName: string;
+
+  /** 传给加载和挂载的各个生命周期函数的属性 */
   appProps: AppProps;
 }
 
 export interface AppMountedResult {
+  /** 处理容器应用渲染完成控制器 */
   containerController: { wait: (containerName: string, props: AppProps) => Promise<unknown> };
 }
 
@@ -45,7 +49,7 @@ export interface IApp {
   /** 应用名称 */
   readonly name: string;
 
-  /** 当前应用的状态 */
+  /** 应用的状态 */
   status: IStatus[keyof IStatus];
 
   /** 应用是否已经加载 */
@@ -66,14 +70,13 @@ export interface IApp {
   /**
    * 等待容器渲染完成
    * @param containerName - 能嵌套应用的容器的名称
-   * @description 参考 issue https://github.com/versea/versea/issues/8。
    */
   waitForChildContainer: (containerName: string, context: IAppSwitcherContext) => Promise<void>;
 
   /** 注册包裹 */
   registerParcel: (config: AppConfig) => IApp;
 
-  /** 加载包裹 */
+  /** 加载并渲染 */
   loadAndMount: () => Promise<void>;
 }
 

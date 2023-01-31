@@ -28,6 +28,9 @@ export interface IRouter {
 }
 
 export interface RerouteHookContext extends HookContext {
+  /** 路由变更的 event 对象 */
   navigationEvent?: Event;
+
+  /** 路由匹配的结果 */
   matchedResult: MatchedResult;
 }

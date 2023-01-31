@@ -43,13 +43,15 @@ export function memoizePromise(index = 0, deleteMemo = true) {
       }
 
       map[key] = originValue.call(this, ...args);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return map[key]!.finally(() => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-empty-function
+      map[key]!.catch(() => {}).finally(() => {
         if (deleteMemo) {
           // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
           delete map[key];
         }
       });
+
+      return map[key];
     };
   };
 }

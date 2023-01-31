@@ -49,6 +49,7 @@ export class Renderer implements IRenderer {
     const context = this._createRendererHookContext(switcherContext);
 
     await switcherContext.runTask(async () => unmount.call(context));
+    // 销毁应用之后，通知当前渲染的的应用路由变化
     switcherContext.callEvent();
     switcherContext.status = this._SwitcherStatus.NotMounted;
     await switcherContext.runTask(async () => mount.call(context));
@@ -104,11 +105,13 @@ export class Renderer implements IRenderer {
           );
           routeState.removeApps(i, toUnmountFragmentApps);
         }
+
         if (i >= mismatchIndex) {
           const parentAppLike: IApp | null = i === 0 ? null : currentRoutes[i - 1].apps[0];
           if (mainApp !== parentAppLike) {
             await switcherContext.runTask(async () => currentRoute.apps[0].unmount(switcherContext, currentRoute));
           }
+
           routeState.pop();
         }
       }
@@ -164,6 +167,7 @@ export class Renderer implements IRenderer {
           if (mainApp !== parentAppLike) {
             await switcherContext.runTask(async () => context.mount(mainApp, targetRoute));
           }
+
           routeState.append(targetRoute, [mainApp]);
         }
       }

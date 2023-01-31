@@ -117,6 +117,7 @@ export class ScriptLoader implements IScriptLoader {
         if (!cachedScript) {
           this._sourceController.insertScript(script, app);
         }
+
         try {
           await this.ensureCode(_script, app);
           await this._hooks.runScript.call({
@@ -199,6 +200,7 @@ export class ScriptLoader implements IScriptLoader {
     if (isGlobal) {
       this._globalScripts.set(src, fetchScriptPromise);
     }
+
     script.code = async ? fetchScriptPromise : await fetchScriptPromise;
   }
 
@@ -328,6 +330,7 @@ export class ScriptLoader implements IScriptLoader {
         throw new VerseaError('Can not find "versea-app-body" element');
       }
     }
+
     return body;
   }
 

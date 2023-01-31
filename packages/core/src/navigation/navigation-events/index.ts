@@ -1,6 +1,6 @@
 /**
  * 重写路由事件和函数
- * @description 特别声明这里借鉴了 single-spa 的实现
+ * @description 借鉴 single-spa 的实现
  * @see https://github.com/single-spa/single-spa/blob/master/src/navigation/navigation-events.js
  */
 

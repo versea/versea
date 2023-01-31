@@ -124,7 +124,6 @@ declare module '@versea/core' {
   interface IConfig {
     /**
      * 默认容器节点
-     * @description 在复杂的情况下，例如存在嵌套应用，可能会存在问题，因此建议每个应用尽量设置 container
      * @example #app
      */
     defaultContainer?: string;

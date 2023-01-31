@@ -25,7 +25,7 @@ export interface IRoute {
    */
   apps: IApp[];
 
-  /** route 额外参数 */
+  /** route 元信息 */
   meta: Record<string, unknown>;
 
   parent: IRoute | null;
@@ -44,7 +44,7 @@ export interface IRoute {
   /** 具有 slot 的路由节点数组 */
   readonly slotRoutes: IRoute[];
 
-  /** 拼接了父节点路径的完整路径 */
+  /** 完整路径 */
   readonly fullPath: string;
 
   /** 深度优先遍历展开树结构 */
@@ -68,7 +68,7 @@ export interface RouteConfig {
   /** 匹配的路径 */
   path: string;
 
-  /** route 额外参数 */
+  /** route 元信息 */
   meta?: RouteMeta;
 
   /** 是否是一个碎片路由 */
@@ -92,10 +92,10 @@ export interface RouteConfig {
 export interface RouteMeta {
   [key: string]: unknown;
 
-  /** 具有嵌套功能的父应用名称 */
+  /** 具有嵌套路由的父应用名称 */
   parentAppName?: string;
 
-  /** 具有嵌套功能的父应用的容器名称 */
+  /** 具有嵌套路由的父应用的容器名称 */
   parentContainerName?: string;
 }
 
@@ -119,7 +119,7 @@ type MatchedRouteTyped = Omit<
     /** 判断两个 matchedRoute 是否相等 */
     equal: (route: MatchedRoute) => boolean;
 
-    /** 获取应用对应的 meta 信息 */
+    /** 获取应用对应的 route 元信息 */
     getMeta: (app: IApp) => RouteMeta;
   };
 

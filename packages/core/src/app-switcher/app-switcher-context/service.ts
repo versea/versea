@@ -69,6 +69,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
 
   @memoizePromise(0, false)
   public async run({ loader, renderer }: RunOptions): Promise<void> {
+    // 未开始和已经被取消都可以开始执行切换
     if (this.status !== this._SwitcherStatus.NotStart && this.status !== this._SwitcherStatus.WaitForCancel) {
       throw new VerseaError(`Can not load apps with status "${this.status}".`);
     }
@@ -110,6 +111,7 @@ export class AppSwitcherContext extends ExtensibleEntity implements IAppSwitcher
     if (this.status !== this._SwitcherStatus.Canceled && this.status !== this._SwitcherStatus.Done) {
       this.status = this._SwitcherStatus.WaitForCancel;
     }
+
     return this._canceledDeferred.promise;
   }
 

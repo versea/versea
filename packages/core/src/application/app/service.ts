@@ -196,6 +196,7 @@ export class App extends ExtensibleEntity implements IApp {
     if (!this.isLoaded) {
       await this.load();
     }
+
     try {
       await this.mount();
     } catch (error) {
@@ -208,6 +209,7 @@ export class App extends ExtensibleEntity implements IApp {
     if (!lifeCycles.mount) {
       logWarn(`App does not export a valid mount function`, this.name);
     }
+
     if (!lifeCycles.unmount) {
       logWarn(`App does not export a valid unmount function`, this.name);
     }

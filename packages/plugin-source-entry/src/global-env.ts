@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { isBrowser } from '@versea/shared';
 
-function isSupportModuleScript(): boolean {
-  const s = document.createElement('script');
-  return 'noModule' in s;
-}
+import { isSupportModuleScript } from './utils';
 
 interface GlobalEnv {
   rawAppendChild: typeof Element.prototype.appendChild;

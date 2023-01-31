@@ -20,5 +20,7 @@ export interface ILoaderHookContext extends HookContext {
 
 export interface LoaderHookContextOptions {
   switcherContext: IAppSwitcherContext;
+
+  /** 路由匹配的结果 */
   matchedResult: MatchedResult;
 }

@@ -33,9 +33,9 @@ export class Loader implements ILoader {
   }
 
   public async load(switcherContext: IAppSwitcherContext): Promise<void> {
-    const { load } = this._hooks;
-    const context = this._createContext(switcherContext);
-    await switcherContext.runTask(async () => load.call(context));
+    // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
+    const context = new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult });
+    await switcherContext.runTask(async () => this._hooks.load.call(context));
   }
 
   public restore(): void {
@@ -53,11 +53,5 @@ export class Loader implements ILoader {
       // 加载应用完成，修改状态
       switcherContext.status = this._SwitcherStatus.Loaded;
     });
-  }
-
-  /** 创建加载应用的上下文 */
-  protected _createContext(switcherContext: IAppSwitcherContext): ILoaderHookContext {
-    // @ts-expect-error 需要传入参数，但 inversify 这里的参数类型是 never
-    return new this._HookContext({ switcherContext, matchedResult: switcherContext.matchedResult });
   }
 }

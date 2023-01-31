@@ -38,6 +38,7 @@ export class AppService implements IAppService {
     if (this._appMap.has(config.name)) {
       throw new VerseaError(`Duplicate app name: "${config.name}".`);
     }
+
     const { beforeRegisterApp, afterRegisterApp } = this._hooks;
     const registerAppHookContext: RegisterAppHookContext = { config };
     beforeRegisterApp.call(registerAppHookContext);

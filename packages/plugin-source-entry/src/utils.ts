@@ -1,3 +1,9 @@
+/** 获取当前环境是否支持 module script */
+export function isSupportModuleScript(): boolean {
+  const s = document.createElement('script');
+  return 'noModule' in s;
+}
+
 /** 增加链接协议 */
 export function addProtocol(url?: string): string {
   if (!url) return '';

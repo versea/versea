@@ -38,9 +38,6 @@ export interface IHooks {
   /** 加载应用 */
   load: AsyncSeriesHook<ILoaderHookContext>;
 
-  /** 加载单组应用 */
-  loadApps: AsyncSeriesHook<ILoaderHookContext>;
-
   /** 销毁应用 */
   unmount: AsyncSeriesHook<IRendererHookContext>;
 

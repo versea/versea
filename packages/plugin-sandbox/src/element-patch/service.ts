@@ -110,6 +110,7 @@ export class ElementPatch implements IElementPatch {
       if (!appName || !selectors || isUniqueElement(selectors) || rawDocument !== this) {
         return globalEnv.rawQuerySelector.call(this, selectors);
       }
+
       return self._appService.getApp(appName)?.container?.querySelector(selectors) ?? null;
     }
 
@@ -119,6 +120,7 @@ export class ElementPatch implements IElementPatch {
       if (!appName || !selectors || isUniqueElement(selectors) || rawDocument !== this) {
         return globalEnv.rawQuerySelectorAll.call(this, selectors);
       }
+
       return self._appService.getApp(appName)?.container?.querySelectorAll(selectors) ?? [];
     }
 
@@ -238,6 +240,7 @@ export class ElementPatch implements IElementPatch {
       if (this.__VERSEA_APP_NAME__) {
         clonedNode.__VERSEA_APP_NAME__ = this.__VERSEA_APP_NAME__;
       }
+
       return clonedNode;
     };
   }
@@ -249,6 +252,7 @@ export class ElementPatch implements IElementPatch {
     if (appName) {
       element.__VERSEA_APP_NAME__ = appName;
     }
+
     return element;
   }
 
@@ -485,6 +489,7 @@ export class ElementPatch implements IElementPatch {
         break;
       }
     }
+
     context.ignoreTap = ignoreTap;
     void runScriptHook.call(context);
   }

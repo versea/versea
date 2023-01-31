@@ -24,11 +24,11 @@ export class Matcher implements IMatcher {
 
   /**
    * 根部碎片路由
-   * @description 数组的每一项都是一个仅有空 children 的 Route。
+   * @description 渲染在主应用上的碎片应用对应的 Route。
    */
   protected readonly _rootFragments: IRoute[] = [];
 
-  /** 普通路由拍平结构 */
+  /** 普通路由深度优先遍历之后拍平的结构 */
   protected _routesList: IRoute[] = [];
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -86,7 +86,6 @@ export class Matcher implements IMatcher {
 
     matchTree.tap(VERSEA_INTERNAL_TAP, (context) => {
       this._matchTree(context);
-      // 补充 parentAppName
       this._addParentAppName(context.routes);
     });
 
@@ -107,6 +106,7 @@ export class Matcher implements IMatcher {
       this._trees.push(route);
       return;
     }
+
     this._trees.splice(wildIndex, 0, route);
   }
 
@@ -119,6 +119,7 @@ export class Matcher implements IMatcher {
         isMatched: false,
       };
       this._hooks.matchRoute.call(matchRouteHookContext);
+
       if (matchRouteHookContext.isMatched) {
         let currentRoute: IRoute | null = route;
         while (currentRoute) {
@@ -132,11 +133,12 @@ export class Matcher implements IMatcher {
     }
   }
 
-  /** 获取嵌套路由的父应用名称 */
+  /** 在路由元信息中添加父应用名称 */
   protected _addParentAppName(routes: MatchedRoute[]): void {
     if (routes.length <= 1) {
       return;
     }
+
     for (let i = 1; i < routes.length; i++) {
       const parentAppLike = routes[i - 1].apps[0];
       if (parentAppLike !== routes[i].apps[0]) {
@@ -154,6 +156,7 @@ export class Matcher implements IMatcher {
         isMatched: false,
       };
       this._hooks.matchRoute.call(matchRouteHookContext);
+
       if (matchRouteHookContext.isMatched) {
         context.fragmentRoutes.push(
           route.toMatchedRoute({ params: matchRouteHookContext.params, query: context.query }),
