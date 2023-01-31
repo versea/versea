@@ -61,6 +61,9 @@ export interface SourceStyle {
 
   /** 是否是全局样式 */
   isGlobal?: boolean;
+
+  /** 是否忽略沙箱 */
+  ignore?: boolean;
 }
 
 /** 脚本资源描述 */
@@ -79,6 +82,9 @@ export interface SourceScript {
 
   /** 是否是全局脚本 */
   isGlobal?: boolean;
+
+  /** 是否忽略沙箱 */
+  ignore?: boolean;
 }
 
 /**
@@ -99,7 +105,10 @@ export interface IInternalApp extends IApp {
    * 文档内容
    * @example <div><h1>title</h1><div id="sub-app-name"></div></div>
    */
-  _documentFragment?: string;
+  _documentFragment?: Promise<string> | string;
+
+  /** 文档内容外层 div className */
+  _documentFragmentWrapperClass?: string;
 
   /** 资源是否已经被执行 */
   _isSourceExecuted?: boolean;
@@ -152,7 +161,7 @@ declare module '@versea/core' {
      * 文档内容
      * @example <div><h1>title</h1><div id="sub-app-name"></div></div>
      */
-    documentFragment?: string;
+    documentFragment?: Promise<string> | string;
 
     /** 文档内容外层 div className */
     documentFragmentWrapperClass?: string;
@@ -188,9 +197,6 @@ declare module '@versea/core' {
   interface IApp {
     /** 容器节点 */
     container?: HTMLElement;
-
-    /** 文档内容外层 div className */
-    documentFragmentWrapperClass?: string;
 
     /** 应用样式 */
     styles?: SourceStyle[];

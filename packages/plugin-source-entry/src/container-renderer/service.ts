@@ -1,4 +1,5 @@
 import { IApp, IConfig, IStarter, provide } from '@versea/core';
+import { isPromise } from '@versea/shared';
 import { inject } from 'inversify';
 import { snakeCase } from 'snake-case';
 
@@ -22,9 +23,9 @@ export class ContainerRender implements IContainerRenderer {
     this._starter = starter;
   }
 
-  public createElement(app: IApp): HTMLElement {
+  public async createElement(app: IApp): Promise<HTMLElement> {
     const wrapperElement = globalEnv.rawCreateElement.call(document, 'div');
-    wrapperElement.innerHTML = this._getContent(app);
+    wrapperElement.innerHTML = await this._getContent(app);
     return wrapperElement.firstChild as HTMLElement;
   }
 
@@ -69,12 +70,12 @@ export class ContainerRender implements IContainerRenderer {
   }
 
   /** 获取应用容器 */
-  protected _getContent(app: IApp): string {
+  protected async _getContent(app: IApp): Promise<string> {
     this._injectVerseaAppStyle();
     const {
       name,
       _documentFragment: documentFragment,
-      documentFragmentWrapperClass,
+      _documentFragmentWrapperClass: documentFragmentWrapperClass,
       _disableRenderContent: disableRenderContent,
     } = app as IInternalApp;
 
@@ -84,9 +85,10 @@ export class ContainerRender implements IContainerRenderer {
         disableRenderContent ? ' style="display: none;"' : ''
       }><div id="${name}"></div></versea-app-body>`;
     } else {
-      const headRegExpArray = /<head[^>]*>([\s\S]*?)<\/head>/i.exec(documentFragment);
+      const documentFragmentString = isPromise(documentFragment) ? await documentFragment : documentFragment;
+      const headRegExpArray = /<head[^>]*>([\s\S]*?)<\/head>/i.exec(documentFragmentString);
       const headContent = `<versea-app-head>${headRegExpArray ? headRegExpArray[1] : ''}</versea-app-head>`;
-      const bodyRegExpArray = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(documentFragment);
+      const bodyRegExpArray = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(documentFragmentString);
       const bodyContent = `<versea-app-body>${bodyRegExpArray ? bodyRegExpArray[1] : ''}</versea-app-body>`;
       content = headContent + bodyContent;
     }

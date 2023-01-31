@@ -368,7 +368,7 @@ export class ElementPatch implements IElementPatch {
 
   protected _handleNewStyleElement(element: HTMLStyleElement, app: IApp): Node {
     if (element.hasAttribute('exclude')) {
-      const replaceComment = document.createComment('style element with exclude attribute ignored by versea-app');
+      const replaceComment = document.createComment('style element with exclude attribute ignored by versea');
       this._dynamicElement.set(element, replaceComment);
       return replaceComment;
     }
@@ -383,7 +383,7 @@ export class ElementPatch implements IElementPatch {
 
   protected _handleNewLinkElement(element: HTMLLinkElement, app: IApp): Node {
     if (element.hasAttribute('exclude')) {
-      const linkReplaceComment = document.createComment('link element with exclude attribute ignored by versea-app');
+      const linkReplaceComment = document.createComment('link element with exclude attribute ignored by versea');
       this._dynamicElement.set(element, linkReplaceComment);
       return linkReplaceComment;
     }
@@ -412,7 +412,7 @@ export class ElementPatch implements IElementPatch {
     // 处理 link 的其他需要忽略的标签
     if (rel && ['prefetch', 'preload', 'prerender', 'icon', 'apple-touch-icon'].includes(rel)) {
       const comment = document.createComment(
-        `link element with rel=${rel}${href ? ` & href=${href}` : ''} removed by versea-app`,
+        `link element with rel=${rel}${href ? ` & href=${href}` : ''} removed by versea`,
       );
       this._dynamicElement.set(element, comment);
       return comment;
@@ -429,11 +429,9 @@ export class ElementPatch implements IElementPatch {
     const { supportModuleScript: supportModule } = globalEnv;
     let replaceComment: Comment | null = null;
     if (element.hasAttribute('exclude')) {
-      replaceComment = document.createComment('script element with exclude attribute removed by versea-app');
+      replaceComment = document.createComment('script element with exclude attribute removed by versea');
     } else if ((supportModule && element.noModule) || (!supportModule && element.type === 'module')) {
-      replaceComment = document.createComment(
-        `${element.noModule ? 'noModule' : 'module'} script ignored by versea-app`,
-      );
+      replaceComment = document.createComment(`${element.noModule ? 'noModule' : 'module'} script ignored by versea`);
     }
 
     if (replaceComment) {

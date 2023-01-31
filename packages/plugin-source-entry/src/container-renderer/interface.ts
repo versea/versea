@@ -6,7 +6,7 @@ export const IContainerRenderer = createServiceSymbol('IContainerRenderer');
 
 export interface IContainerRenderer {
   /** 生成容器元素 */
-  createElement: (app: IApp) => HTMLElement;
+  createElement: (app: IApp) => Promise<HTMLElement>;
 
   /** 获取容器 ID */
   getWrapperId: (name: string) => string;

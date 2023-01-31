@@ -13,6 +13,7 @@ import {
   PLUGIN_SOURCE_ENTRY_REMOVE_CONTAINER_TAP,
 } from '../constants';
 import { IContainerRenderer } from '../container-renderer/interface';
+import { globalEnv } from '../global-env';
 import { ISourceController } from '../source-controller/interface';
 import { addProtocol, getEffectivePath } from '../utils';
 import {
@@ -45,6 +46,7 @@ App.defineProp('assetsPublicPath', {
 App.defineProp('_fetch', { optionKey: 'fetch' });
 App.defineProp('_parentContainer', { optionKey: 'container' });
 App.defineProp('_documentFragment', { optionKey: 'documentFragment' });
+App.defineProp('_documentFragmentWrapperClass', { optionKey: 'documentFragmentWrapperClass' });
 App.defineProp('_disableRenderContent', { optionKey: 'disableRenderContent' });
 App.defineProp('_libraryName', { optionKey: 'libraryName' });
 
@@ -105,10 +107,8 @@ export class PluginSourceEntry implements IPluginSourceEntry {
 
       // 容器无论如何都不能二次变更，因为已经执行的资源文件已经对容器产生了不可逆的副作用
       if (!app.container) {
-        app.container = this._containerRenderer.createElement(app);
+        app.container = await this._containerRenderer.createElement(app);
       }
-
-      return Promise.resolve();
     });
 
     // 加载资源
@@ -116,7 +116,9 @@ export class PluginSourceEntry implements IPluginSourceEntry {
       const { app } = context;
 
       app.styles = this._sourceController.normalizeSource(app.styles, app.assetsPublicPath);
-      app.scripts = this._sourceController.normalizeSource(app.scripts, app.assetsPublicPath);
+      app.scripts = this._sourceController
+        .normalizeSource(app.scripts, app.assetsPublicPath)
+        .filter((script) => !script.module || globalEnv.supportModuleScript);
 
       await this._sourceController.load(context);
     });

@@ -239,7 +239,7 @@ export class ScriptLoader implements IScriptLoader {
     }
 
     return document.createComment(
-      `${script.src ? `script with src='${script.src}'` : 'inline script'} extract by versea-app`,
+      `${script.src ? `script with src='${script.src}'` : 'inline script'} extract by versea`,
     );
   }
 
@@ -268,9 +268,12 @@ export class ScriptLoader implements IScriptLoader {
     element: Comment | HTMLScriptElement,
     appendToBody?: boolean,
   ): Promise<void> {
-    const context = { code, script, app } as ProcessScripCodeHookContext;
-    this._hooks.processScriptCode.call(context);
-    const resultCode = context.result;
+    let resultCode = code;
+    if (!script.ignore) {
+      const context = { code, script, app } as ProcessScripCodeHookContext;
+      this._hooks.processScriptCode.call(context);
+      resultCode = context.result;
+    }
 
     if ((app as IInternalApp)._inlineScript || script.module) {
       const promise = this._sourceController.runCodeInline(resultCode, element as HTMLScriptElement, script, app);

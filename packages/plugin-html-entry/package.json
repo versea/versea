@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@versea/core": "0.2.5",
+    "@versea/plugin-source-entry": "0.2.5",
+    "@versea/shared": "0.2.5",
     "inversify": "^6.0.1",
     "tslib": "^2.3.1"
   },

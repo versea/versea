@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { isBrowser } from '@versea/shared';
 
+function isSupportModuleScript(): boolean {
+  const s = document.createElement('script');
+  return 'noModule' in s;
+}
+
 interface GlobalEnv {
   rawAppendChild: typeof Element.prototype.appendChild;
   rawRemoveChild: typeof Element.prototype.removeChild;
@@ -8,6 +13,8 @@ interface GlobalEnv {
   rawCreateElement: typeof Document.prototype.createElement;
   rawQuerySelector: typeof Document.prototype.querySelector;
   rawGetElementsByTagName: typeof Document.prototype.getElementsByTagName;
+
+  supportModuleScript: boolean;
 }
 
 export const globalEnv: GlobalEnv = {} as GlobalEnv;
@@ -20,5 +27,7 @@ if (isBrowser) {
     rawCreateElement: Document.prototype.createElement,
     rawQuerySelector: Document.prototype.querySelector,
     rawGetElementsByTagName: Document.prototype.getElementsByTagName,
+
+    supportModuleScript: isSupportModuleScript(),
   });
 }

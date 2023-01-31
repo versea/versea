@@ -74,7 +74,9 @@ export class StyleLoader implements IStyleLoader {
         try {
           await this.ensureCode(_style, app);
           styleElement.textContent = _style.code as string;
-          this.scopeCSS(styleElement, _style, app);
+          if (!_style.ignore) {
+            this.scopeCSS(styleElement, _style, app);
+          }
           this._loadEvent.dispatchOnLoadEvent(originElement);
         } catch (error) {
           logError(error, app.name);
@@ -197,7 +199,9 @@ export class StyleLoader implements IStyleLoader {
     styleElement.__VERSEA_APP_LINK_PATH__ = src;
     styleElement.setAttribute('data-origin-href', src ?? '');
 
-    this.scopeCSS(styleElement, style, app);
+    if (!style.ignore) {
+      this.scopeCSS(styleElement, style, app);
+    }
 
     if (placeholder?.parentNode) {
       rawReplaceChild.call(placeholder.parentNode, styleElement, placeholder);
