@@ -23,7 +23,7 @@ export class PluginHtmlEntry implements IPluginHtmlEntry {
 
   constructor(
     @inject(IHooks) hooks: IHooks,
-    @inject(IPluginSourceEntry) htmlLoader: IHtmlLoader,
+    @inject(IHtmlLoader) htmlLoader: IHtmlLoader,
     @inject(IPluginSourceEntry) pluginSourceEntry: IPluginSourceEntry,
   ) {
     this._hooks = hooks;
