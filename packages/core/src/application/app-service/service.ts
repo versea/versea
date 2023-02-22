@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { VerseaError } from '@versea/shared';
+import { logWarn, VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { IStatus } from '../../enum/status';
@@ -23,6 +23,8 @@ export class AppService implements IAppService {
   protected readonly _Status: IStatus;
 
   protected readonly _hooks: IHooks;
+
+  protected _rootParcels: IApp[] = [];
 
   constructor(
     @inject(IApp) App: interfaces.Newable<IApp>,
@@ -69,6 +71,18 @@ export class AppService implements IAppService {
     const apps = configList.map((config) => this.registerApp(config, false));
     void this._router.reroute();
     return apps;
+  }
+
+  public registerRootParcel(config: AppConfig): IApp {
+    if (this._appMap.has(config.name)) {
+      logWarn(`Parcel "${config.name}" has been registered.`);
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return this._appMap.get(config.name)!;
+    }
+
+    const app = this.registerApp(config, false);
+    this._rootParcels.push(app);
+    return app;
   }
 
   public hasApp(name: string): boolean {

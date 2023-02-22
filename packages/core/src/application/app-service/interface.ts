@@ -12,6 +12,9 @@ export interface IAppService {
   /** 注册多个应用 */
   registerApps: (configList: AppConfig[]) => IApp[];
 
+  /** 注册主应用包裹 */
+  registerRootParcel: (config: AppConfig) => IApp;
+
   /** 根据应用名称获取应用实例 */
   getApp: (name: string) => IApp | undefined;
 
