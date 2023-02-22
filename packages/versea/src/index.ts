@@ -52,6 +52,10 @@ export class Versea {
     return this.appService.registerApps(configList);
   }
 
+  public registerRootParcel(config: AppConfig): IApp {
+    return this.appService.registerRootParcel(config);
+  }
+
   public async start(): Promise<void> {
     return this.starter.start();
   }
