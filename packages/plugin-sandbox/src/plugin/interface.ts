@@ -2,7 +2,7 @@ import { createServiceSymbol, IPlugin } from '@versea/core';
 import { AsyncSeriesHook, SyncHook } from '@versea/tapable';
 
 import { ISandbox } from '../sandbox/sandbox/interface';
-import { RewriteCSSRuleHookContext } from '../source/scoped-css/interface';
+import { RewriteCSSRuleHookContext, RewriteCSSRuleSelectorHookContext } from '../source/scoped-css/interface';
 import {
   LoadDynamicScriptHookContext,
   LoadScriptHookContext,
@@ -41,6 +41,9 @@ declare module '@versea/core' {
 
     /** 重写 CSSRule */
     rewriteCSSRule: SyncHook<RewriteCSSRuleHookContext>;
+
+    /** 重写 CSSRule 的 selector */
+    rewriteCSSRuleSelector: SyncHook<RewriteCSSRuleSelectorHookContext>;
 
     /** 沙箱环境加载 script，不包含动态加载 */
     loadScript: AsyncSeriesHook<LoadScriptHookContext>;

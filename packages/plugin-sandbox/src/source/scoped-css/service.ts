@@ -6,7 +6,7 @@ import { inject } from 'inversify';
 
 import { PLUGIN_SANDBOX_TAP } from '../../constants';
 import { globalEnv } from '../../global-env';
-import { IScopedCSS, RewriteCSSRuleHookContext } from './interface';
+import { IScopedCSS, RewriteCSSRuleHookContext, RewriteCSSRuleSelectorHookContext } from './interface';
 
 export * from './interface';
 
@@ -43,6 +43,7 @@ export class ScopedCSS implements IScopedCSS {
     this._hooks = hooks;
     this._containerRenderer = containerRenderer;
     this._hooks.addHook('rewriteCSSRule', new SyncHook());
+    this._hooks.addHook('rewriteCSSRuleSelector', new SyncHook());
 
     // 在 document.body 上创建一个空的 style 标签，设置样式表为禁用
     const { rawCreateElement, rawAppendChild } = globalEnv;
@@ -58,9 +59,20 @@ export class ScopedCSS implements IScopedCSS {
     this._hooks.rewriteCSSRule.tap(PLUGIN_SANDBOX_TAP, (context) => {
       context.result = context.rule.cssText;
       if (context.rule.type === RuleType.STYLE) {
-        context.result = this._rewriteStyleRuleSelector(context.result, context.prefix);
+        context.result = this.rewriteStyleRuleSelector(context.result, context.prefix, context.style, context.app);
       }
-      context.result = this._rewriteCSSRuleUrl(context.result, context.style, context.app);
+
+      context.result = this.rewriteCSSRuleUrl(context.result, context.style, context.app);
+    });
+
+    this._hooks.rewriteCSSRuleSelector.tap(PLUGIN_SANDBOX_TAP, (context) => {
+      const { prefix, p, selector } = context;
+      const startedWithPrefixRE = new RegExp(`^[\\s\\n]*${prefix}`, 'g');
+      if (startedWithPrefixRE.test(selector)) {
+        context.result = `${p}${selector.replace(/^ */, '')}`;
+      } else {
+        context.result = `${p}${prefix} ${selector.replace(/^ */, '')}`;
+      }
     });
   }
 
@@ -97,6 +109,66 @@ export class ScopedCSS implements IScopedCSS {
     // we don't need create a cleanup function manually
     // see https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver/disconnect
     mutator.observe(styleNode, { childList: true });
+  }
+
+  /** 重写 CSSStyleRule 的选择器 */
+  public rewriteStyleRuleSelector(cssText: string, prefix: string, style: SourceStyle, app: IApp): string {
+    const rootCombinationRE = /(html[^\w{[\-.#]+)/gm;
+    const rootSelectorRE = /((?:[^\w\-.#]|^)(body|html|:root))/gm;
+
+    function getPrefix(_p: string, originSelector: string): string {
+      if (originSelector === 'body') {
+        return `${_p} versea-app-body`;
+      }
+      return _p;
+    }
+
+    return cssText.replace(/^[\s\S]+{/, (selectors) =>
+      // 选择器按逗号分隔开
+      selectors.replace(/(^|,\n?)([^,]+)/g, (_, p: string, s: string) => {
+        // 去掉 html body, html > body 或 html #app 这类选择器的前面部分
+        if (rootCombinationRE.test(s)) {
+          const siblingSelectorRE = /(html[^\w{]+)(\+|~)/gm;
+          // 忽略 html + body 或 html ~ body
+          if (siblingSelectorRE.test(s)) {
+            return '';
+          }
+
+          s = s.replace(rootCombinationRE, '');
+        }
+
+        if (rootSelectorRE.test(s)) {
+          s = s.replace(rootSelectorRE, (m, i, t: string) => {
+            // 保留特殊字符，例如 body,html 或 *:not(:root) 中的 "," 和 "("
+            const whitePrevChars = [',', '('];
+            if (m && whitePrevChars.includes(m[0])) {
+              return `${m[0]}${getPrefix(prefix, t)}`;
+            }
+
+            return getPrefix(prefix, t);
+          });
+        }
+
+        const context = { app, prefix, style, p, selector: s } as RewriteCSSRuleSelectorHookContext;
+        this._hooks.rewriteCSSRuleSelector.call(context);
+        return context.result;
+      }),
+    );
+  }
+
+  /** 重写 CSSRule 的 url */
+  public rewriteCSSRuleUrl(cssText: string, style: SourceStyle, app: IApp): string {
+    if (!app.assetsPublicPath) {
+      return cssText;
+    }
+
+    return cssText.replace(/(?:url\(["']?((?:[^)"'}]+))["']?\))/gm, (declaration, url: string) => {
+      if (/^((data|blob):|#)/.test(url) || /^(https?:)?\/\//.test(url)) {
+        return declaration;
+      }
+
+      return `url("${completionPath(url, style.src ?? app.assetsPublicPath)}")`;
+    });
   }
 
   /** 获取 ScopedCSS 的 text */
@@ -150,66 +222,5 @@ export class ScopedCSS implements IScopedCSS {
     const context = { app, rule, prefix, style } as RewriteCSSRuleHookContext;
     this._hooks.rewriteCSSRule.call(context);
     return context.result;
-  }
-
-  /** 重写 CSSStyleRule 的选择器 */
-  protected _rewriteStyleRuleSelector(cssText: string, prefix: string): string {
-    const rootSelectorRE = /((?:[^\w\-.#]|^)(body|html|:root))/gm;
-    const rootCombinationRE = /(html[^\w{[\-.#]+)/gm;
-
-    function getPrefix(_p: string, originSelector: string): string {
-      if (originSelector === 'body') {
-        return `${_p} versea-app-body`;
-      }
-      return _p;
-    }
-
-    return cssText.replace(/^[\s\S]+{/, (selectors) =>
-      // 选择器按逗号分隔开
-      selectors.replace(/(^|,\n?)([^,]+)/g, (_, p: string, s: string) => {
-        // 去掉 html body, html > body 或 html #app 这类选择器的前面部分
-        if (rootCombinationRE.test(s)) {
-          const siblingSelectorRE = /(html[^\w{]+)(\+|~)/gm;
-          // 忽略 html + body 或 html ~ body
-          if (siblingSelectorRE.test(s)) {
-            return '';
-          }
-
-          s = s.replace(rootCombinationRE, '');
-        }
-
-        if (rootSelectorRE.test(s)) {
-          s = s.replace(rootSelectorRE, (m, i, t: string) => {
-            // 保留特殊字符，例如 body,html 或 *:not(:root) 中的 "," 和 "("
-            const whitePrevChars = [',', '('];
-            if (m && whitePrevChars.includes(m[0])) {
-              return `${m[0]}${getPrefix(prefix, t)}`;
-            }
-            return getPrefix(prefix, t);
-          });
-        }
-
-        const startedWithPrefixRE = new RegExp(`^[\\s\\n]*${prefix}`, 'g');
-        if (startedWithPrefixRE.test(s)) {
-          return `${p}${s.replace(/^ */, '')}`;
-        }
-        return `${p}${prefix} ${s.replace(/^ */, '')}`;
-      }),
-    );
-  }
-
-  /** 重写 CSSRule 的 url */
-  protected _rewriteCSSRuleUrl(cssText: string, style: SourceStyle, app: IApp): string {
-    if (!app.assetsPublicPath) {
-      return cssText;
-    }
-
-    return cssText.replace(/(?:url\(["']?((?:[^)"'}]+))["']?\))/gm, (declaration, url: string) => {
-      if (/^((data|blob):|#)/.test(url) || /^(https?:)?\/\//.test(url)) {
-        return declaration;
-      }
-
-      return `url("${completionPath(url, style.src ?? app.assetsPublicPath)}")`;
-    });
   }
 }
