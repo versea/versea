@@ -51,7 +51,7 @@ export class App extends ExtensibleEntity implements IApp {
   /** 处理容器应用渲染完成控制器 */
   protected _containerController?: AppMountedResult['containerController'];
 
-  protected _parcels: IApp[] = [];
+  protected readonly _parcels: IApp[] = [];
 
   /**
    * 生成一个 App 实例

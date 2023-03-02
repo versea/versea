@@ -21,22 +21,22 @@ export * from './interface';
 @provide(IStyleLoader)
 export class StyleLoader implements IStyleLoader {
   /** 资源文件链接和资源文件内容的 Map */
-  protected _globalStyles = new Map<string, Promise<string>>();
+  protected readonly _globalStyles = new Map<string, Promise<string>>();
 
   /** 应用名称和 style 加载完成的 Promise 的 Map */
-  protected _styleDeferred = new WeakMap<IApp, Deferred<void>>();
+  protected readonly _styleDeferred = new WeakMap<IApp, Deferred<void>>();
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _request: IRequest;
+  protected readonly _request: IRequest;
 
-  protected _sourceController: ISourceController;
+  protected readonly _sourceController: ISourceController;
 
-  protected _loadEvent: ILoadEvent;
+  protected readonly _loadEvent: ILoadEvent;
 
-  protected _scopedCSS: IScopedCSS;
+  protected readonly _scopedCSS: IScopedCSS;
 
   constructor(
     @inject(IHooks) hooks: IHooks,
@@ -124,7 +124,7 @@ export class StyleLoader implements IStyleLoader {
     }
   }
 
-  public async ensureCode(style: SourceStyle, app: IApp): Promise<void> {
+  public async ensureCode(style: SourceStyle, app?: IApp): Promise<void> {
     const { src, code, isGlobal } = style;
 
     if (isPromise(code)) {
@@ -174,7 +174,7 @@ export class StyleLoader implements IStyleLoader {
   }
 
   /** 获取 style 资源内容 */
-  protected async _fetchStyleCode(style: SourceStyle, app: IApp): Promise<string> {
+  protected async _fetchStyleCode(style: SourceStyle, app?: IApp): Promise<string> {
     const { src, isGlobal } = style;
 
     try {

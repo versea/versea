@@ -40,21 +40,21 @@ export class Sandbox extends ExtensibleEntity implements ISandbox {
   protected _active = false;
 
   /** 新设置到 appWindow 的 key */
-  protected _injectedKeys = new Set<PropertyKey>();
+  protected readonly _injectedKeys = new Set<PropertyKey>();
 
   /** 需要设置到 rawWindow 的 key */
-  protected _escapeKeys = new Set<PropertyKey>();
+  protected readonly _escapeKeys = new Set<PropertyKey>();
 
   /** 新设置到 appWindow 的 key 对应的 value */
   protected _recordInjectedValues?: Map<PropertyKey, unknown>;
 
-  protected _currentApp: ICurrentApp;
+  protected readonly _currentApp: ICurrentApp;
 
-  protected _documentEffect: IDocumentEffect;
+  protected readonly _documentEffect: IDocumentEffect;
 
-  protected _sandboxEffect: ISandboxEffect;
+  protected readonly _sandboxEffect: ISandboxEffect;
 
-  protected _elementPatch: IElementPatch;
+  protected readonly _elementPatch: IElementPatch;
 
   constructor(
     options: SandboxOptions,

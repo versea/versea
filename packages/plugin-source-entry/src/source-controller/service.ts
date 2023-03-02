@@ -19,7 +19,7 @@ function removeEvent(target: HTMLLinkElement | HTMLScriptElement): void {
 
 @provide(ISourceController)
 export class SourceController implements ISourceController {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
   constructor(@inject(IHooks) hooks: IHooks) {
     this._hooks = hooks;

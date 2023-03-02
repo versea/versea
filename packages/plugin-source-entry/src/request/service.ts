@@ -8,7 +8,7 @@ export * from './interface';
 
 @provide(IRequest)
 export class Request implements IRequest {
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
   constructor(@inject(IConfig) config: IConfig) {
     this._config = config;

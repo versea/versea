@@ -6,10 +6,12 @@ import {
   IConfig,
   IHooks,
   IPlugin,
+  IPrefetchService,
   IRouter,
   IRouteState,
   IStarter,
   provideValue,
+  PrefetchOptions,
 } from '@versea/core';
 import { Container } from 'inversify';
 
@@ -62,6 +64,11 @@ export class Versea {
 
   public async reroute(navigationEvent?: Event): Promise<void> {
     return this.router.reroute(navigationEvent);
+  }
+
+  public async prefetch(apps: string[], options?: PrefetchOptions): Promise<void> {
+    const prefetchService = this.container.get<IPrefetchService>(IPrefetchService);
+    await prefetchService.fetch(apps, options);
   }
 
   /** 使用插件 */

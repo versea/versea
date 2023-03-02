@@ -12,11 +12,11 @@ export * from './interface';
 
 @provide(ILoader)
 export class Loader implements ILoader {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
   protected readonly _SwitcherStatus: ISwitcherStatus;
 
-  protected _HookContext: interfaces.Newable<ILoaderHookContext>;
+  protected readonly _HookContext: interfaces.Newable<ILoaderHookContext>;
 
   constructor(
     @inject(IHooks) hooks: IHooks,

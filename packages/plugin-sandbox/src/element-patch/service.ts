@@ -23,17 +23,17 @@ function isInvalidQuerySelectorKey(key: string): boolean {
 @provide(IElementPatch)
 export class ElementPatch implements IElementPatch {
   /** 新增的节点和替换的节点的 Map */
-  protected _dynamicElement = new WeakMap<Node, Comment | Element>();
+  protected readonly _dynamicElement = new WeakMap<Node, Comment | Element>();
 
-  protected _appService: IAppService;
+  protected readonly _appService: IAppService;
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _currentApp: ICurrentApp;
+  protected readonly _currentApp: ICurrentApp;
 
-  protected _styleLoader: IStyleLoader;
+  protected readonly _styleLoader: IStyleLoader;
 
-  protected _scriptLoader: IScriptLoader;
+  protected readonly _scriptLoader: IScriptLoader;
 
   constructor(
     @inject(IAppService) appService: IAppService,

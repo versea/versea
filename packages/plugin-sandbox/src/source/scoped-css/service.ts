@@ -35,9 +35,9 @@ export class ScopedCSS implements IScopedCSS {
 
   protected _swapNode: HTMLStyleElement;
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _containerRenderer: IContainerRenderer;
+  protected readonly _containerRenderer: IContainerRenderer;
 
   constructor(@inject(IHooks) hooks: IHooks, @inject(IContainerRenderer) containerRenderer: IContainerRenderer) {
     this._hooks = hooks;

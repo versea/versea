@@ -11,9 +11,9 @@ export * from './interface';
 
 @provide(IContainerRenderer)
 export class ContainerRender implements IContainerRenderer {
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _starter: IStarter;
+  protected readonly _starter: IStarter;
 
   /** 是否已经注入自定义元素的样式 */
   protected _hasInjectVerseaAppStyle = false;

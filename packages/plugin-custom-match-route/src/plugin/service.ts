@@ -7,7 +7,7 @@ export * from './interface';
 
 @provide(IPluginCustomMatchRoute)
 export class PluginCustomMatchRoute implements IPluginCustomMatchRoute {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
   constructor(@inject(IHooks) hooks: IHooks) {
     this._hooks = hooks;

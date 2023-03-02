@@ -15,11 +15,11 @@ export * from './interface';
 
 @provide(IPluginHtmlEntry)
 export class PluginHtmlEntry implements IPluginHtmlEntry {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _htmlLoader: IHtmlLoader;
+  protected readonly _htmlLoader: IHtmlLoader;
 
-  protected _pluginSourceEntry: IPluginSourceEntry;
+  protected readonly _pluginSourceEntry: IPluginSourceEntry;
 
   constructor(
     @inject(IHooks) hooks: IHooks,

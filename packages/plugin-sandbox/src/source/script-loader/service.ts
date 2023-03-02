@@ -62,20 +62,20 @@ const GlobalKeys = [
 @provide(IScriptLoader)
 export class ScriptLoader implements IScriptLoader {
   /** 资源文件链接和资源文件内容的 Map */
-  protected _globalScripts = new Map<string, Promise<string>>();
+  protected readonly _globalScripts = new Map<string, Promise<string>>();
 
   /** 应用名称和 script 加载完成的 Promise 的 Map */
-  protected _scriptDeferred = new WeakMap<IApp, Deferred<void>>();
+  protected readonly _scriptDeferred = new WeakMap<IApp, Deferred<void>>();
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _request: IRequest;
+  protected readonly _request: IRequest;
 
-  protected _sourceController: ISourceController;
+  protected readonly _sourceController: ISourceController;
 
-  protected _loadEvent: ILoadEvent;
+  protected readonly _loadEvent: ILoadEvent;
 
   constructor(
     @inject(IHooks) hooks: IHooks,
@@ -172,7 +172,7 @@ export class ScriptLoader implements IScriptLoader {
     }
   }
 
-  public async ensureCode(script: SourceScript, app: IApp): Promise<void> {
+  public async ensureCode(script: SourceScript, app?: IApp): Promise<void> {
     const { src, code, async, isGlobal } = script;
 
     if (isPromise(code)) {
@@ -296,7 +296,7 @@ export class ScriptLoader implements IScriptLoader {
   }
 
   /** 获取 script 资源内容 */
-  protected async _fetchScriptCode(script: SourceScript, app: IApp): Promise<string> {
+  protected async _fetchScriptCode(script: SourceScript, app?: IApp): Promise<string> {
     const { src, isGlobal } = script;
 
     /* eslint-disable @typescript-eslint/no-non-null-assertion */

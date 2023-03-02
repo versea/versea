@@ -7,6 +7,7 @@ import { RegisterAppHookContext } from '../application/app-service/interface';
 import { WaitForChildContainerContext } from '../application/app/interface';
 import { MatchRoutesHookContext, MatchRouteHookContext } from '../navigation/matcher/interface';
 import { RerouteHookContext } from '../navigation/router/interface';
+import { PrefetchHookContext } from '../prefetch-service/interface';
 import { createServiceSymbol } from '../utils';
 
 export const IHooks = createServiceSymbol('IHooks');
@@ -61,6 +62,9 @@ export interface IHooks {
 
   /** 等待子应用的容器的容器渲染 */
   waitForChildContainer: AsyncSeriesHook<WaitForChildContainerContext>;
+
+  /** prefetch 应用 */
+  prefetch: AsyncSeriesHook<PrefetchHookContext>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   addHook: (key: string, hook: BaseHook<any, any>) => void;

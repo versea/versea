@@ -12,9 +12,9 @@ export * from './interface';
 
 @provide(ISandboxEffect, 'Constructor')
 export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
-  protected _windowListenerMap = new Map<string, Set<VerseaAppEventListener>>();
+  protected readonly _windowListenerMap = new Map<string, Set<VerseaAppEventListener>>();
 
-  protected _documentListenerMap = new Map<string, Set<VerseaAppEventListener>>();
+  protected readonly _documentListenerMap = new Map<string, Set<VerseaAppEventListener>>();
 
   protected _intervalIdMap = new Map<number, TimerEventRecord>();
 
@@ -24,11 +24,11 @@ export class SandboxEffect extends ExtensibleEntity implements ISandboxEffect {
 
   protected _proxyWindow: VerseaAppWindow;
 
-  protected _currentApp: ICurrentApp;
+  protected readonly _currentApp: ICurrentApp;
 
-  protected _windowEffect: IWindowEffect;
+  protected readonly _windowEffect: IWindowEffect;
 
-  protected _documentEffect: IDocumentEffect;
+  protected readonly _documentEffect: IDocumentEffect;
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   constructor(options: SandboxEffectOptions, { currentApp, documentEffect, WindowEffect }: SandboxEffectDependencies) {

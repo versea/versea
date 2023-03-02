@@ -43,6 +43,9 @@ export { IRoute, Route } from './navigation/route/service';
 export type { RerouteHookContext } from './navigation/router/service';
 export { IRouter, Router } from './navigation/router/service';
 
+export type { PrefetchHookContext, PrefetchOptions } from './prefetch-service/service';
+export { IPrefetchService, PrefetchService } from './prefetch-service/service';
+
 export * from './provider';
 
 export { IStarter, Starter } from './starter/service';

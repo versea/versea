@@ -18,7 +18,7 @@ export interface IScriptLoader {
   dispose: (app: IApp) => void;
 
   /** 尝试设置 script.code */
-  ensureCode: (script: SourceScript, app: IApp) => Promise<void>;
+  ensureCode: (script: SourceScript, app?: IApp) => Promise<void>;
 
   /** 执行资源文件 */
   exec: (app: IApp) => Promise<void>;

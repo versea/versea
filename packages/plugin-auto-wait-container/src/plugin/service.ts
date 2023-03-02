@@ -16,13 +16,13 @@ provideValue({ autoWaitContainerTimeout: DefaultTimeOut }, IConfig);
 
 @provide(IPluginAutoWaitContainer)
 export class PluginAutoWaitContainer implements IPluginAutoWaitContainer {
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _pluginSourceEntry: IPluginSourceEntry;
+  protected readonly _pluginSourceEntry: IPluginSourceEntry;
 
-  protected _containerRenderer: IContainerRenderer;
+  protected readonly _containerRenderer: IContainerRenderer;
 
   protected _deferredContainer: DeferredContainer<Record<string, unknown>>;
 

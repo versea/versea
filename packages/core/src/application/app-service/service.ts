@@ -24,7 +24,7 @@ export class AppService implements IAppService {
 
   protected readonly _hooks: IHooks;
 
-  protected _rootParcels: IApp[] = [];
+  protected readonly _rootParcels: IApp[] = [];
 
   constructor(
     @inject(IApp) App: interfaces.Newable<IApp>,

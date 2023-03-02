@@ -18,7 +18,7 @@ export interface IStyleLoader {
   dispose: (app: IApp) => void;
 
   /** 尝试设置 style.code */
-  ensureCode: (style: SourceStyle, app: IApp) => Promise<void>;
+  ensureCode: (style: SourceStyle, app?: IApp) => Promise<void>;
 
   /** 给样式表增加前缀 */
   scopeCSS: (styleLink: HTMLStyleElement, style: SourceStyle, app: IApp) => void;

@@ -11,7 +11,7 @@ export * from './interface';
 
 @provide(IHtmlLoader)
 export class HtmlLoader implements IHtmlLoader {
-  protected _request: IRequest;
+  protected readonly _request: IRequest;
 
   constructor(@inject(IRequest) request: IRequest) {
     this._request = request;

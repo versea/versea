@@ -38,29 +38,29 @@ App.defineProp('_isPersistentSourceCode', { optionKey: 'isPersistentSourceCode' 
 export class PluginSandbox implements IPluginSandbox {
   public isApplied = false;
 
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _styleLoader: IStyleLoader;
+  protected readonly _styleLoader: IStyleLoader;
 
-  protected _scriptLoader: IScriptLoader;
+  protected readonly _scriptLoader: IScriptLoader;
 
-  protected _currentApp: ICurrentApp;
+  protected readonly _currentApp: ICurrentApp;
 
-  protected _documentEffect: IDocumentEffect;
+  protected readonly _documentEffect: IDocumentEffect;
 
-  protected _WindowEffect: interfaces.Newable<IWindowEffect>;
+  protected readonly _WindowEffect: interfaces.Newable<IWindowEffect>;
 
-  protected _SandboxEffect: interfaces.Newable<ISandboxEffect>;
+  protected readonly _SandboxEffect: interfaces.Newable<ISandboxEffect>;
 
-  protected _Sandbox: interfaces.Newable<ISandbox>;
+  protected readonly _Sandbox: interfaces.Newable<ISandbox>;
 
-  protected _elementPatch: IElementPatch;
+  protected readonly _elementPatch: IElementPatch;
 
-  protected _sourceController: ISourceController;
+  protected readonly _sourceController: ISourceController;
 
-  protected _pluginSourceEntry: IPluginSourceEntry;
+  protected readonly _pluginSourceEntry: IPluginSourceEntry;
 
   constructor(
     @inject(IConfig) config: IConfig,

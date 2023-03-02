@@ -7,6 +7,7 @@ import { RegisterAppHookContext } from '../application/app-service/interface';
 import { WaitForChildContainerContext } from '../application/app/interface';
 import { MatchRouteHookContext, MatchRoutesHookContext } from '../navigation/matcher/interface';
 import { RerouteHookContext } from '../navigation/router/interface';
+import { PrefetchHookContext } from '../prefetch-service/interface';
 import { provide } from '../provider';
 import { IHooks } from './interface';
 
@@ -49,6 +50,8 @@ export class Hooks implements IHooks {
   public mountFragmentApps = new AsyncSeriesHook<IRendererHookContext>();
 
   public waitForChildContainer = new AsyncSeriesHook<WaitForChildContainerContext>();
+
+  public prefetch = new AsyncSeriesHook<PrefetchHookContext>();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public addHook(key: string, hook: BaseHook<any, any>): void {

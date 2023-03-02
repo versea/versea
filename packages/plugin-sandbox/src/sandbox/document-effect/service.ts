@@ -16,7 +16,7 @@ export class DocumentEffect implements IDocumentEffect {
 
   public readonly eventListenerMap = new Map<string, Map<string, Set<VerseaAppEventListener>>>();
 
-  protected _currentApp: ICurrentApp;
+  protected readonly _currentApp: ICurrentApp;
 
   protected _hasOverwriteDocumentOnClick = false;
 

@@ -54,13 +54,13 @@ App.defineProp('_libraryName', { optionKey: 'libraryName' });
 export class PluginSourceEntry implements IPluginSourceEntry {
   public isApplied = false;
 
-  protected _config: IConfig;
+  protected readonly _config: IConfig;
 
-  protected _hooks: IHooks;
+  protected readonly _hooks: IHooks;
 
-  protected _containerRenderer: IContainerRenderer;
+  protected readonly _containerRenderer: IContainerRenderer;
 
-  protected _sourceController: ISourceController;
+  protected readonly _sourceController: ISourceController;
 
   constructor(
     @inject(IConfig) config: IConfig,
