@@ -96,7 +96,7 @@ export interface IInternalApp extends IApp {
    * 容器名称
    * @example #app
    */
-  _parentContainer?: string;
+  _parentContainer?: string | ((context: MountAppHookContext | UnmountAppHookContext) => string);
 
   /** 禁用渲染内容 */
   _disableRenderContent?: boolean;
@@ -154,7 +154,7 @@ declare module '@versea/core' {
      * 容器名称
      * @example #app
      */
-    container?: string;
+    container?: string | ((context: MountAppHookContext | UnmountAppHookContext) => string);
 
     /**
      * 文档内容

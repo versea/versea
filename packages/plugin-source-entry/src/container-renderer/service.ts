@@ -110,9 +110,13 @@ export class ContainerRender implements IContainerRenderer {
       }
     }
 
-    if ((app as IInternalApp)._parentContainer) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      return this.querySelector((app as IInternalApp)._parentContainer!);
+    const parentContainer = (app as IInternalApp)._parentContainer;
+    if (parentContainer) {
+      if (typeof parentContainer === 'function') {
+        return this.querySelector(parentContainer(context));
+      }
+
+      return this.querySelector(parentContainer);
     }
 
     // 获取默认容器

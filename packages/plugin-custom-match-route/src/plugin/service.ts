@@ -32,6 +32,7 @@ export class PluginCustomMatchRoute implements IPluginCustomMatchRoute {
 // customMatchRoute 信息在 IRoute 上保存，在路由匹配时调用
 Route.defineProp('customMatchRoute', {
   validator: (customMatchRoute, routeConfig) => !customMatchRoute || !!routeConfig.isRootFragment,
+  onClone: () => undefined,
 });
 
 declare module '@versea/core' {

@@ -131,6 +131,11 @@ export class App extends ExtensibleEntity implements IApp {
 
     await Promise.all(
       this._parcels.map(async (app): Promise<void> => {
+        // mount 过程中，等待 mount 完成之后再执行 unmount
+        if (app.status === this._Status.Mounting) {
+          await app.mount();
+        }
+
         if (app.status === this._Status.Mounted) {
           await app.unmount();
         }
