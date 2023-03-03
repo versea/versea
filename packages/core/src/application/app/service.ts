@@ -3,6 +3,7 @@ import {
   logError,
   logWarn,
   memoizePromise,
+  promiseWithTimeout,
   VerseaError,
   VerseaNotFoundContainerError,
 } from '@versea/shared';
@@ -84,12 +85,17 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.LoadingSourceCode;
     try {
-      const lifeCycles = await this._loadApp(this.getProps(context));
+      const lifeCycles = await promiseWithTimeout(this._loadApp(this.getProps(context)));
       this.isLoaded = true;
       this.status = this._Status.NotMounted;
       this._setLifeCycles(lifeCycles);
     } catch (error) {
       this.status = this._Status.LoadError;
+
+      if (typeof error === 'string') {
+        throw new Error(error);
+      }
+
       throw error;
     }
   }
