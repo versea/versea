@@ -1,27 +1,34 @@
 export interface RunWithTimeoutOptions {
   maxTime?: number;
-  timeoutCb?: (taskName: string, reject: (reason?: unknown) => void) => void;
+  timeoutCb?: (reject: (reason?: unknown) => void) => void;
+  timeoutMsg?: string;
   useReject?: boolean;
 }
 
-export const runWithTimeout = async <T>(
-  task: (...args: unknown[]) => Promise<T>,
+/**
+ * default timeout is 5000ms
+ * @param taskPromise
+ * @param options
+ * @returns
+ */
+export const promiseWithTimeout = async <T>(
+  taskPromise: Promise<T>,
   options: RunWithTimeoutOptions = {},
-): Promise<Awaited<T> | string> => {
+): Promise<Awaited<T>> => {
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  const { maxTime = 5000, timeoutCb, useReject = true } = options || {};
+  const { maxTime = 5000, timeoutCb, useReject = true, timeoutMsg } = options || {};
 
-  const timer = new Promise<string>((_, reject) => {
+  const timer = new Promise<T>((_, reject) => {
     setTimeout(() => {
       if (timeoutCb) {
-        timeoutCb(task.name, reject);
+        timeoutCb(reject);
       }
 
       if (useReject) {
-        reject(`Task ${task.name} has timed out for ${maxTime}.`);
+        reject(timeoutMsg ?? `Task has been timed out for ${maxTime}.`);
       }
     }, maxTime);
   });
 
-  return Promise.race([timer, task()]);
+  return Promise.race([timer, taskPromise]);
 };
