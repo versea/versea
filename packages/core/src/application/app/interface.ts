@@ -1,3 +1,4 @@
+import { TimeoutConfig } from '@versea/shared';
 import { HookContext } from '@versea/tapable';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
@@ -93,6 +94,9 @@ export interface AppConfig {
    * @description 透传给应用加载和挂载的各个生命周期函数的属性。
    */
   props?: AppConfigProps;
+
+  /** 对应任务超时处理配置 */
+  timeoutConfig?: TimeoutConfig;
 
   /** 加载应用 */
   loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
