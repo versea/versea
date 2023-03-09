@@ -1,3 +1,5 @@
+import { TimeoutConfig, TimeoutMethodName } from '@versea/shared';
+
 import { provideValue } from './provider';
 import { createServiceSymbol } from './utils';
 
@@ -10,10 +12,30 @@ export const IConfig = createServiceSymbol('IConfig');
 export interface IConfig {
   /** 路由模式 */
   routerMode: 'hash' | 'history';
+
+  /** 任务超时配置 */
+  timeoutConfig: TimeoutConfig;
 }
 
 const config: IConfig = {
   routerMode: 'history',
+  timeoutConfig: {
+    [TimeoutMethodName.LOAD]: {
+      maxTime: 4000,
+      dieOnTimeout: true,
+      timeoutMsg: 'Time out for loading app resources.',
+    },
+    [TimeoutMethodName.MOUNT]: {
+      maxTime: 4000,
+      dieOnTimeout: true,
+      timeoutMsg: 'Time out for mounting app.',
+    },
+    [TimeoutMethodName.WAIT_FOR_CHILD_CONTAINER]: {
+      maxTime: 4000,
+      dieOnTimeout: true,
+      timeoutMsg: 'Time out for waiting app container.',
+    },
+  },
 };
 
 // 使用合并策略取代替换策略

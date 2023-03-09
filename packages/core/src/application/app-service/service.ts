@@ -2,6 +2,7 @@
 import { logWarn, VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
+import { IConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { IRouter } from '../../navigation/router/interface';
@@ -24,22 +25,28 @@ export class AppService implements IAppService {
 
   protected readonly _hooks: IHooks;
 
+  protected _IConfig: IConfig;
+
   protected readonly _rootParcels: IApp[] = [];
 
   constructor(
     @inject(IApp) App: interfaces.Newable<IApp>,
     @inject(IStatus) Status: IStatus,
     @inject(IHooks) hooks: IHooks,
+    @inject(IConfig) config: IConfig,
   ) {
     this._AppConstructor = App;
     this._Status = Status;
     this._hooks = hooks;
+    this._IConfig = config;
   }
 
   public registerApp(config: AppConfig, reroute = true): IApp {
     if (this._appMap.has(config.name)) {
       throw new VerseaError(`Duplicate app name: "${config.name}".`);
     }
+
+    config.timeoutConfig = { ...this._IConfig.timeoutConfig, ...config.timeoutConfig };
 
     const { beforeRegisterApp, afterRegisterApp } = this._hooks;
     const registerAppHookContext: RegisterAppHookContext = { config };

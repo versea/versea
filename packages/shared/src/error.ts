@@ -23,3 +23,5 @@ export class VerseaError extends BaseError {}
 export class VerseaCanceledError extends BaseError {}
 
 export class VerseaNotFoundContainerError extends BaseError {}
+
+export class VerseaTimeoutError extends BaseError {}

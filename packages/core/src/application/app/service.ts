@@ -3,7 +3,9 @@ import {
   logError,
   logWarn,
   memoizePromise,
-  promiseWithTimeout,
+  timeout,
+  TimeoutConfig,
+  TimeoutMethodName,
   VerseaError,
   VerseaNotFoundContainerError,
 } from '@versea/shared';
@@ -34,6 +36,9 @@ export class App extends ExtensibleEntity implements IApp {
   public status: IStatus[keyof IStatus];
 
   public isLoaded = false;
+
+  /** 对应任务超时处理配置 */
+  protected _timeoutConfig?: TimeoutConfig;
 
   protected readonly _loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 
@@ -70,8 +75,11 @@ export class App extends ExtensibleEntity implements IApp {
     this._props = config.props ?? {};
     this._loadApp = config.loadApp;
     this.status = this._Status.NotLoaded;
+
+    this._timeoutConfig = config.timeoutConfig;
   }
 
+  @timeout({ configName: TimeoutMethodName.LOAD })
   @memoizePromise()
   public async load(context?: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
@@ -85,21 +93,17 @@ export class App extends ExtensibleEntity implements IApp {
 
     this.status = this._Status.LoadingSourceCode;
     try {
-      const lifeCycles = await promiseWithTimeout(this._loadApp(this.getProps(context)));
+      const lifeCycles = await this._loadApp(this.getProps(context));
       this.isLoaded = true;
       this.status = this._Status.NotMounted;
       this._setLifeCycles(lifeCycles);
     } catch (error) {
       this.status = this._Status.LoadError;
-
-      if (typeof error === 'string') {
-        throw new Error(error);
-      }
-
       throw error;
     }
   }
 
+  @timeout({ configName: TimeoutMethodName.MOUNT })
   @memoizePromise()
   public async mount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotMounted) {
@@ -162,6 +166,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
+  @timeout({ configName: TimeoutMethodName.WAIT_FOR_CHILD_CONTAINER })
   @memoizePromise()
   public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
