@@ -1,3 +1,4 @@
+import { VerseaTimeoutError } from '@versea/shared';
 import { Container } from 'inversify';
 
 import {
@@ -10,6 +11,8 @@ import {
   IAppSwitcherContext,
   IStatus,
   MatchedRoute,
+  provideValue,
+  IConfig,
 } from '../../';
 
 async function delay(time: number): Promise<void> {
@@ -206,6 +209,135 @@ describe('App', () => {
       } catch (error) {
         expect(app.status).toBe(Status.Broken);
       }
+    });
+  });
+
+  describe('Task Timeout', () => {
+    test('应用 load 超时可以通过配置设置报错处理.', async () => {
+      const app = getAppInstance({
+        name: 'app',
+        loadApp: async () => {
+          await delay(5);
+          return Promise.resolve({});
+        },
+        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout.' } },
+      });
+
+      await expect(app.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout.'));
+    });
+
+    test('应用 mount 超时可以通过配置设置报错处理.', async () => {
+      const app = getAppWithLoadHook(
+        { name: 'app', timeoutConfig: { mount: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'mounting timeout.' } } },
+        {
+          mount: async () => {
+            return delay(5);
+          },
+        },
+      );
+
+      await app.load();
+      await expect(app.mount()).rejects.toStrictEqual(new VerseaTimeoutError('mounting timeout.'));
+    });
+
+    test('应用 unmount 超时可以通过配置设置报错处理.', async () => {
+      const app = getAppWithLoadHook(
+        {
+          name: 'app',
+          timeoutConfig: { unmount: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'unmounting timeout.' } },
+        },
+        {
+          mount: async () => Promise.resolve(),
+          unmount: async () => {
+            return delay(5);
+          },
+        },
+      );
+
+      await app.load();
+      await app.mount();
+      await expect(app.unmount()).rejects.toStrictEqual(new VerseaTimeoutError('unmounting timeout.'));
+    });
+
+    test('应用 waitForChildContainer 超时可以通过配置设置报错处理.', async () => {
+      const app = getAppWithLoadHook(
+        {
+          name: 'app',
+          timeoutConfig: {
+            waitForChildContainer: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'waitForChildContainer timeout.' },
+          },
+        },
+        {},
+        {
+          containerController: {
+            wait: async () => {
+              console.log('call');
+              await delay(5);
+              return Promise.resolve();
+            },
+          },
+        },
+      );
+
+      await app.load();
+      await app.mount();
+      await expect(app.waitForChildContainer('foo', {} as IAppSwitcherContext)).rejects.toStrictEqual(
+        new VerseaTimeoutError('waitForChildContainer timeout.'),
+      );
+    });
+
+    test('应用任务可以配置超时抛出警告.', async () => {
+      const app = getAppInstance({
+        name: 'app',
+        loadApp: async () => {
+          await delay(5);
+          return Promise.resolve({});
+        },
+        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: false, timeoutMsg: 'loading timeout.' } },
+      });
+
+      jest.spyOn(console, 'warn');
+
+      await app.load();
+      expect(console.warn).toHaveBeenCalledWith('[versea] loading timeout.');
+    });
+
+    test('可以接收到应用任务在超时之前抛出的错误.', async () => {
+      const app = getAppInstance({
+        name: 'app',
+        loadApp: async () => {
+          return Promise.reject(new Error('task error'));
+        },
+      });
+
+      await expect(app.load()).rejects.toStrictEqual(new Error('task error'));
+    });
+
+    test('超时配置读取优先级: 全局IConfig配置 < 每个app在注册时的配置.', async () => {
+      provideValue(
+        { timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout at IConfig.' } } },
+        IConfig,
+      );
+      const app1 = getAppInstance({
+        name: 'app1',
+        loadApp: async () => {
+          await delay(5);
+          return Promise.resolve({});
+        },
+      });
+
+      await expect(app1.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout at IConfig.'));
+
+      const app2 = getAppInstance({
+        name: 'app2',
+        loadApp: async () => {
+          await delay(5);
+          return Promise.resolve({});
+        },
+        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout at App config.' } },
+      });
+
+      await expect(app2.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout at App config.'));
     });
   });
 });

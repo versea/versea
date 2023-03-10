@@ -21,18 +21,23 @@ const config: IConfig = {
   routerMode: 'history',
   timeoutConfig: {
     [TimeoutMethodName.LOAD]: {
-      maxTime: 4000,
-      dieOnTimeout: true,
+      maxTime: 3000,
+      dieOnTimeout: false,
       timeoutMsg: 'Time out for loading app resources.',
     },
     [TimeoutMethodName.MOUNT]: {
-      maxTime: 4000,
-      dieOnTimeout: true,
+      maxTime: 3000,
+      dieOnTimeout: false,
       timeoutMsg: 'Time out for mounting app.',
     },
+    [TimeoutMethodName.UNMOUNT]: {
+      maxTime: 3000,
+      dieOnTimeout: false,
+      timeoutMsg: 'Time out for unmounting app.',
+    },
     [TimeoutMethodName.WAIT_FOR_CHILD_CONTAINER]: {
-      maxTime: 4000,
-      dieOnTimeout: true,
+      maxTime: 3000,
+      dieOnTimeout: false,
       timeoutMsg: 'Time out for waiting app container.',
     },
   },

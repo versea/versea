@@ -58,6 +58,7 @@ export class AppService implements IAppService {
       appService: this,
       hooks: this._hooks,
     });
+
     this._appMap.set(app.name, app);
 
     registerAppHookContext.app = app;

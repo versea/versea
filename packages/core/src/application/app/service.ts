@@ -131,6 +131,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
+  @timeout({ configName: TimeoutMethodName.UNMOUNT })
   @memoizePromise()
   public async unmount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.Mounted) {
