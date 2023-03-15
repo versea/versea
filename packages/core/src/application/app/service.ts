@@ -9,9 +9,10 @@ import {
   VerseaError,
   VerseaNotFoundContainerError,
 } from '@versea/shared';
-import { omit } from 'ramda';
+import { omit, mergeDeepRight } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
+import { IConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
@@ -61,6 +62,8 @@ export class App extends ExtensibleEntity implements IApp {
 
   protected readonly _hooks: IHooks;
 
+  protected readonly _config: IConfig;
+
   /** 加载应用返回的声明周期 */
   protected _lifeCycles: AppLifeCycles = {};
 
@@ -80,13 +83,14 @@ export class App extends ExtensibleEntity implements IApp {
     this._Status = dependencies.Status;
     this._appService = dependencies.appService;
     this._hooks = dependencies.hooks;
+    this._config = dependencies.config ?? {};
 
     this.name = config.name;
     this._props = config.props ?? {};
     this._loadApp = config.loadApp;
     this.status = this._Status.NotLoaded;
 
-    this._timeoutConfig = config.timeoutConfig;
+    this._timeoutConfig = mergeDeepRight(this._config.timeoutConfig, config.timeoutConfig ?? {});
   }
 
   @timeout({ configName: TimeoutMethodName.LOAD })
