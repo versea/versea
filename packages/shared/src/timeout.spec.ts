@@ -1,5 +1,5 @@
 import { VerseaTimeoutError } from './error';
-import { promiseWithTimeout, timeout } from './timeout';
+import { createTimeoutDecorator, promiseWithTimeout } from './timeout';
 
 describe('Timeout', () => {
   describe('promiseWithTimeout', () => {
@@ -57,6 +57,8 @@ describe('Timeout', () => {
   });
 
   describe('timeout decorator', () => {
+    const timeout = createTimeoutDecorator();
+
     it('should throw error after time out.', async () => {
       class Foo {
         @timeout({ maxTime: 0, dieOnTimeout: true, timeoutMsg: 'timeout.' })

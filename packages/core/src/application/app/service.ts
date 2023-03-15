@@ -3,7 +3,7 @@ import {
   logError,
   logWarn,
   memoizePromise,
-  timeout,
+  createTimeoutDecorator,
   TimeoutConfig,
   TimeoutMethodName,
   VerseaError,
@@ -28,6 +28,16 @@ import {
 } from './interface';
 
 export * from './interface';
+
+const timeout = createTimeoutDecorator<App>(function (this, { methodName, configName, ...options }) {
+  const config = (this as unknown as { _timeoutConfig?: TimeoutConfig })._timeoutConfig ?? {};
+
+  // options priority: options -> options from config by given configName -> options from config by the raw methodName
+  return {
+    ...(config[(configName ?? methodName) as TimeoutMethodName] ?? {}),
+    ...options,
+  };
+});
 
 @provide(IApp, 'Constructor')
 export class App extends ExtensibleEntity implements IApp {
