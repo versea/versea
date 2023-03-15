@@ -2,6 +2,7 @@ import { TimeoutConfig } from '@versea/shared';
 import { HookContext } from '@versea/tapable';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
+import { IConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
@@ -107,4 +108,5 @@ export interface AppDependencies {
   Status: IStatus;
   appService: IAppService;
   hooks: IHooks;
+  config: IConfig;
 }

@@ -25,7 +25,7 @@ export class AppService implements IAppService {
 
   protected readonly _hooks: IHooks;
 
-  protected _IConfig: IConfig;
+  protected _config: IConfig;
 
   protected readonly _rootParcels: IApp[] = [];
 
@@ -38,15 +38,13 @@ export class AppService implements IAppService {
     this._AppConstructor = App;
     this._Status = Status;
     this._hooks = hooks;
-    this._IConfig = config;
+    this._config = config;
   }
 
   public registerApp(config: AppConfig, reroute = true): IApp {
     if (this._appMap.has(config.name)) {
       throw new VerseaError(`Duplicate app name: "${config.name}".`);
     }
-
-    config.timeoutConfig = { ...this._IConfig.timeoutConfig, ...config.timeoutConfig };
 
     const { beforeRegisterApp, afterRegisterApp } = this._hooks;
     const registerAppHookContext: RegisterAppHookContext = { config };
@@ -57,6 +55,7 @@ export class AppService implements IAppService {
       Status: this._Status,
       appService: this,
       hooks: this._hooks,
+      config: this._config,
     });
 
     this._appMap.set(app.name, app);
