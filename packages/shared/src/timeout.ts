@@ -1,4 +1,5 @@
-import { VerseaTimeoutError } from './error';
+import { VerseaTimeoutError } from '.';
+import { Deferred } from './promise-helper';
 import { logWarn } from './utils';
 
 export interface RunWithTimeoutOptions {
@@ -25,39 +26,34 @@ export type TimeoutConfig = Partial<Record<TimeoutMethodName, RunWithTimeoutOpti
 export const promiseWithTimeout = async <T>(
   taskPromise: Promise<T>,
   options: RunWithTimeoutOptions = {},
-): Promise<Awaited<T>> => {
+): Promise<T> => {
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   const { maxTime = 5000, dieOnTimeout = false, timeoutMsg } = options || {};
   const message = timeoutMsg ?? `Task has been timed out for ${maxTime}.`;
+  const defer = new Deferred<T>();
 
-  let timer: NodeJS.Timeout | null = null;
-  const timerPromise = new Promise<T>((_, reject) => {
-    timer = setTimeout(() => {
-      reject(new VerseaTimeoutError(message));
-    }, maxTime);
-  });
+  const timer = setTimeout(() => {
+    if (dieOnTimeout) {
+      defer.reject(new VerseaTimeoutError(message));
+    } else {
+      logWarn(message);
+    }
+  }, maxTime);
 
-  try {
-    return await Promise.race([timerPromise, taskPromise]);
-  } catch (error) {
-    const isTimeoutError = error instanceof VerseaTimeoutError;
-
-    if (isTimeoutError) {
-      if (dieOnTimeout) {
-        throw error;
-      } else {
-        logWarn(message);
-        return await taskPromise;
+  void taskPromise
+    .then((value) => {
+      defer.resolve(value);
+    })
+    .catch((error) => {
+      defer.reject(error);
+    })
+    .finally(() => {
+      if (timer) {
+        clearTimeout(timer);
       }
-    }
+    });
 
-    // throw the error from the task promise
-    throw error;
-  } finally {
-    if (timer) {
-      clearTimeout(timer);
-    }
-  }
+  return defer.promise;
 };
 
 export function timeout(options: RunWithTimeoutOptions & { configName?: TimeoutMethodName } = {}) {
