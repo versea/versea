@@ -17,6 +17,8 @@ export enum TimeoutMethodName {
 
 export type TimeoutConfig = Partial<Record<TimeoutMethodName, RunWithTimeoutOptions>>;
 
+export type TimeoutOptions = RunWithTimeoutOptions & { configName?: TimeoutMethodName };
+
 /**
  * default timeout is 5000ms
  * @param taskPromise
@@ -56,21 +58,19 @@ export const promiseWithTimeout = async <T>(
   return defer.promise;
 };
 
-export function timeout(options: RunWithTimeoutOptions & { configName?: TimeoutMethodName } = {}) {
-  return function (_target: unknown, methodName: string, descriptor: PropertyDescriptor): void {
-    const originValue = descriptor.value as (...args: unknown[]) => Promise<unknown>;
+export function createTimeoutDecorator<T = unknown>(
+  processOptions?: (this: T, options: TimeoutOptions & { methodName: string }) => TimeoutOptions,
+) {
+  return function timeout(options: TimeoutOptions = {}) {
+    return function (_target: unknown, methodName: string, descriptor: PropertyDescriptor): void {
+      const originValue = descriptor.value as (...args: unknown[]) => Promise<unknown>;
 
-    descriptor.value = async function (...args: unknown[]): Promise<unknown> {
-      const config = (this as { _timeoutConfig?: TimeoutConfig })._timeoutConfig ?? {};
+      descriptor.value = async function (...args: unknown[]): Promise<unknown> {
+        const finalOptions = processOptions?.call(this as T, { ...options, methodName }) ?? options;
 
-      // options priority: options -> options from config by given configName -> options from config by the raw method name
-      const finalOptions = {
-        ...(config[(options?.configName ?? methodName) as TimeoutMethodName] ?? {}),
-        ...options,
+        const taskPromise = originValue.apply(this, args);
+        return promiseWithTimeout(taskPromise, finalOptions);
       };
-
-      const taskPromise = originValue.apply(this, args);
-      return promiseWithTimeout(taskPromise, finalOptions);
     };
   };
 }
