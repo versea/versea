@@ -1,7 +1,14 @@
-import { TimeoutConfig, TimeoutMethodName } from '@versea/shared';
+import { TimeoutOptions } from '@versea/shared';
 
 import { provideValue } from './provider';
 import { createServiceSymbol } from './utils';
+
+export interface TimeoutConfig {
+  load?: TimeoutOptions;
+  mount?: TimeoutOptions;
+  unmount?: TimeoutOptions;
+  waitForChildContainer?: TimeoutOptions;
+}
 
 export const IConfig = createServiceSymbol('IConfig');
 
@@ -13,32 +20,32 @@ export interface IConfig {
   /** 路由模式 */
   routerMode: 'hash' | 'history';
 
-  /** 任务超时配置 */
+  /** 超时配置 */
   timeoutConfig: TimeoutConfig;
 }
 
 const config: IConfig = {
   routerMode: 'history',
   timeoutConfig: {
-    [TimeoutMethodName.LOAD]: {
-      maxTime: 3000,
+    load: {
+      millisecond: 3000,
       dieOnTimeout: false,
-      timeoutMsg: 'Time out for loading app resources.',
+      message: 'Time out for loading app resources.',
     },
-    [TimeoutMethodName.MOUNT]: {
-      maxTime: 3000,
+    mount: {
+      millisecond: 10000,
       dieOnTimeout: false,
-      timeoutMsg: 'Time out for mounting app.',
+      message: 'Time out for mounting app.',
     },
-    [TimeoutMethodName.UNMOUNT]: {
-      maxTime: 3000,
+    unmount: {
+      millisecond: 3000,
       dieOnTimeout: false,
-      timeoutMsg: 'Time out for unmounting app.',
+      message: 'Time out for unmounting app.',
     },
-    [TimeoutMethodName.WAIT_FOR_CHILD_CONTAINER]: {
-      maxTime: 3000,
+    waitForChildContainer: {
+      millisecond: 10000,
       dieOnTimeout: false,
-      timeoutMsg: 'Time out for waiting app container.',
+      message: 'Time out for waiting child container.',
     },
   },
 };

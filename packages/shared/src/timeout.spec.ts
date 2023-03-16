@@ -1,55 +1,55 @@
 import { VerseaTimeoutError } from './error';
-import { createTimeoutDecorator, promiseWithTimeout } from './timeout';
+import { createTimeoutDecorator, wrapPromise, TimeoutOptions } from './timeout';
 
 describe('Timeout', () => {
-  describe('promiseWithTimeout', () => {
+  describe('wrapPromise', () => {
     it('should throw error after time out.', async () => {
-      const promise = new Promise((res) => setTimeout(res, 2000));
+      const promise = new Promise((resolve) => setTimeout(resolve, 100));
 
-      await expect(promiseWithTimeout(promise, { maxTime: 0, dieOnTimeout: true })).rejects.toStrictEqual(
-        new VerseaTimeoutError('Task has been timed out for 0.'),
+      await expect(wrapPromise(promise, { millisecond: 0, dieOnTimeout: true })).rejects.toStrictEqual(
+        new VerseaTimeoutError('The task has been timed out for 0ms.'),
       );
     });
 
     it('should be resolved within time out.', async () => {
-      const promise = new Promise((res) =>
+      const promise = new Promise((resolve) =>
         setTimeout(() => {
-          res('resolved');
-        }, 0),
+          resolve('resolved');
+        }, 10),
       );
 
-      await expect(promiseWithTimeout(promise, { maxTime: 1000 })).resolves.toBe('resolved');
+      await expect(wrapPromise(promise, { millisecond: 100 })).resolves.toBe('resolved');
     });
 
     it('should log warning and return resolved results instead of throwing error when dieOnTimeout is false.', async () => {
-      const promise = new Promise((res) =>
+      const promise = new Promise((resolve) =>
         setTimeout(() => {
-          res('resolved');
-        }, 500),
+          resolve('resolved');
+        }, 100),
       );
 
       jest.spyOn(console, 'warn');
 
       await expect(
-        promiseWithTimeout(promise, {
-          maxTime: 0,
+        wrapPromise(promise, {
+          millisecond: 0,
           dieOnTimeout: false,
         }),
       ).resolves.toBe('resolved');
 
-      expect(console.warn).toHaveBeenCalledWith('[versea] Task has been timed out for 0.');
+      expect(console.warn).toHaveBeenCalledWith('[versea] The task has been timed out for 0ms.');
     });
 
     it('should be able to get the error from the task within time out.', async () => {
-      const promise = new Promise((_, rej) =>
+      const promise = new Promise((_, reject) =>
         setTimeout(() => {
-          rej(new Error('error from task.'));
-        }, 0),
+          reject(new Error('error from task.'));
+        }, 10),
       );
 
       await expect(
-        promiseWithTimeout(promise, {
-          maxTime: 2000,
+        wrapPromise(promise, {
+          millisecond: 100,
           dieOnTimeout: false,
         }),
       ).rejects.toStrictEqual(new Error('error from task.'));
@@ -57,13 +57,13 @@ describe('Timeout', () => {
   });
 
   describe('timeout decorator', () => {
-    const timeout = createTimeoutDecorator();
+    const timeout = createTimeoutDecorator((_, config?: TimeoutOptions) => config);
 
     it('should throw error after time out.', async () => {
       class Foo {
-        @timeout({ maxTime: 0, dieOnTimeout: true, timeoutMsg: 'timeout.' })
+        @timeout({ millisecond: 10, dieOnTimeout: true, message: 'timeout.' })
         public async task(): Promise<number> {
-          return new Promise((res) => setTimeout(res, 2000));
+          return new Promise((res) => setTimeout(res, 100));
         }
       }
 
@@ -72,12 +72,12 @@ describe('Timeout', () => {
 
     it('should be resolved within time out.', async () => {
       class Foo {
-        @timeout({ maxTime: 2000 })
+        @timeout({ millisecond: 100 })
         public async task(): Promise<string> {
-          return new Promise((res) =>
+          return new Promise((resolve) =>
             setTimeout(() => {
-              res('resolved');
-            }, 0),
+              resolve('resolved');
+            }, 10),
           );
         }
       }
@@ -87,12 +87,12 @@ describe('Timeout', () => {
 
     it('should log warning and return resolved results instead of throwing error when dieOnTimeout is false.', async () => {
       class Foo {
-        @timeout({ maxTime: 0, dieOnTimeout: false, timeoutMsg: 'timeout.' })
+        @timeout({ millisecond: 10, dieOnTimeout: false, message: 'timeout.' })
         public async task(): Promise<string> {
-          return new Promise((res) =>
+          return new Promise((resolve) =>
             setTimeout(() => {
-              res('resolved');
-            }, 500),
+              resolve('resolved');
+            }, 100),
           );
         }
       }
@@ -106,12 +106,12 @@ describe('Timeout', () => {
 
     it('should be able to get the error from the task within time out.', async () => {
       class Foo {
-        @timeout({ maxTime: 2000, dieOnTimeout: false, timeoutMsg: 'timeout.' })
+        @timeout({ millisecond: 100, dieOnTimeout: false, message: 'timeout.' })
         public async task(): Promise<string> {
-          return new Promise((_, rej) =>
+          return new Promise((_, reject) =>
             setTimeout(() => {
-              rej(new Error('error from task.'));
-            }, 0),
+              reject(new Error('error from task.'));
+            }, 10),
           );
         }
       }
