@@ -85,8 +85,8 @@ export class App extends ExtensibleEntity implements IApp {
     this._timeoutConfig = mergeDeepRight(this._config.timeoutConfig, config.timeoutConfig ?? {});
   }
 
-  @timeout('load')
   @memoizePromise()
+  @timeout('load')
   public async load(context?: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
       throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
@@ -109,8 +109,8 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout('mount')
   @memoizePromise()
+  @timeout('mount')
   public async mount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotMounted) {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
@@ -137,8 +137,8 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout('unmount')
   @memoizePromise()
+  @timeout('unmount')
   public async unmount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
@@ -173,8 +173,8 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout('waitForChildContainer')
   @memoizePromise()
+  @timeout('waitForChildContainer')
   public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       logError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
