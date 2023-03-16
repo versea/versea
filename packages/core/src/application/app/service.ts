@@ -4,15 +4,13 @@ import {
   logWarn,
   memoizePromise,
   createTimeoutDecorator,
-  TimeoutConfig,
-  TimeoutMethodName,
   VerseaError,
   VerseaNotFoundContainerError,
 } from '@versea/shared';
 import { omit, mergeDeepRight } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
-import { IConfig } from '../../config';
+import { IConfig, TimeoutConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
@@ -30,14 +28,9 @@ import {
 
 export * from './interface';
 
-const timeout = createTimeoutDecorator<App>(function (this, { methodName, configName, ...options }) {
-  const config = (this as unknown as { _timeoutConfig?: TimeoutConfig })._timeoutConfig ?? {};
-
-  // options priority: options -> options from config by given configName -> options from config by the raw methodName
-  return {
-    ...(config[(configName ?? methodName) as TimeoutMethodName] ?? {}),
-    ...options,
-  };
+const timeout = createTimeoutDecorator((instance: IApp, property: keyof TimeoutConfig) => {
+  const config = (instance as IApp & { _timeoutConfig?: TimeoutConfig })._timeoutConfig ?? ({} as TimeoutConfig);
+  return config[property];
 });
 
 @provide(IApp, 'Constructor')
@@ -83,17 +76,16 @@ export class App extends ExtensibleEntity implements IApp {
     this._Status = dependencies.Status;
     this._appService = dependencies.appService;
     this._hooks = dependencies.hooks;
-    this._config = dependencies.config ?? {};
+    this._config = dependencies.config;
 
     this.name = config.name;
+    this.status = this._Status.NotLoaded;
     this._props = config.props ?? {};
     this._loadApp = config.loadApp;
-    this.status = this._Status.NotLoaded;
-
     this._timeoutConfig = mergeDeepRight(this._config.timeoutConfig, config.timeoutConfig ?? {});
   }
 
-  @timeout({ configName: TimeoutMethodName.LOAD })
+  @timeout('load')
   @memoizePromise()
   public async load(context?: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
@@ -117,7 +109,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout({ configName: TimeoutMethodName.MOUNT })
+  @timeout('mount')
   @memoizePromise()
   public async mount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.NotMounted) {
@@ -145,7 +137,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout({ configName: TimeoutMethodName.UNMOUNT })
+  @timeout('unmount')
   @memoizePromise()
   public async unmount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.Mounted) {
@@ -181,7 +173,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
   }
 
-  @timeout({ configName: TimeoutMethodName.WAIT_FOR_CHILD_CONTAINER })
+  @timeout('waitForChildContainer')
   @memoizePromise()
   public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {

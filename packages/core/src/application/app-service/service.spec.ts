@@ -17,7 +17,7 @@ import {
 
 async function delay(time: number): Promise<void> {
   return new Promise((resolve) => {
-    setTimeout(resolve, time * 100);
+    setTimeout(resolve, time);
   });
 }
 
@@ -40,11 +40,11 @@ function getAppWithLoadHook(
     loadApp: async () => {
       return Promise.resolve({
         mount: async () => {
-          await delay(1);
+          await delay(10);
           return result;
         },
         unmount: async () => {
-          await delay(1);
+          await delay(10);
           return;
         },
         ...hooks,
@@ -64,7 +64,7 @@ describe('App', () => {
       const app = getAppInstance({
         name: 'app',
         loadApp: async () => {
-          await delay(1);
+          await delay(10);
           return Promise.resolve({});
         },
       });
@@ -90,7 +90,7 @@ describe('App', () => {
       const app = getAppInstance({
         name: 'app',
         loadApp: async () => {
-          await delay(1);
+          await delay(10);
           throw new Error('load error');
         },
       });
@@ -129,7 +129,7 @@ describe('App', () => {
         { name: 'app' },
         {
           mount: async () => {
-            await delay(1);
+            await delay(10);
             throw new Error('mount error');
           },
         },
@@ -153,7 +153,7 @@ describe('App', () => {
         {
           containerController: {
             wait: async () => {
-              await delay(1);
+              await delay(10);
               return test();
             },
           },
@@ -196,7 +196,7 @@ describe('App', () => {
         { name: 'app' },
         {
           unmount: async () => {
-            await delay(1);
+            await delay(10);
             throw new Error('unmount error');
           },
         },
@@ -212,7 +212,7 @@ describe('App', () => {
     });
   });
 
-  describe('Task Timeout', () => {
+  describe('Timeout', () => {
     test('应用 load 超时可以通过配置设置报错处理.', async () => {
       const app = getAppInstance({
         name: 'app',
@@ -220,7 +220,7 @@ describe('App', () => {
           await delay(5);
           return Promise.resolve({});
         },
-        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout.' } },
+        timeoutConfig: { load: { millisecond: 3, dieOnTimeout: true, message: 'loading timeout.' } },
       });
 
       await expect(app.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout.'));
@@ -228,7 +228,10 @@ describe('App', () => {
 
     test('应用 mount 超时可以通过配置设置报错处理.', async () => {
       const app = getAppWithLoadHook(
-        { name: 'app', timeoutConfig: { mount: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'mounting timeout.' } } },
+        {
+          name: 'app',
+          timeoutConfig: { mount: { millisecond: 3, dieOnTimeout: true, message: 'mounting timeout.' } },
+        },
         {
           mount: async () => {
             return delay(5);
@@ -244,7 +247,7 @@ describe('App', () => {
       const app = getAppWithLoadHook(
         {
           name: 'app',
-          timeoutConfig: { unmount: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'unmounting timeout.' } },
+          timeoutConfig: { unmount: { millisecond: 3, dieOnTimeout: true, message: 'unmounting timeout.' } },
         },
         {
           mount: async () => Promise.resolve(),
@@ -264,14 +267,13 @@ describe('App', () => {
         {
           name: 'app',
           timeoutConfig: {
-            waitForChildContainer: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'waitForChildContainer timeout.' },
+            waitForChildContainer: { millisecond: 3, dieOnTimeout: true, message: 'waitForChildContainer timeout.' },
           },
         },
         {},
         {
           containerController: {
             wait: async () => {
-              console.log('call');
               await delay(5);
               return Promise.resolve();
             },
@@ -293,7 +295,7 @@ describe('App', () => {
           await delay(5);
           return Promise.resolve({});
         },
-        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: false, timeoutMsg: 'loading timeout.' } },
+        timeoutConfig: { load: { millisecond: 3, dieOnTimeout: false, message: 'loading timeout.' } },
       });
 
       jest.spyOn(console, 'warn');
@@ -315,7 +317,7 @@ describe('App', () => {
 
     test('超时配置读取优先级: 全局IConfig配置 < 每个app在注册时的配置.', async () => {
       provideValue(
-        { timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout at IConfig.' } } },
+        { timeoutConfig: { load: { millisecond: 3, dieOnTimeout: true, message: 'loading timeout at IConfig.' } } },
         IConfig,
       );
       const app1 = getAppInstance({
@@ -334,7 +336,7 @@ describe('App', () => {
           await delay(5);
           return Promise.resolve({});
         },
-        timeoutConfig: { load: { maxTime: 0, dieOnTimeout: true, timeoutMsg: 'loading timeout at App config.' } },
+        timeoutConfig: { load: { millisecond: 0, dieOnTimeout: true, message: 'loading timeout at App config.' } },
       });
 
       await expect(app2.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout at App config.'));

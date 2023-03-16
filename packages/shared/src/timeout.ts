@@ -1,48 +1,28 @@
-import { VerseaTimeoutError } from '.';
+import { VerseaTimeoutError } from './error';
 import { Deferred } from './promise-helper';
 import { logWarn } from './utils';
 
-export interface RunWithTimeoutOptions {
-  maxTime?: number;
-  timeoutMsg?: string;
+export interface TimeoutOptions {
+  millisecond?: number;
   dieOnTimeout?: boolean;
+  message?: string;
 }
 
-export enum TimeoutMethodName {
-  LOAD = 'load',
-  MOUNT = 'mount',
-  UNMOUNT = 'unmount',
-  WAIT_FOR_CHILD_CONTAINER = 'waitForChildContainer',
-}
-
-export type TimeoutConfig = Partial<Record<TimeoutMethodName, RunWithTimeoutOptions>>;
-
-export type TimeoutOptions = RunWithTimeoutOptions & { configName?: TimeoutMethodName };
-
-/**
- * default timeout is 5000ms
- * @param taskPromise
- * @param options
- * @returns
- */
-export const promiseWithTimeout = async <T>(
-  taskPromise: Promise<T>,
-  options: RunWithTimeoutOptions = {},
-): Promise<T> => {
+export async function wrapPromise<T>(promise: Promise<T>, options: TimeoutOptions = {}): Promise<T> {
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-  const { maxTime = 5000, dieOnTimeout = false, timeoutMsg } = options || {};
-  const message = timeoutMsg ?? `Task has been timed out for ${maxTime}.`;
+  const { millisecond = 5000, dieOnTimeout = false, message } = options || {};
+  const errorMessage = message ?? `The task has been timed out for ${millisecond}ms.`;
   const defer = new Deferred<T>();
 
   const timer = setTimeout(() => {
     if (dieOnTimeout) {
-      defer.reject(new VerseaTimeoutError(message));
+      defer.reject(new VerseaTimeoutError(errorMessage));
     } else {
-      logWarn(message);
+      logWarn(errorMessage);
     }
-  }, maxTime);
+  }, millisecond);
 
-  void taskPromise
+  void promise
     .then((value) => {
       defer.resolve(value);
     })
@@ -56,20 +36,18 @@ export const promiseWithTimeout = async <T>(
     });
 
   return defer.promise;
-};
+}
 
-export function createTimeoutDecorator<T = unknown>(
-  processOptions?: (this: T, options: TimeoutOptions & { methodName: string }) => TimeoutOptions,
+export function createTimeoutDecorator<T = unknown, K extends unknown[] = []>(
+  getTimeoutOptions?: (instance: T, ...decoratorArgs: K) => TimeoutOptions | undefined,
 ) {
-  return function timeout(options: TimeoutOptions = {}) {
-    return function (_target: unknown, methodName: string, descriptor: PropertyDescriptor): void {
+  return function timeout(...decoratorArgs: K) {
+    return function (_target: T, _method: string, descriptor: PropertyDescriptor): void {
       const originValue = descriptor.value as (...args: unknown[]) => Promise<unknown>;
 
       descriptor.value = async function (...args: unknown[]): Promise<unknown> {
-        const finalOptions = processOptions?.call(this as T, { ...options, methodName }) ?? options;
-
-        const taskPromise = originValue.apply(this, args);
-        return promiseWithTimeout(taskPromise, finalOptions);
+        const options = getTimeoutOptions?.(this as T, ...decoratorArgs);
+        return wrapPromise(originValue.apply(this, args), options);
       };
     };
   };
