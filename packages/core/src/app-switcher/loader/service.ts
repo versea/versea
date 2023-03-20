@@ -48,10 +48,12 @@ export class Loader implements ILoader {
       const { switcherContext, apps } = context;
 
       // 开始加载应用
-      switcherContext.status = this._SwitcherStatus.Loading;
-      await Promise.all(apps.map(async (app) => app.load(switcherContext)));
+      apps.map((app) => {
+        app.load(switcherContext);
+      });
       // 加载应用完成，修改状态
       switcherContext.status = this._SwitcherStatus.Loaded;
+      return Promise.resolve();
     });
   }
 }

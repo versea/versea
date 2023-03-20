@@ -24,7 +24,6 @@ export interface IStatus extends IStatusTyped {}
 export const ISwitcherStatus = createServiceSymbol('ISwitcherStatus');
 const SwitcherStatus = {
   NotStart: 'NotStart',
-  Loading: 'Loading',
   Loaded: 'Loaded',
   NotUnmounted: 'NotUnmounted',
   Unmounting: 'Unmounting',
