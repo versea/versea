@@ -3,14 +3,12 @@ import {
   logError,
   logWarn,
   memoizePromise,
-  createTimeoutDecorator,
   VerseaError,
   VerseaNotFoundContainerError,
 } from '@versea/shared';
-import { omit, mergeDeepRight } from 'ramda';
+import { omit } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
-import { IConfig, TimeoutConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
@@ -28,11 +26,6 @@ import {
 
 export * from './interface';
 
-const timeout = createTimeoutDecorator((instance: IApp, property: keyof TimeoutConfig) => {
-  const config = (instance as IApp & { _timeoutConfig?: TimeoutConfig })._timeoutConfig ?? ({} as TimeoutConfig);
-  return config[property];
-});
-
 @provide(IApp, 'Constructor')
 export class App extends ExtensibleEntity implements IApp {
   public readonly name: string;
@@ -40,9 +33,6 @@ export class App extends ExtensibleEntity implements IApp {
   public status: IStatus[keyof IStatus];
 
   public isLoaded = false;
-
-  /** 对应任务超时处理配置 */
-  protected _timeoutConfig?: TimeoutConfig;
 
   protected readonly _loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 
@@ -55,8 +45,6 @@ export class App extends ExtensibleEntity implements IApp {
 
   protected readonly _hooks: IHooks;
 
-  protected readonly _config: IConfig;
-
   /** 加载应用返回的声明周期 */
   protected _lifeCycles: AppLifeCycles = {};
 
@@ -64,6 +52,8 @@ export class App extends ExtensibleEntity implements IApp {
   protected _containerController?: AppMountedResult['containerController'];
 
   protected readonly _parcels: IApp[] = [];
+
+  protected _loadDefer: Promise<void> | null = null;
 
   /**
    * 生成一个 App 实例
@@ -76,44 +66,21 @@ export class App extends ExtensibleEntity implements IApp {
     this._Status = dependencies.Status;
     this._appService = dependencies.appService;
     this._hooks = dependencies.hooks;
-    this._config = dependencies.config;
 
     this.name = config.name;
     this.status = this._Status.NotLoaded;
     this._props = config.props ?? {};
     this._loadApp = config.loadApp;
-    this._timeoutConfig = mergeDeepRight(this._config.timeoutConfig, config.timeoutConfig ?? {});
   }
 
   @memoizePromise()
-  @timeout('load')
-  public async load(context?: IAppSwitcherContext): Promise<void> {
-    if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
-      throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
-    }
-
-    if (!this._loadApp) {
-      this.status = this._Status.Broken;
-      throw new VerseaError(`Can not find loadApp prop on app "${this.name}".`);
-    }
-
-    this.status = this._Status.LoadingSourceCode;
-    try {
-      const lifeCycles = await this._loadApp(this.getProps(context));
-      this.isLoaded = true;
-      this.status = this._Status.NotMounted;
-      this._setLifeCycles(lifeCycles);
-    } catch (error) {
-      this.status = this._Status.LoadError;
-      throw error;
-    }
-  }
-
-  @memoizePromise()
-  @timeout('mount')
   public async mount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
-    if (this.status !== this._Status.NotMounted) {
+    if (this.status !== this._Status.NotMounted && this.status !== this._Status.LoadingSourceCode) {
       throw new VerseaError(`Can not mount app "${this.name}" with status "${this.status}".`);
+    }
+
+    if (this.status === this._Status.LoadingSourceCode && this._loadDefer) {
+      await this._loadDefer;
     }
 
     if (!this._lifeCycles.mount) {
@@ -138,7 +105,6 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  @timeout('unmount')
   public async unmount(context?: IAppSwitcherContext, route?: MatchedRoute): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       throw new VerseaError(`Can not unmount app "${this.name}" with status "${this.status}".`);
@@ -174,7 +140,6 @@ export class App extends ExtensibleEntity implements IApp {
   }
 
   @memoizePromise()
-  @timeout('waitForChildContainer')
   public async waitForChildContainer(containerName: string, context: IAppSwitcherContext): Promise<void> {
     if (this.status !== this._Status.Mounted) {
       logError(`Can not run waiting because app "${this.name}" status is "${this.status}".`);
@@ -190,6 +155,35 @@ export class App extends ExtensibleEntity implements IApp {
 
     await this._containerController.wait(containerName, appProps);
     return;
+  }
+
+  @memoizePromise()
+  protected async _load(context?: IAppSwitcherContext): Promise<void> {
+    if (this.status !== this._Status.NotLoaded && this.status !== this._Status.LoadError) {
+      throw new VerseaError(`Can not load app "${this.name}" with status "${this.status}".`);
+    }
+
+    if (!this._loadApp) {
+      this.status = this._Status.Broken;
+      throw new VerseaError(`Can not find loadApp prop on app "${this.name}".`);
+    }
+
+    this.status = this._Status.LoadingSourceCode;
+    try {
+      const lifeCycles = await this._loadApp(this.getProps(context));
+      this.isLoaded = true;
+      this.status = this._Status.NotMounted;
+      this._setLifeCycles(lifeCycles);
+    } catch (error) {
+      this.status = this._Status.LoadError;
+      throw error;
+    } finally {
+      this._loadDefer = null;
+    }
+  }
+
+  public load(context?: IAppSwitcherContext): void {
+    this._loadDefer = this._load(context);
   }
 
   public getProps(context?: IAppSwitcherContext, route?: MatchedRoute): AppProps {
@@ -217,7 +211,7 @@ export class App extends ExtensibleEntity implements IApp {
 
   public async loadAndMount(): Promise<void> {
     if (!this.isLoaded) {
-      await this.load();
+      this.load();
     }
 
     try {

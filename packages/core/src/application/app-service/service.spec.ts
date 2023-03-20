@@ -1,4 +1,3 @@
-import { VerseaTimeoutError } from '@versea/shared';
 import { Container } from 'inversify';
 
 import {
@@ -11,8 +10,6 @@ import {
   IAppSwitcherContext,
   IStatus,
   MatchedRoute,
-  provideValue,
-  IConfig,
 } from '../../';
 
 async function delay(time: number): Promise<void> {
@@ -70,9 +67,9 @@ describe('App', () => {
       });
 
       expect(app.status).toBe(Status.NotLoaded);
-      const promise = app.load({} as IAppSwitcherContext);
+      app.load({} as IAppSwitcherContext);
       expect(app.status).toBe(Status.LoadingSourceCode);
-      await promise;
+      await (app as IApp & { _loadDefer: Promise<void> })._loadDefer;
       expect(app.status).toBe(Status.NotMounted);
     });
 
@@ -80,8 +77,9 @@ describe('App', () => {
       const app = getAppInstance({ name: 'app' });
 
       expect(app.status).toBe(Status.NotLoaded);
+      app.load({} as IAppSwitcherContext);
       void expect(async () => {
-        await app.load({} as IAppSwitcherContext);
+        await (app as IApp & { _loadDefer: Promise<void> })._loadDefer;
       }).rejects.toThrowError('Can not find loadApp prop');
       expect(app.status).toBe(Status.Broken);
     });
@@ -95,8 +93,9 @@ describe('App', () => {
         },
       });
 
+      app.load({} as IAppSwitcherContext);
       try {
-        await app.load({} as IAppSwitcherContext);
+        await (app as IApp & { _loadDefer: Promise<void> })._loadDefer;
       } catch (error) {
         expect(app.status).toBe(Status.LoadError);
       }
@@ -106,9 +105,9 @@ describe('App', () => {
   describe('App.mount', () => {
     test('应用 mount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' });
-      await app.load({} as IAppSwitcherContext);
-
-      expect(app.status).toBe(Status.NotMounted);
+      app.load({} as IAppSwitcherContext);
+      expect(app.status).toBe(Status.LoadingSourceCode);
+      await (app as IApp & { _loadDefer: Promise<void> })._loadDefer;
       const promise = app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
       expect(app.status).toBe(Status.Mounting);
       await promise;
@@ -117,9 +116,9 @@ describe('App', () => {
 
     test('没有 mount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, { mount: undefined });
-      await app.load({} as IAppSwitcherContext);
-
-      expect(app.status).toBe(Status.NotMounted);
+      app.load({} as IAppSwitcherContext);
+      expect(app.status).toBe(Status.LoadingSourceCode);
+      await (app as IApp & { _loadDefer: Promise<void> })._loadDefer;
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
       expect(app.status).toBe(Status.Mounted);
     });
@@ -134,8 +133,7 @@ describe('App', () => {
           },
         },
       );
-      await app.load({} as IAppSwitcherContext);
-
+      app.load({} as IAppSwitcherContext);
       try {
         await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
       } catch (error) {
@@ -160,7 +158,7 @@ describe('App', () => {
         },
       );
 
-      await app.load({} as IAppSwitcherContext);
+      app.load({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
       await app.waitForChildContainer('foo', {} as IAppSwitcherContext);
 
@@ -171,7 +169,7 @@ describe('App', () => {
   describe('App.unmount', () => {
     test('应用 unmount 之前和之后，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, {});
-      await app.load({} as IAppSwitcherContext);
+      app.load({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.Mounted);
@@ -183,7 +181,7 @@ describe('App', () => {
 
     test('没有 unmount 的 hook，应用的状态变化应该正确', async () => {
       const app = getAppWithLoadHook({ name: 'app' }, { unmount: undefined });
-      await app.load({} as IAppSwitcherContext);
+      app.load({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       expect(app.status).toBe(Status.Mounted);
@@ -201,7 +199,7 @@ describe('App', () => {
           },
         },
       );
-      await app.load({} as IAppSwitcherContext);
+      app.load({} as IAppSwitcherContext);
       await app.mount({} as IAppSwitcherContext, {} as MatchedRoute);
 
       try {
@@ -209,137 +207,6 @@ describe('App', () => {
       } catch (error) {
         expect(app.status).toBe(Status.Broken);
       }
-    });
-  });
-
-  describe('Timeout', () => {
-    test('应用 load 超时可以通过配置设置报错处理.', async () => {
-      const app = getAppInstance({
-        name: 'app',
-        loadApp: async () => {
-          await delay(5);
-          return Promise.resolve({});
-        },
-        timeoutConfig: { load: { millisecond: 3, dieOnTimeout: true, message: 'loading timeout.' } },
-      });
-
-      await expect(app.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout.'));
-    });
-
-    test('应用 mount 超时可以通过配置设置报错处理.', async () => {
-      const app = getAppWithLoadHook(
-        {
-          name: 'app',
-          timeoutConfig: { mount: { millisecond: 3, dieOnTimeout: true, message: 'mounting timeout.' } },
-        },
-        {
-          mount: async () => {
-            return delay(5);
-          },
-        },
-      );
-
-      await app.load();
-      await expect(app.mount()).rejects.toStrictEqual(new VerseaTimeoutError('mounting timeout.'));
-    });
-
-    test('应用 unmount 超时可以通过配置设置报错处理.', async () => {
-      const app = getAppWithLoadHook(
-        {
-          name: 'app',
-          timeoutConfig: { unmount: { millisecond: 3, dieOnTimeout: true, message: 'unmounting timeout.' } },
-        },
-        {
-          mount: async () => Promise.resolve(),
-          unmount: async () => {
-            return delay(5);
-          },
-        },
-      );
-
-      await app.load();
-      await app.mount();
-      await expect(app.unmount()).rejects.toStrictEqual(new VerseaTimeoutError('unmounting timeout.'));
-    });
-
-    test('应用 waitForChildContainer 超时可以通过配置设置报错处理.', async () => {
-      const app = getAppWithLoadHook(
-        {
-          name: 'app',
-          timeoutConfig: {
-            waitForChildContainer: { millisecond: 3, dieOnTimeout: true, message: 'waitForChildContainer timeout.' },
-          },
-        },
-        {},
-        {
-          containerController: {
-            wait: async () => {
-              await delay(5);
-              return Promise.resolve();
-            },
-          },
-        },
-      );
-
-      await app.load();
-      await app.mount();
-      await expect(app.waitForChildContainer('foo', {} as IAppSwitcherContext)).rejects.toStrictEqual(
-        new VerseaTimeoutError('waitForChildContainer timeout.'),
-      );
-    });
-
-    test('应用任务可以配置超时抛出警告.', async () => {
-      const app = getAppInstance({
-        name: 'app',
-        loadApp: async () => {
-          await delay(5);
-          return Promise.resolve({});
-        },
-        timeoutConfig: { load: { millisecond: 3, dieOnTimeout: false, message: 'loading timeout.' } },
-      });
-
-      jest.spyOn(console, 'warn');
-
-      await app.load();
-      expect(console.warn).toHaveBeenCalledWith('[versea] loading timeout.');
-    });
-
-    test('可以接收到应用任务在超时之前抛出的错误.', async () => {
-      const app = getAppInstance({
-        name: 'app',
-        loadApp: async () => {
-          return Promise.reject(new Error('task error'));
-        },
-      });
-
-      await expect(app.load()).rejects.toStrictEqual(new Error('task error'));
-    });
-
-    test('超时配置读取优先级: 全局IConfig配置 < 每个app在注册时的配置.', async () => {
-      provideValue(
-        { timeoutConfig: { load: { millisecond: 3, dieOnTimeout: true, message: 'loading timeout at IConfig.' } } },
-        IConfig,
-      );
-      const app1 = getAppInstance({
-        name: 'app1',
-        loadApp: async () => {
-          await delay(5);
-          return Promise.resolve({});
-        },
-      });
-
-      await expect(app1.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout at IConfig.'));
-
-      const app2 = getAppInstance({
-        name: 'app2',
-        loadApp: async () => {
-          await delay(5);
-          return Promise.resolve({});
-        },
-        timeoutConfig: { load: { millisecond: 0, dieOnTimeout: true, message: 'loading timeout at App config.' } },
-      });
-
-      await expect(app2.load()).rejects.toStrictEqual(new VerseaTimeoutError('loading timeout at App config.'));
     });
   });
 });

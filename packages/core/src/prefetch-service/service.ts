@@ -50,7 +50,12 @@ export class PrefetchService implements IPrefetchService {
 
   protected _initHooks(): void {
     this._hooks.prefetch.tap(VERSEA_INTERNAL_TAP, async ({ apps }) => {
-      await Promise.all(apps.filter((app) => app.status === this._Status.NotLoaded).map(async (app) => app.load()));
+      apps
+        .filter((app) => app.status === this._Status.NotLoaded)
+        .map((app) => {
+          app.load();
+        });
+      return Promise.resolve();
     });
   }
 }
