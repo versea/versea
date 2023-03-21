@@ -66,9 +66,9 @@ export class Versea {
     return this.router.reroute(navigationEvent);
   }
 
-  public async prefetch(apps: string[], options?: PrefetchOptions): Promise<void> {
+  public prefetch(apps: string[], options?: PrefetchOptions): void {
     const prefetchService = this.container.get<IPrefetchService>(IPrefetchService);
-    await prefetchService.fetch(apps, options);
+    prefetchService.fetch(apps, options);
   }
 
   /** 使用插件 */

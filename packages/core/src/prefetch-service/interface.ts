@@ -7,7 +7,7 @@ export const IPrefetchService = createServiceSymbol('IPrefetchService');
 
 export interface IPrefetchService {
   /** prefetch 应用 */
-  fetch: (apps: string[], options?: PrefetchOptions) => Promise<void>;
+  fetch: (apps: string[], options?: PrefetchOptions) => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

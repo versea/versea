@@ -32,8 +32,8 @@ export class PrefetchService implements IPrefetchService {
     this._initHooks();
   }
 
-  public async fetch(apps: string[], options: PrefetchOptions = {} as PrefetchOptions): Promise<void> {
-    await this._hooks.prefetch.call({
+  public fetch(apps: string[], options: PrefetchOptions = {} as PrefetchOptions): void {
+    void this._hooks.prefetch.call({
       apps: apps
         .map((name) => {
           const app = this._appService.getApp(name);
@@ -52,9 +52,10 @@ export class PrefetchService implements IPrefetchService {
     this._hooks.prefetch.tap(VERSEA_INTERNAL_TAP, async ({ apps }) => {
       apps
         .filter((app) => app.status === this._Status.NotLoaded)
-        .map((app) => {
+        .forEach((app) => {
           app.load();
         });
+
       return Promise.resolve();
     });
   }
