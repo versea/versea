@@ -1,12 +1,12 @@
 import { VerseaTimeoutError } from './error';
-import { createTimeoutDecorator, wrapPromise, TimeoutOptions } from './timeout';
+import { createTimeoutDecorator, runWithTimeout, TimeoutOptions } from './timeout';
 
 describe('Timeout', () => {
-  describe('wrapPromise', () => {
+  describe('runWithTimeout', () => {
     it('should throw error after time out.', async () => {
       const promise = new Promise((resolve) => setTimeout(resolve, 100));
 
-      await expect(wrapPromise(promise, { millisecond: 0, dieOnTimeout: true })).rejects.toStrictEqual(
+      await expect(runWithTimeout(promise, { millisecond: 0, dieOnTimeout: true })).rejects.toStrictEqual(
         new VerseaTimeoutError('The task has been timed out for 0ms.'),
       );
     });
@@ -18,7 +18,7 @@ describe('Timeout', () => {
         }, 10),
       );
 
-      await expect(wrapPromise(promise, { millisecond: 100 })).resolves.toBe('resolved');
+      await expect(runWithTimeout(promise, { millisecond: 100 })).resolves.toBe('resolved');
     });
 
     it('should log warning and return resolved results instead of throwing error when dieOnTimeout is false.', async () => {
@@ -31,7 +31,7 @@ describe('Timeout', () => {
       jest.spyOn(console, 'warn');
 
       await expect(
-        wrapPromise(promise, {
+        runWithTimeout(promise, {
           millisecond: 0,
           dieOnTimeout: false,
         }),
@@ -48,7 +48,7 @@ describe('Timeout', () => {
       );
 
       await expect(
-        wrapPromise(promise, {
+        runWithTimeout(promise, {
           millisecond: 100,
           dieOnTimeout: false,
         }),

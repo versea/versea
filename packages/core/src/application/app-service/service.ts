@@ -2,6 +2,7 @@
 import { logWarn, VerseaError } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
+import { IConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { IRouter } from '../../navigation/router/interface';
@@ -24,16 +25,20 @@ export class AppService implements IAppService {
 
   protected readonly _hooks: IHooks;
 
+  protected readonly _config: IConfig;
+
   protected readonly _rootParcels: IApp[] = [];
 
   constructor(
     @inject(IApp) App: interfaces.Newable<IApp>,
     @inject(IStatus) Status: IStatus,
     @inject(IHooks) hooks: IHooks,
+    @inject(IConfig) config: IConfig,
   ) {
     this._AppConstructor = App;
     this._Status = Status;
     this._hooks = hooks;
+    this._config = config;
   }
 
   public registerApp(config: AppConfig, reroute = true): IApp {
@@ -50,6 +55,7 @@ export class AppService implements IAppService {
       Status: this._Status,
       appService: this,
       hooks: this._hooks,
+      config: this._config,
     });
     this._appMap.set(app.name, app);
 

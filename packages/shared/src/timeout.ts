@@ -8,7 +8,7 @@ export interface TimeoutOptions {
   message?: string;
 }
 
-export async function wrapPromise<T>(promise: Promise<T>, options: TimeoutOptions = {}): Promise<T> {
+export async function runWithTimeout<T>(promise: Promise<Awaited<T>>, options: TimeoutOptions = {}): Promise<T> {
   // eslint-disable-next-line @typescript-eslint/no-magic-numbers
   const { millisecond = 5000, dieOnTimeout = false, message } = options || {};
   const errorMessage = message ?? `The task has been timed out for ${millisecond}ms.`;
@@ -47,7 +47,7 @@ export function createTimeoutDecorator<T = unknown, K extends unknown[] = []>(
 
       descriptor.value = async function (...args: unknown[]): Promise<unknown> {
         const options = getTimeoutOptions?.(this as T, ...decoratorArgs);
-        return wrapPromise(originValue.apply(this, args), options);
+        return runWithTimeout(originValue.apply(this, args), options);
       };
     };
   };

@@ -1,4 +1,4 @@
-import { buildProviderModule, IApp, IMatcher, IStatus } from '@versea/core';
+import { buildProviderModule, IApp, IConfig, IMatcher, IStatus } from '@versea/core';
 import { Container, interfaces } from 'inversify';
 
 import { IPluginCustomMatchRoute } from '../index';
@@ -14,7 +14,7 @@ function createContainerWithPlugin(): Container {
 function getAppInstance(container: Container, appName: string): IApp {
   const App = container.get<interfaces.Newable<IApp>>(IApp);
   // @ts-expect-error 这里需要向 App 传入构造函数参数
-  return new App({ name: appName }, { Status: container.get(IStatus) });
+  return new App({ name: appName }, { Status: container.get(IStatus), config: container.get(IConfig) });
 }
 
 /**

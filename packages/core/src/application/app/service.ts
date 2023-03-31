@@ -5,10 +5,12 @@ import {
   memoizePromise,
   VerseaError,
   VerseaNotFoundContainerError,
+  VerseaTimeoutError,
 } from '@versea/shared';
-import { omit } from 'ramda';
+import { mergeDeepRight, omit } from 'ramda';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
+import { IConfig, TimeoutConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute } from '../../navigation/route/interface';
@@ -34,6 +36,8 @@ export class App extends ExtensibleEntity implements IApp {
 
   public isLoaded = false;
 
+  public timeoutConfig: TimeoutConfig;
+
   protected readonly _loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 
   protected readonly _props: AppConfigProps;
@@ -44,6 +48,8 @@ export class App extends ExtensibleEntity implements IApp {
   protected readonly _appService: IAppService;
 
   protected readonly _hooks: IHooks;
+
+  protected readonly _config: IConfig;
 
   /** 加载应用返回的声明周期 */
   protected _lifeCycles: AppLifeCycles = {};
@@ -66,9 +72,11 @@ export class App extends ExtensibleEntity implements IApp {
     this._Status = dependencies.Status;
     this._appService = dependencies.appService;
     this._hooks = dependencies.hooks;
+    this._config = dependencies.config;
 
     this.name = config.name;
     this.status = this._Status.NotLoaded;
+    this.timeoutConfig = mergeDeepRight(this._config.timeoutConfig, config.timeoutConfig ?? {});
     this._props = config.props ?? {};
     this._loadApp = config.loadApp;
   }
@@ -80,7 +88,16 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (this.status === this._Status.LoadingSourceCode && this._loadDefer) {
-      await this._loadDefer;
+      try {
+        await this._loadDefer;
+      } catch (error) {
+        if (error instanceof VerseaTimeoutError) {
+          logError(error.message, this.name);
+          return;
+        } else {
+          throw error;
+        }
+      }
     }
 
     if (!this._lifeCycles.mount) {
@@ -94,9 +111,11 @@ export class App extends ExtensibleEntity implements IApp {
       this._containerController = result?.containerController;
       this.status = this._Status.Mounted;
     } catch (error) {
-      // 没有寻找到容器的错误可以被再次渲染
+      // 没有寻找到容器或者超时的错误可以被再次渲染
       if (error instanceof VerseaNotFoundContainerError) {
         this.status = this._Status.Mounted;
+      } else if (error instanceof VerseaTimeoutError) {
+        logError(error.message, this.name);
       } else {
         this.status = this._Status.Broken;
       }
