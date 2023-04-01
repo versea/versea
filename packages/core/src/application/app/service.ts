@@ -88,16 +88,7 @@ export class App extends ExtensibleEntity implements IApp {
     }
 
     if (this.status === this._Status.LoadingSourceCode && this._loadDefer) {
-      try {
-        await this._loadDefer;
-      } catch (error) {
-        if (error instanceof VerseaTimeoutError) {
-          logError(error.message, this.name);
-          return;
-        } else {
-          throw error;
-        }
-      }
+      await this._loadDefer;
     }
 
     if (!this._lifeCycles.mount) {
@@ -112,10 +103,8 @@ export class App extends ExtensibleEntity implements IApp {
       this.status = this._Status.Mounted;
     } catch (error) {
       // 没有寻找到容器或者超时的错误可以被再次渲染
-      if (error instanceof VerseaNotFoundContainerError) {
+      if (error instanceof VerseaNotFoundContainerError || error instanceof VerseaTimeoutError) {
         this.status = this._Status.Mounted;
-      } else if (error instanceof VerseaTimeoutError) {
-        logError(error.message, this.name);
       } else {
         this.status = this._Status.Broken;
       }

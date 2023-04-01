@@ -1,5 +1,5 @@
 import { App, AppLifeCycles, AppMountedResult, AppProps, IConfig, IHooks, provide } from '@versea/core';
-import { logWarn, VerseaNotFoundContainerError } from '@versea/shared';
+import { logWarn, runWithTimeout, VerseaNotFoundContainerError } from '@versea/shared';
 import { AsyncSeriesHook } from '@versea/tapable';
 import { inject } from 'inversify';
 
@@ -181,7 +181,10 @@ export class PluginSourceEntry implements IPluginSourceEntry {
     this._hooks.mountApp.tap(PLUGIN_SOURCE_ENTRY_EXEC_LIFECYCLE_TAP, async (context): Promise<void> => {
       const { lifeCycles, props } = context;
       if (lifeCycles.mount) {
-        context.result = await lifeCycles.mount(props);
+        context.result = await runWithTimeout<Promise<AppMountedResult> | Promise<void>>(
+          lifeCycles.mount(props),
+          context.app.timeoutConfig.mount,
+        );
       }
     });
   }
