@@ -1,4 +1,10 @@
-import { ExtensibleEntity, logError, VerseaNotFoundContainerError } from '@versea/shared';
+import {
+  ExtensibleEntity,
+  logError,
+  runWithTimeout,
+  VerseaNotFoundContainerError,
+  VerseaTimeoutError,
+} from '@versea/shared';
 
 import { IAppService } from '../../application/app-service/interface';
 import { IApp } from '../../application/app/interface';
@@ -54,17 +60,19 @@ export class RendererHookContext extends ExtensibleEntity implements IRendererHo
     // 解构出应用对应的 meta 信息
     const meta = route.getMeta(app);
 
-    if (meta.parentAppName && meta.parentContainerName) {
-      const parentApp = this._appService.getApp(meta.parentAppName);
-      if (parentApp) {
-        await parentApp.waitForChildContainer(meta.parentContainerName, switcherContext);
-      }
-    }
-
     try {
+      if (meta.parentAppName && meta.parentContainerName) {
+        const parentApp = this._appService.getApp(meta.parentAppName);
+        if (parentApp) {
+          await runWithTimeout(
+            parentApp.waitForChildContainer(meta.parentContainerName, switcherContext),
+            parentApp.timeoutConfig.waitForChildContainer,
+          );
+        }
+      }
       await app.mount(switcherContext, route);
     } catch (error) {
-      if (error instanceof VerseaNotFoundContainerError) {
+      if (error instanceof VerseaNotFoundContainerError || error instanceof VerseaTimeoutError) {
         logError(error, app.name);
       } else {
         throw error;

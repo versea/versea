@@ -1,6 +1,7 @@
 import { HookContext } from '@versea/tapable';
 
 import { IAppSwitcherContext } from '../../app-switcher/app-switcher-context/interface';
+import { IConfig, TimeoutConfig } from '../../config';
 import { IStatus } from '../../enum/status';
 import { IHooks } from '../../hooks/interface';
 import { MatchedRoute, RouteConfig } from '../../navigation/route/interface';
@@ -55,6 +56,9 @@ export interface IApp {
   /** 应用是否已经加载 */
   isLoaded: boolean;
 
+  /** 应用异步任务超时配置 */
+  readonly timeoutConfig: TimeoutConfig;
+
   /** 加载应用 */
   load: (context?: IAppSwitcherContext) => void;
 
@@ -94,6 +98,9 @@ export interface AppConfig {
    */
   props?: AppConfigProps;
 
+  /** 应用异步任务超时配置 */
+  timeoutConfig?: Partial<TimeoutConfig>;
+
   /** 加载应用 */
   loadApp?: (props: AppProps) => Promise<AppLifeCycles>;
 }
@@ -103,4 +110,5 @@ export interface AppDependencies {
   Status: IStatus;
   appService: IAppService;
   hooks: IHooks;
+  config: IConfig;
 }

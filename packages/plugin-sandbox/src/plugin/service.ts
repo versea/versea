@@ -8,7 +8,7 @@ import {
   PLUGIN_SOURCE_ENTRY_TAP,
   ISourceController,
 } from '@versea/plugin-source-entry';
-import { VerseaError } from '@versea/shared';
+import { VerseaError, runWithTimeout } from '@versea/shared';
 import { inject, interfaces } from 'inversify';
 
 import { PLUGIN_SANDBOX_TAP, PLUGIN_SANDBOX_EFFECT_TAP } from '../constants';
@@ -191,7 +191,10 @@ export class PluginSandbox implements IPluginSandbox {
         const scriptLoader = this._scriptLoader;
 
         // 等待资源加载完成
-        await Promise.all([styleLoader.waitLoaded(app), scriptLoader.waitLoaded(app)]);
+        await runWithTimeout(
+          Promise.all([styleLoader.waitLoaded(app), scriptLoader.waitLoaded(app)]),
+          app.timeoutConfig.load,
+        );
 
         await scriptLoader.exec(app);
         // 获取导出的生命周期函数

@@ -1,7 +1,15 @@
+import { TimeoutOptions } from '@versea/shared';
+
 import { provideValue } from './provider';
 import { createServiceSymbol } from './utils';
 
 export const IConfig = createServiceSymbol('IConfig');
+
+export interface TimeoutConfig {
+  load: TimeoutOptions;
+  mount: TimeoutOptions;
+  waitForChildContainer: TimeoutOptions;
+}
 
 /**
  * 全局配置
@@ -10,10 +18,28 @@ export const IConfig = createServiceSymbol('IConfig');
 export interface IConfig {
   /** 路由模式 */
   routerMode: 'hash' | 'history';
+  timeoutConfig: TimeoutConfig;
 }
 
 const config: IConfig = {
   routerMode: 'history',
+  timeoutConfig: {
+    load: {
+      millisecond: 3000,
+      dieOnTimeout: true,
+      message: 'Time out for loading app',
+    },
+    mount: {
+      millisecond: 3000,
+      dieOnTimeout: true,
+      message: 'Time out for mounting app',
+    },
+    waitForChildContainer: {
+      millisecond: 3000,
+      dieOnTimeout: true,
+      message: 'Time out for waiting for child container',
+    },
+  },
 };
 
 // 使用合并策略取代替换策略
